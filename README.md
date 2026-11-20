@@ -20,6 +20,9 @@ Proofs of concept that turn the ideas in *Site Reliability Engineering, 2nd Edit
 | VI · 19–23 AI & SRE | [`poc-11-ai-ops-guardrails`](poc-11-ai-ops-guardrails) autonomy levels L0–L4, reversible atomic actions, progressive authorization | Bedrock / Q Developer agents, ARC, Lambda |
 | I–II · 1–7 Context, culture, org | [`docs/`](docs) concept map, culture/org cheat sheet, interview question bank | n/a |
 
+## Study guide
+An interactive tutor for every chapter (explanations, AWS mapping, labs, flashcards, quiz, interview drills) is published as a private Claude artifact: https://claude.ai/artifact/Q35uEdK1hrKUhbZ15vWvVy (share it from its page if you want others to see it).
+
 ## Quick start
 ```bash
 pip install -r requirements-dev.txt
