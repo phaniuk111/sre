@@ -1,0 +1,26 @@
+active_teams: [checkout-sre, payments-oncall, search-oncall]
+services:
+  - name: checkout
+    customer_facing: true
+    azs: [eu-west-2a, eu-west-2b, eu-west-2c]
+    alert_route: checkout-sre
+    slos: [{name: availability, target: 0.999, lifecycle: committed}]
+    incidents_per_shift: 1
+    deploy_strategy: canary
+    stateful: false
+  - name: legacy-billing
+    customer_facing: true
+    azs: [eu-west-2a]
+    alert_route: billing-team-disbanded-2024
+    slos: []
+    incidents_per_shift: 3
+    deploy_strategy: all_at_once
+    stateful: true
+  - name: new-recs
+    greenfield: true
+    customer_facing: true
+    azs: [eu-west-2a, eu-west-2b]
+    alert_route: search-oncall
+    slos: [{name: latency, target: 0.99, lifecycle: experimental}]
+    deploy_strategy: linear
+    stateful: false

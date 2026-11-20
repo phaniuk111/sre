@@ -1,0 +1,27 @@
+# Local run that ships to your real AWS account (needs credentials with
+# CloudWatchAgentServerPolicy + AWSXRayDaemonWriteAccess).
+services:
+  adot:
+    image: public.ecr.aws/aws-observability/aws-otel-collector:latest
+    command: ["--config=/etc/otel/config.yaml"]
+    volumes:
+      - ./collector/adot-config.yaml:/etc/otel/config.yaml:ro
+      - ~/.aws:/root/.aws:ro
+    environment:
+      AWS_REGION: ${AWS_REGION:-eu-west-2}
+      AWS_PROFILE: ${AWS_PROFILE:-default}
+    ports: ["4317:4317", "4318:4318"]
+
+  checkout:
+    build: ./app
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://adot:4317
+      INJECT_ERROR_RATE: "0.02"
+      SERVICE_VERSION: "1.4.2"
+    ports: ["8080:8080"]
+    depends_on: [adot]
+
+  load:
+    image: curlimages/curl:latest
+    entrypoint: ["/bin/sh", "-c", "while true; do curl -s -H 'x-cuj: checkout' http://checkout:8080/checkout >/dev/null; curl -s -H 'x-cuj: search' http://checkout:8080/search > /dev/null; sleep 0.2; done"]
+    depends_on: [checkout]

@@ -1,0 +1,45 @@
+[
+  {
+    "id": "INC-101",
+    "impact_start": "2026-11-02T10:00:00Z",
+    "detected": "2026-11-02T10:04:00Z",
+    "mitigated": "2026-11-02T10:19:00Z",
+    "resolved": "2026-11-02T12:30:00Z",
+    "detected_by": "alert",
+    "pages": 2,
+    "responders": [
+      {"name": "asha", "team": "checkout-sre", "role": "IC"},
+      {"name": "ben", "team": "checkout-sre", "role": "Ops"},
+      {"name": "cara", "team": "payments", "role": "SME"}
+    ]
+  },
+  {
+    "id": "INC-102",
+    "impact_start": "2026-11-09T02:10:00Z",
+    "detected": "2026-11-09T02:55:00Z",
+    "mitigated": "2026-11-09T03:40:00Z",
+    "resolved": "2026-11-09T06:00:00Z",
+    "detected_by": "customer",
+    "pages": 9,
+    "handoffs": 2,
+    "responders": [
+      {"name": "dev", "team": "checkout-sre", "role": "Ops"},
+      {"name": "eli", "team": "network", "role": "SME"},
+      {"name": "fay", "team": "storage", "role": "SME"},
+      {"name": "gus", "team": "payments", "role": "SME"},
+      {"name": "hal", "team": "leadership", "role": "Observer"}
+    ]
+  },
+  {
+    "id": "INC-103",
+    "impact_start": "2026-11-15T14:00:00Z",
+    "detected": "2026-11-15T14:02:00Z",
+    "mitigated": "2026-11-15T14:08:00Z",
+    "resolved": "2026-11-15T14:40:00Z",
+    "detected_by": "alert",
+    "pages": 1,
+    "responders": [
+      {"name": "asha", "team": "checkout-sre", "role": "IC"}
+    ]
+  }
+]

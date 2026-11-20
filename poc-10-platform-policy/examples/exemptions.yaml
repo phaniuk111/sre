@@ -1,0 +1,11 @@
+# Brownfield exemptions: explicit, owned, time-boxed and visible to leadership.
+- policy: location/multi-az
+  services: [legacy-billing]
+  bug: SRE-1234
+  valid_until: "2027-03-31"
+  reason: LEGACY - migration to Aurora Multi-AZ planned Q1 2027; risk accepted by VP Eng
+- policy: release/progressive
+  services: [legacy-billing]
+  bug: SRE-1235
+  valid_until: "2025-12-31"
+  reason: LEGACY - should have moved to CodeDeploy by end of 2025

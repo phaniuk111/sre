@@ -1,0 +1,15 @@
+# Used by your pipeline:  aws deploy create-deployment --application-name checkout \
+#   --deployment-group-name checkout-live --revision file://appspec rendered with versions
+version: 0.0
+Resources:
+  - checkout:
+      Type: AWS::Lambda::Function
+      Properties:
+        Name: checkout
+        Alias: live
+        CurrentVersion: "{{CURRENT}}"
+        TargetVersion: "{{TARGET}}"
+Hooks:
+  # A Lambda that runs canary_analysis.judge() against per-version metrics and
+  # calls PutLifecycleEventHookExecutionStatus with Succeeded/Failed.
+  - AfterAllowTraffic: checkout-canary-judge

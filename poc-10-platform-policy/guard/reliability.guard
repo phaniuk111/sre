@@ -1,0 +1,30 @@
+# AWS CloudFormation Guard rules: the same platform policies enforced at
+# template-review time (shift down into the paved road).
+#   cfn-guard validate -r guard/reliability.guard -d template.yaml
+
+# DynamoDB tables must have PITR and deletion protection (ch. 16)
+let tables = Resources.*[ Type == 'AWS::DynamoDB::Table' ]
+rule dynamodb_recoverable when %tables !empty {
+  %tables.Properties.PointInTimeRecoverySpecification.PointInTimeRecoveryEnabled == true
+  %tables.Properties.DeletionProtectionEnabled == true
+}
+
+# Auto Scaling groups span at least two AZs/subnets (ch. 17 failure domains)
+let asgs = Resources.*[ Type == 'AWS::AutoScaling::AutoScalingGroup' ]
+rule asg_multi_az when %asgs !empty {
+  %asgs.Properties.VPCZoneIdentifier[1] exists
+}
+
+# RDS must be Multi-AZ with backups retained (ch. 16)
+let dbs = Resources.*[ Type == 'AWS::RDS::DBInstance' ]
+rule rds_resilient when %dbs !empty {
+  %dbs.Properties.MultiAZ == true
+  %dbs.Properties.BackupRetentionPeriod >= 7
+}
+
+# Lambda deployment groups must use a progressive config (ch. 17 progressive rollout)
+let dgs = Resources.*[ Type == 'AWS::CodeDeploy::DeploymentGroup' ]
+rule progressive_deploys when %dgs !empty {
+  %dgs.Properties.DeploymentConfigName != 'CodeDeployDefault.LambdaAllAtOnce'
+  %dgs.Properties.AutoRollbackConfiguration.Enabled == true
+}

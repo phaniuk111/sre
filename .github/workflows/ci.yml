@@ -1,0 +1,21 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -r requirements-dev.txt
+      - run: make test
+  terraform:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dir: [poc-01-slo-error-budget, poc-02-observability-otel, poc-03-incident-management, poc-05-progressive-delivery, poc-06-chaos-fis, poc-07-capacity-planning, poc-08-data-resilience]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform init -backend=false && terraform validate
+        working-directory: ${{ matrix.dir }}/terraform

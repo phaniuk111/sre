@@ -1,0 +1,57 @@
+# AWS Distro for OpenTelemetry (ADOT) collector pipeline.
+# OTLP in -> batch -> CloudWatch EMF (metrics) + X-Ray (traces).
+# The book calls the Collector a "Swiss Army knife": it can also scrape
+# Prometheus endpoints or tail log files and convert them to OTLP.
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+    timeout: 10s
+  memory_limiter:
+    check_interval: 1s
+    limit_percentage: 75
+    spike_limit_percentage: 15
+  resourcedetection:
+    detectors: [env, ec2, ecs]
+    timeout: 2s
+  # Cardinality control (ch. 9): never let raw user IDs become metric labels.
+  attributes/drop_high_cardinality:
+    actions:
+      - key: user.id
+        action: delete
+      - key: session.id
+        action: delete
+
+exporters:
+  awsemf:
+    namespace: SRE/Checkout
+    log_group_name: /sre/checkout/metrics
+    dimension_rollup_option: NoDimensionRollup
+    metric_declarations:
+      - dimensions: [[service.name, route, status], [service.name, cuj]]
+        metric_name_selectors: ["http.server.*"]
+  awsxray:
+    indexed_attributes: [cuj, http.route]
+  debug:
+    verbosity: basic
+
+extensions:
+  health_check:
+
+service:
+  extensions: [health_check]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, resourcedetection, batch]
+      exporters: [awsxray]
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, resourcedetection, attributes/drop_high_cardinality, batch]
+      exporters: [awsemf]

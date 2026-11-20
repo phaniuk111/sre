@@ -1,0 +1,108 @@
+# SSM Automation runbook: SRE-GenericMitigation-Diagnose
+# Started automatically by the Incident Manager response plan (POC 03).
+# Book ch. 9/13/21: automate the COMMON SYMPTOM CHECKS on every page, so the
+# on-caller starts with findings instead of an empty page; keep risky actuation
+# behind a human approval step (autonomy level L2: automation proposes and
+# actuates, human approves).
+description: |
+  Collect standard diagnostics for a service, then (optionally, with approval)
+  drain one Availability Zone with a Route 53 ARC zonal shift.
+schemaVersion: '0.3'
+assumeRole: '{{ AutomationAssumeRole }}'
+parameters:
+  ServiceName:
+    type: String
+  IncidentRecordArn:
+    type: String
+    default: ''
+  AutomationAssumeRole:
+    type: String
+    default: ''
+  LoadBalancerArn:
+    type: String
+    default: ''
+  ImpairedAz:
+    type: String
+    default: ''
+    description: AZ ID (e.g. euw2-az1) to drain. Leave empty to only diagnose.
+  Approvers:
+    type: StringList
+    default: []
+mainSteps:
+  - name: RecentDeployments
+    action: aws:executeAwsApi
+    inputs:
+      Service: codedeploy
+      Api: ListDeployments
+      applicationName: '{{ ServiceName }}'
+      includeOnlyStatuses: [InProgress, Succeeded, Failed, Stopped]
+    outputs:
+      - Name: DeploymentIds
+        Selector: $.deployments
+        Type: StringList
+  - name: AlarmsInAlarm
+    action: aws:executeAwsApi
+    inputs:
+      Service: cloudwatch
+      Api: DescribeAlarms
+      AlarmNamePrefix: '{{ ServiceName }}'
+      StateValue: ALARM
+    outputs:
+      - Name: Alarms
+        Selector: $.MetricAlarms..AlarmName
+        Type: StringList
+  - name: RecentAppConfigDeployments
+    action: aws:executeScript
+    inputs:
+      Runtime: python3.11
+      Handler: handler
+      InputPayload:
+        service: '{{ ServiceName }}'
+      Script: |-
+        import boto3
+        def handler(event, context):
+            ac = boto3.client("appconfig")
+            apps = [a for a in ac.list_applications()["Items"] if a["Name"] == event["service"]]
+            out = []
+            for app in apps:
+                for env in ac.list_environments(ApplicationId=app["Id"])["Items"]:
+                    for d in ac.list_deployments(ApplicationId=app["Id"], EnvironmentId=env["Id"])["Items"][:3]:
+                        out.append(f'{env["Name"]}#{d["DeploymentNumber"]}:{d["State"]}')
+            return {"recent": out}
+    outputs:
+      - Name: Recent
+        Selector: $.Payload.recent
+        Type: StringList
+  - name: DecideDrain
+    action: aws:branch
+    inputs:
+      Choices:
+        - NextStep: ApproveDrain
+          Not:
+            Variable: '{{ ImpairedAz }}'
+            StringEquals: ''
+      Default: Done
+  - name: ApproveDrain
+    action: aws:approve
+    timeoutSeconds: 900
+    inputs:
+      Approvers: '{{ Approvers }}'
+      MinRequiredApprovals: 1
+      Message: |
+        Drain {{ ImpairedAz }} for {{ ServiceName }} via ARC zonal shift (expires in 1h).
+        Evidence - alarms: {{ AlarmsInAlarm.Alarms }}; deployments: {{ RecentDeployments.DeploymentIds }}
+  - name: ZonalShift
+    action: aws:executeAwsApi
+    inputs:
+      Service: arc-zonal-shift
+      Api: StartZonalShift
+      ResourceIdentifier: '{{ LoadBalancerArn }}'
+      AwayFrom: '{{ ImpairedAz }}'
+      ExpiresIn: 1h
+      Comment: 'SRE generic mitigation: drain. Incident {{ IncidentRecordArn }}'
+    # Reversible by design: the shift auto-expires, and CancelZonalShift undoes it.
+  - name: Done
+    action: aws:sleep
+    inputs:
+      Duration: PT1S
+    isEnd: true

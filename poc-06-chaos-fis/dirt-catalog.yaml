@@ -1,0 +1,57 @@
+# Service-level resilience test catalog, organised by the dimensions in
+# SRE 2nd ed. ch. 14 (DiRT) and expressed as "X resilient to Y measured by Z".
+# Each entry says which AWS tool runs it. Start with low blast radius in staging,
+# then a single AZ in production with a stop condition.
+service: checkout
+owner: checkout-sre
+tests:
+  - dimension: capacity_and_stability
+    x: checkout CUJ
+    y: lose all tasks in one AZ (cold start of replacements)
+    z: availability SLI >= 99.9% over the test, p99 < 800ms
+    tool: AWS FIS aws:ec2:stop-instances / aws:ecs:stop-task, or Route 53 ARC zonal shift
+  - dimension: capacity_and_stability
+    x: checkout under 2x peak load
+    y: overload
+    z: CRITICAL traffic served, SHEDDABLE traffic rejected with 503 + Retry-After, goodput plateaus (not collapses)
+    tool: Distributed Load Testing on AWS / k6 on Fargate
+  - dimension: data_resilience
+    x: orders table
+    y: restore last night's backup into a fresh table and diff
+    z: restore completes within RTO 2h, data within RPO 15m
+    tool: AWS Backup restore testing (POC 08)
+  - dimension: infrastructure_resilience
+    x: checkout -> payments
+    y: +300ms latency / 5% packet loss
+    z: checkout p99 < 1s, recommendations degrade gracefully
+    tool: AWS FIS AWSFIS-Run-Network-Latency-Sources / Packet-Loss
+  - dimension: dependency_resilience
+    x: product page
+    y: recommendations service returns 100% errors (OPTIONAL dependency)
+    z: page still renders, no SLO burn
+    tool: AppConfig flag that forces the client into failure mode, or FIS aws:lambda:invocation-error
+  - dimension: dependency_resilience
+    x: all callers of checkout
+    y: run checkout AT its SLO (inject 0.1% errors)
+    z: callers still meet their own SLOs (validates client retry/timeout settings)
+    tool: AWS FIS aws:lambda:invocation-error with percentage
+  - dimension: failure_handling
+    x: deployment pipeline
+    y: bad build reaches canary
+    z: CodeDeploy auto-rollback within 5 min, no customer-visible burn
+    tool: deliberately broken build in staging
+  - dimension: operational_resilience
+    x: on-call team
+    y: Wheel of Misfortune replay of last quarter's top incident
+    z: correct mitigation within 15 min, comms update within 10 min
+    tool: tabletop + staging environment
+  - dimension: observability_and_tooling
+    x: alerting pipeline
+    y: primary Region monitoring account unavailable
+    z: pages still delivered (Incident Manager replication set, secondary Region)
+    tool: game day, disable cross-account role
+  - dimension: business_continuity
+    x: team
+    y: the two most senior engineers are unavailable
+    z: playbooks let any on-caller mitigate the top-5 failure modes
+    tool: staff SPOF game day
