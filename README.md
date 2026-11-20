@@ -21,7 +21,7 @@ Proofs of concept that turn the ideas in *Site Reliability Engineering, 2nd Edit
 | I–II · 1–7 Context, culture, org | [`docs/`](docs) concept map, culture/org cheat sheet, interview question bank, full-reading notes for chapters 4–23 | n/a |
 
 ## Study guide
-An interactive course with one lesson per chapter (diagrams, AWS mapping, interview practice, quick checks, exercises that point at these POCs) plus labs, flashcards, a quiz and interview drills is published as a private Claude artifact: https://claude.ai/artifact/Q35uEdK1hrKUhbZ15vWvVy (share it from its page if you want others to see it). It now includes a second-pass deep dive from a full read of every chapter, with 125 flashcards, 43 quiz questions and 16 interview drills.
+An interactive course with one lesson per chapter (diagrams, AWS mapping, interview practice, quick checks, exercises that point at these POCs) plus labs, flashcards, a quiz and interview drills is published as a private Claude artifact: https://claude.ai/artifact/Q35uEdK1hrKUhbZ15vWvVy (share it from its page if you want others to see it). It includes a deep dive from a full read of every chapter and redrawn versions of the book's key diagrams, with 146 flashcards, 50 quiz questions and 18 interview drills. The diagram notes are also in [`docs/diagrams-and-rereads.md`](docs/diagrams-and-rereads.md).
 
 The same deep-dive material is in [`docs/full-reading-notes.md`](docs/full-reading-notes.md): case studies (Paris outage, Maps STPA/CAST, Google Meet at COVID scale, Traffic Director, Persistent Disk, Azure, Disney, Spotify, Waymo), the numbers worth memorising, and an interview angle for each chapter.
 

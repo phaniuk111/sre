@@ -24,7 +24,7 @@ python backup_slo.py --live     # your account (needs backup:List*, tag:GetResou
 
 ## Objectives
 * **RPO**: how much data you can lose, which sets backup frequency (or PITR).
-* **RTO** (the book calls it *Restore* Time Objective): how fast you must restore. Snapshots restore faster but share fate with the source; measure the real number with restore tests.
+* **RTO** (the book calls it *Restore* Time Objective): how fast you must be back. It is cumulative: time to detect + time to act + time to restore, counted from the incident. Snapshots restore faster but share fate with the source; measure the real number with restore tests.
 * **RWO** (Restore Window Objective): how far back you can restore. It has to satisfy the business *and* data-deletion law (GDPR erasure), which caps retention.
 
 ## Rules of thumb from the chapter
