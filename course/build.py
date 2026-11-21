@@ -106,6 +106,7 @@ for ch, q in X.NEWQ.items():
     QUIZ.append(q)
 import extras2 as X2
 import extras3 as X3
+import extras4 as X4
 import synthesis as SY
 CARDS += X3.CARDS
 for ch, q in X2.NEWQUIZ.items():
@@ -203,6 +204,8 @@ for n in range(1, 24):
         aws = aws[0].upper() + aws[1:]
         tail += f'<div class="note aws"><b>On AWS</b>{aws}</div>'
     iqs = ''.join(qa(q) for q in (q1, q2) if q)
+    if n in X4.IQ:
+        iqs = ''.join(f'<div class="iq"><p class="iqq">{q}</p><details><summary>Show a model answer</summary>' + ''.join(f'<p>{a}</p>' for a in ans) + '</details></div>' for q, ans in X4.IQ[n])
     if iqs:
         tail += '<h2>Interview practice</h2><p>Answer aloud for two minutes before you open the model answer.</p>' + iqs
     qs = quiz_ch.get(n, [])[:3 if n in X2.NEWQUIZ else 2]
