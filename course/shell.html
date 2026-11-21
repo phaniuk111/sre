@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SRE Interview Tutor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE a patient tutor: one chapter at a time, plain words, then practice
+   IDEA a metro map of the book: every chapter is a station, every part of the book is a coloured line
+   PICTURE the route map in the sidebar fills in as you learn; inside lessons, boxes-and-arrows diagrams and small tables
+   COLOUR white / near-black ground; one line colour per book part (green, red, blue, orange, purple, teal, ink)
+   TYPE Figtree 800 titles, Figtree body
+   LAYOUT laptop: sticky route map left, one lesson right; phone: station strip on top, lesson below */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#0e1116);--ink:light-dark(#0e1116,#e9edf3);--mute:light-dark(#4b5563,#a3acb9);--rule:light-dark(#e3e6ea,#262c36);--panel:light-dark(#f4f6f8,#161b23);
+  --green:#00875a;--red:#d92b1f;--blue:#0a5cff;--orange:#c05a00;--purple:#7a3cff;--teal:#007f8c;--magenta:#c0158a;--lime:#4a7a00;--inkline:light-dark(#0e1116,#c9d1dc);
+  --link:light-dark(#0a4fd6,#8ab4ff);--soft:var(--mute);--c:var(--ink);--ct:#fff}
+:root[data-theme=light]{color-scheme:light}
+:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html{scroll-padding-top:80px}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.65 Figtree,system-ui,sans-serif;overflow-x:clip}
+a{color:var(--link)}
+.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:16px;padding:10px max(3vw,16px);min-height:57px}
+.top b{font-weight:800;font-size:17px;white-space:nowrap}
+.bar{flex:1;height:8px;background:var(--panel);border-radius:4px;overflow:hidden;max-width:360px}
+.bar i{display:block;height:100%;width:0;background:var(--green);transition:width .3s}
+.top small{color:var(--mute);font-size:14px;white-space:nowrap}
+.top a{font-weight:600;font-size:15px;white-space:nowrap;margin-left:auto}
+.layout{display:grid;grid-template-columns:300px minmax(0,1fr);max-width:1320px;margin:0 auto}
+.side{position:sticky;top:57px;align-self:start;max-height:calc(100vh - 57px);overflow:auto;padding:24px 12px 40px 20px;border-right:1px solid var(--rule)}
+.part{font-size:14px;font-weight:800;margin:18px 0 6px 6px;color:var(--mute)}
+.book{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin:26px 0 -8px 6px;padding-top:14px;border-top:1px solid var(--rule)}
+.sidewrap>.book:first-child{margin-top:0;padding-top:0;border-top:0}
+pre{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:12px 14px;overflow-x:auto;font-size:14px;line-height:1.55;margin:16px 0}
+pre code{background:none;padding:0;font-size:inherit;overflow-wrap:normal}
+.sidewrap>.book+div .part{margin-top:14px}
+.stations{list-style:none;margin:0;padding:0;position:relative}
+.stations li{position:relative}
+.stations li::before{content:"";position:absolute;left:17px;top:0;bottom:0;width:6px;background:var(--c);opacity:.9}
+.stations li.first::before{top:20px}
+.stations li.last::before{bottom:calc(100% - 20px)}
+.stations a{position:relative;display:flex;align-items:center;gap:12px;min-height:40px;padding:3px 8px 3px 4px;border-radius:8px;text-decoration:none;color:var(--ink);font-size:15px;line-height:1.3}
+.stations a:hover{background:var(--panel)}
+.stations a.on{background:var(--panel);font-weight:800}
+.dot{flex:none;width:30px;height:30px;border-radius:50%;border:5px solid var(--c);background:var(--bg);display:grid;place-items:center;font-size:11px;font-weight:800;position:relative;z-index:1}
+.done .dot{background:var(--c);color:var(--ct)}
+main{padding:32px clamp(16px,4vw,56px) 64px;max-width:900px}
+.lesson[hidden]{display:none}
+.chip{display:inline-block;font-size:14px;font-weight:600;color:var(--ct);background:var(--c);padding:3px 10px;border-radius:999px;margin-right:8px;white-space:nowrap}
+.meta{color:var(--mute);font-size:15px;margin-bottom:10px}
+h1{font-size:clamp(32px,4.4vw,48px);line-height:1.05;letter-spacing:-.02em;font-weight:800;margin:6px 0 14px;text-wrap:balance}
+h2{font-size:clamp(23px,2.4vw,28px);line-height:1.15;letter-spacing:-.01em;font-weight:800;margin:40px 0 12px;text-wrap:balance}
+h3{font-size:18px;margin:26px 0 8px}
+p,li{max-width:70ch}
+main ul,main ol{padding-left:22px}
+main li{margin:6px 0}
+code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:.86em;overflow-wrap:anywhere;background:var(--panel);padding:1px 5px;border-radius:4px}
+.learn{border-left:6px solid var(--c);background:var(--panel);padding:14px 18px;border-radius:0 10px 10px 0;margin:18px 0}
+.learn b{display:block;margin-bottom:4px}
+.learn ul{margin:0;padding-left:20px}
+.note,.warn{border:1px solid var(--rule);border-radius:10px;padding:12px 16px;margin:18px 0;background:var(--panel)}
+.warn{border-color:color-mix(in srgb,var(--red) 45%,var(--rule))}
+.note>b,.warn>b{display:block}
+.aws{border-left:6px solid var(--orange)}
+.say{border:2px solid var(--c);border-radius:14px 14px 14px 0;padding:14px 18px;margin:28px 0 18px}
+.say>b{display:block;font-size:14px;color:var(--mute)}
+.say p{margin:4px 0 0;font-size:18px;line-height:1.55}
+.deeper{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:48px 0 0;padding-top:18px;border-top:6px solid var(--c);color:var(--mute);font-size:15px}
+.deeper span{font-weight:800;color:var(--ink);font-size:17px}
+.deeper+h2{margin-top:22px}
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;margin:18px 0}
+.box{flex:1 1 140px;border:2px solid var(--c);border-radius:10px;padding:10px 12px;background:var(--bg)}
+.box b{display:block;font-size:15px;line-height:1.3}
+.box span{font-size:14px;color:var(--mute);line-height:1.4;display:block;margin-top:2px}
+.arr{flex:none;align-self:center;font-size:22px;font-weight:800;color:var(--mute)}
+.loopnote{font-size:15px;color:var(--mute);margin-top:-8px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:10px;margin:18px 0}
+.tile{border-top:6px solid var(--c);background:var(--panel);padding:12px;border-radius:0 0 10px 10px}
+.tile b{display:block;line-height:1.3}
+.tile span{font-size:15px;color:var(--mute);line-height:1.45;display:block;margin-top:4px}
+.seq{list-style:none;padding:0;margin:18px 0;border-left:4px solid var(--c)}
+.seq li{display:grid;grid-template-columns:minmax(0,70px) minmax(0,1fr);gap:12px;padding:8px 0 8px 14px;border-bottom:1px dashed var(--rule);max-width:none;margin:0}
+.seq .who{font-weight:800;font-variant-numeric:tabular-nums}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:15px;margin:14px 0}
+th{text-align:left;font-size:14px;color:var(--mute);border-bottom:2px solid var(--ink);padding:8px}
+td{border-bottom:1px solid var(--rule);padding:8px;vertical-align:top}
+td:first-child{font-weight:600}
+table.num td{font-variant-numeric:tabular-nums}
+.pl{display:inline-block;padding:1px 9px;border-radius:999px;font-size:13px;font-weight:600}
+.pl.a{background:color-mix(in srgb,var(--green) 18%,var(--bg));color:light-dark(#005c3d,#7fe0b6)}
+.pl.h{background:var(--panel);color:var(--mute)}
+.quiz{border:2px solid var(--ink);border-radius:12px;padding:16px;margin:22px 0}
+.quiz>b{display:block;margin-bottom:8px}
+.quiz button,.opt{display:block;width:100%;text-align:left;min-height:44px;margin:6px 0;padding:8px 12px;border-radius:8px;border:1px solid var(--rule);background:var(--bg);color:var(--ink);font:16px Figtree,sans-serif;cursor:pointer}
+.quiz button:hover,.opt:hover{background:var(--panel)}
+.quiz button.right,.opt.right{border-color:var(--green);background:color-mix(in srgb,var(--green) 14%,var(--bg))}
+.quiz button.wrong,.opt.wrong{border-color:var(--red);background:color-mix(in srgb,var(--red) 12%,var(--bg))}
+.quiz .why{display:none;margin-top:8px;color:var(--mute)}
+.quiz.answered .why{display:block}
+.iq{border:1px solid var(--rule);border-left:6px solid var(--c);border-radius:0 10px 10px 0;padding:12px 16px;margin:14px 0}
+.iqq{font-weight:800;margin:0 0 4px}
+.iq summary,.drill summary{cursor:pointer;font-weight:600;color:var(--link);min-height:36px;display:flex;align-items:center}
+.iq details p{margin:8px 0}
+.take{background:var(--ink);color:var(--bg);border-radius:12px;padding:16px 20px;margin:26px 0}
+.take b{display:block;margin-bottom:4px}
+.take ul{margin:0;padding-left:20px}
+.ex{border:2px dashed var(--c);border-radius:12px;padding:14px 18px;margin:22px 0}
+.ex>b{display:block}
+.pager{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;border-top:1px solid var(--rule);margin-top:36px;padding-top:20px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border-radius:999px;border:2px solid var(--ink);background:var(--bg);color:var(--ink);font:600 15px Figtree,sans-serif;cursor:pointer;text-decoration:none}
+.btn.solid{background:var(--ink);color:var(--bg)}
+.btn[disabled]{opacity:.35;cursor:default}
+.btn[hidden]{display:none}
+button:focus-visible,a:focus-visible,summary:focus-visible,select:focus-visible,input:focus-visible,.fcard:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+.parts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px;margin:18px 0}
+.parts a{display:block;border-top:6px solid var(--c);background:var(--panel);padding:12px;border-radius:0 0 10px 10px;text-decoration:none;color:var(--ink)}
+.parts a b{display:block}
+.parts a span{font-size:14px;color:var(--mute)}
+/* calculator and labs */
+label{display:block;font-weight:600;font-size:14px;margin-bottom:4px}
+select,input[type=number],input[type=text]{font:inherit;font-size:16px;min-height:44px;padding:6px 10px;border:1.5px solid var(--mute);border-radius:8px;background:var(--bg);color:var(--ink);width:100%}
+input[type=range]{width:100%;accent-color:var(--red);min-height:44px}
+.calc{border:2px solid var(--ink);border-radius:12px;padding:16px;margin:18px 0}
+.controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.big{font-weight:800;font-size:clamp(48px,8vw,84px);line-height:1;color:var(--red);white-space:nowrap;margin:16px 0 4px;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.bigcap{color:var(--mute);font-size:15px}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:14px 0}
+.facts div{border-top:4px solid var(--ink);padding-top:6px;font-size:14px;color:var(--mute)}
+.facts b{display:block;font-size:22px;color:var(--ink);white-space:nowrap}
+.fig{position:relative;height:240px}
+.fig>svg{position:absolute;inset:0;width:100%;height:100%}
+.labs{display:grid;gap:20px}
+.lab{border:2px solid var(--ink);border-radius:12px;padding:16px}
+.lab h3{margin-top:0;font-size:20px}
+.out{font-weight:800;font-size:36px;line-height:1.1;margin:12px 0;color:var(--red);font-variant-numeric:tabular-nums}
+.pill{display:inline-block;padding:4px 10px;border-radius:999px;font-weight:600;font-size:14px;margin:2px 4px 2px 0}
+.pill.on{background:var(--red);color:#fff}.pill.off{background:var(--panel);color:var(--mute)}
+.deps{display:grid;gap:8px}
+.deprow{display:grid;grid-template-columns:minmax(0,1fr) 110px 44px;gap:8px;align-items:center}
+.row{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;align-items:center}
+.row select{width:auto}
+.lab button,.row button{min-height:44px;padding:0 16px;border-radius:999px;border:2px solid var(--ink);background:var(--bg);color:var(--ink);font:600 15px Figtree,sans-serif;cursor:pointer}
+.row button.solid{background:var(--ink);color:var(--bg)}
+/* flashcards */
+.fcard{min-height:240px;border:2px solid var(--ink);border-radius:14px;padding:24px;display:flex;flex-direction:column;justify-content:center;cursor:pointer;background:var(--bg)}
+.fcard.flip{background:var(--ink);color:var(--bg)}
+.fcard .face{font-size:21px;font-weight:600;line-height:1.4}
+.fcard .hint{font-size:14px;margin-top:12px;opacity:.7}
+.drill{border:1px solid var(--rule);border-left:6px solid var(--c);border-radius:0 10px 10px 0;padding:6px 16px;margin:12px 0}
+.drill summary{color:var(--ink);font-weight:800;padding:6px 0}
+.expl{background:var(--panel);padding:12px 16px;border-radius:8px;margin-top:8px}
+@media(max-width:900px){
+ .layout{grid-template-columns:minmax(0,1fr)}
+ .side{position:static;max-height:none;border-right:0;border-bottom:1px solid var(--rule);padding:10px 12px;overflow-x:auto}
+ .part,.book{display:none}
+ .sidewrap{display:flex}
+ .stations{display:flex}
+ .stations li::before{left:0;right:0;top:20px;bottom:auto;height:6px;width:auto}
+ .stations li.first::before{left:20px}
+ .stations li.last::before{right:calc(100% - 20px)}
+ .stations a{padding:4px 6px}
+ .stations a .t{display:none}
+ .top small{display:none}
+}
+@media(max-width:600px){table{font-size:13px}th,td{padding:6px 4px}.flow{flex-direction:column}.box{flex:none}.arr{align-self:flex-start;transform:rotate(90deg);margin-left:20px}.top a{display:none}.controls,.facts{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.seq li{grid-template-columns:minmax(0,52px) minmax(0,1fr)}}
+@media(prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+</head>
+<body>
+<div class="top">
+  <b>SRE Interview Tutor</b>
+  <div class="bar" aria-label="Chapters learned"><i id="prog"></i></div>
+  <small id="progtxt">0 of 23 chapters</small>
+  <a href="https://github.com/phaniuk111/sre">POC repo on GitHub</a>
+</div>
+
+<div class="layout">
+<nav class="side" id="side" aria-label="Lessons"></nav>
+<main id="main">
+
+<section class="lesson" id="start" data-part="1" data-dot="0" data-title="Start here">
+<div class="meta"><span class="chip">Start here</span>Two books · 33 chapter lessons</div>
+<h1>Learn SRE and platform engineering well enough to teach them</h1>
+<p>This course walks you through two books, one lesson per chapter: all 23 chapters of <i>Site Reliability Engineering, 2nd Edition</i>, and the 10 chapters published so far of <i>Platform Engineering at Google</i>. I’m your tutor: each lesson explains the ideas in plain words, shows them as a picture, and then makes you practise saying them the way you would in an interview. Everything is written in my own words and mapped to AWS.</p>
+<div class="learn"><b>Every lesson follows the same pattern</b><ul>
+<li><b>The big picture</b>: the chapter’s argument in short paragraphs, with a diagram.</li>
+<li><b>Going deeper</b>: the case studies, numbers and named models interviewers probe for.</li>
+<li><b>Say it in an interview</b>, the AWS translation, and a question with a model answer you reveal after trying.</li>
+<li><b>A quick check, an exercise</b> (often a POC to run from the repo) and three takeaways.</li>
+</ul></div>
+<p>Mark a lesson complete at the bottom and its station on the route map fills in. Your progress is kept in this browser.</p>
+
+<h2>Start with one number</h2>
+<p>Almost every SRE conversation comes back to the <b>error budget</b>: the amount of failure your reliability target allows. Change the inputs and watch how quickly a small error rate eats a month’s budget.</p>
+<div class="calc">
+  <div class="controls">
+    <div><label for="slo">SLO</label><select id="slo"><option value="0.99">99%</option><option value="0.995">99.5%</option><option value="0.999" selected>99.9%</option><option value="0.9995">99.95%</option><option value="0.9999">99.99%</option></select></div>
+    <div><label for="win">Window</label><select id="win"><option value="7">7 days</option><option value="28">28 days</option><option value="30" selected>30 days</option><option value="90">90 days</option></select></div>
+    <div><label for="err">Current error rate</label><select id="err"><option value="0.0005">0.05%</option><option value="0.001">0.1%</option><option value="0.002" selected>0.2%</option><option value="0.005">0.5%</option><option value="0.0144">1.44%</option><option value="0.05">5%</option></select></div>
+  </div>
+  <div class="big" id="bigOut">43.2 min</div>
+  <div class="bigcap">of full downtime allowed in the window</div>
+  <div class="facts">
+    <div>Burn rate<b id="fBurn">2.0×</b></div>
+    <div>Budget gone in<b id="fExh">15 days</b></div>
+    <div>Alert says<b id="fAlert">ticket</b></div>
+  </div>
+  <div class="fig" aria-label="Error budget remaining over the SLO window"><svg id="heroSvg" role="img"></svg></div>
+</div>
+<p>You will learn exactly where these numbers come from in the lesson on SLOs. If you only have an hour before an interview, do that lesson first.</p>
+
+<h2>The route map</h2>
+<p>The SRE book has six parts and the platform book adds two more. Each is a coloured line on the map, and the last line is practice.</p>
+<div class="parts">
+  <a href="#ch-1" style="--c:var(--green)"><b>I · SRE in context</b><span>What SRE is, why it pays, what the cloud changed</span></a>
+  <a href="#ch-4" style="--c:var(--red)"><b>II · Sociotechnical foundations</b><span>Culture, hiring, org design, engagement models</span></a>
+  <a href="#ch-8" style="--c:var(--blue)"><b>III · Awareness and preparedness</b><span>SLOs, observability, incidents, learning, STPA</span></a>
+  <a href="#ch-13" style="--c:var(--orange)"><b>IV · Infrastructure design</b><span>Automation, testing, capacity, data</span></a>
+  <a href="#ch-17" style="--c:var(--purple)"><b>V · Resilient products</b><span>Resilience principles and platforms</span></a>
+  <a href="#ch-19" style="--c:var(--teal)"><b>VI · Outlook</b><span>AI, other environments, the future</span></a>
+  <a href="#pe" style="--c:var(--magenta)"><b>Platform book · Architecture</b><span>Coupling, layers, shared fate, and deep dives on efficiency, security and reliability</span></a>
+  <a href="#pe-7" style="--c:var(--lime)"><b>Platform book · Execution</b><span>Developer experience, platform as a product, AI, education</span></a>
+  <a href="#labs" style="--c:var(--inkline)"><b>Practice and synthesis</b><span>Labs, {NCARDS} flashcards, {NQUIZ} quiz questions, {NDRILLS} interview drills, the AWS map, then an executive summary, knowledge map, requirements checklist and numbers to know</span></a>
+</div>
+
+<h2>A study plan</h2>
+<div class="tiles">
+  <div class="tile" style="--c:var(--blue)"><b>Days 1–3: the language</b><span>Chapters 1–3 and 8. Derive 43.2 minutes and 14.4× on a whiteboard. POC 01.</span></div>
+  <div class="tile" style="--c:var(--blue)"><b>Days 4–6: detect and respond</b><span>Chapters 9–12. Observability, incident roles, blameless learning. POC 02 and 03.</span></div>
+  <div class="tile" style="--c:var(--orange)"><b>Days 7–10: build it right</b><span>Chapters 13–18. Automation, testing, capacity, data, resilience, platforms. POC 04 to 10.</span></div>
+  <div class="tile" style="--c:var(--red)"><b>Days 11–14: people and future</b><span>Chapters 4–7 and 19–23. Then every drill, aloud. POC 11.</span></div>
+  <div class="tile" style="--c:var(--magenta)"><b>Days 15–17: platform architecture</b><span>Platform lessons 1–6. Shift down, coupling, safe coding, risk profiles. POC 12 to 17.</span></div>
+  <div class="tile" style="--c:var(--lime)"><b>Days 18–19: platform execution</b><span>Platform lessons 7–10. Developer experience, product thinking, AI, education. POC 18 and 19.</span></div>
+</div>
+<p>When you have been through both books, finish with the four synthesis pages at the end of the map: <a href="#summary">executive summary</a>, <a href="#map">knowledge map</a>, <a href="#checklist">requirements checklist</a> and <a href="#numbers">numbers to know</a>.</p>
+<div class="take"><b>How to study each lesson</b><ul><li>Read it once, then close it and explain it out loud without looking.</li><li>Answer the interview question aloud before you open the model answer.</li><li>Do the exercise. Running the code is what makes the ideas stick.</li></ul></div>
+</section>
+
+/*LESSONS*/
+
+<section class="lesson" id="labs" data-part="7" data-dot="A" data-title="Labs">
+<div class="meta"><span class="chip">Practice</span>Three calculators</div>
+<h1>Labs: do the maths yourself</h1>
+<p>These are the calculations interviewers like to see on a whiteboard. Change the inputs and explain out loud why the output moves.</p>
+<div class="labs">/*LABS*/</div>
+</section>
+
+<section class="lesson" id="cards" data-part="7" data-dot="B" data-title="Flashcards">
+<div class="meta"><span class="chip">Practice</span>{NCARDS} cards</div>
+<h1>Flashcards</h1>
+<p>Say the answer before you flip. Click the card or press Space to turn it over.</p>
+<div class="fcard" id="card" tabindex="0" role="button" aria-live="polite"><div class="face" id="cardFace"></div><div class="hint" id="cardHint"></div></div>
+<div class="row"><button id="prevC">Previous</button><button class="solid" id="nextC">Next</button><button id="shufC">Shuffle</button><span id="cardPos" style="color:var(--mute)"></span></div>
+</section>
+
+<section class="lesson" id="quiz" data-part="7" data-dot="C" data-title="Quiz">
+<div class="meta"><span class="chip">Practice</span>{NQUIZ} questions</div>
+<h1>Quiz</h1>
+<p id="qscore">Interview-style questions across both books. Each one explains the answer.</p>
+<div class="quiz" id="qbox"></div>
+<div class="row"><button class="solid" id="qnext">Next question</button><button id="qreset">Restart</button></div>
+</section>
+
+<section class="lesson" id="drills" data-part="7" data-dot="D" data-title="Interview drills">
+<div class="meta"><span class="chip">Practice</span>{NDRILLS} open questions</div>
+<h1>Interview drills</h1>
+<p>Open-ended questions you will actually get. Answer aloud for two minutes before opening the model answer, then compare the structure as well as the facts.</p>
+<div id="drillList"></div>
+</section>
+
+<section class="lesson" id="aws" data-part="7" data-dot="E" data-title="AWS map">
+<div class="meta"><span class="chip">Practice</span>Reference</div>
+<h1>Concept to AWS service</h1>
+<p>One row per concept: what to say, which AWS services implement it, and the POC in the repo that shows it working.</p>
+<h2>Site Reliability Engineering</h2><div class="scroll">/*AWS*/</div>
+<h2>Platform Engineering at Google</h2>/*AWS2*/
+<p style="color:var(--mute);font-size:15px">Study notes written in my own words from <i>Site Reliability Engineering, 2nd Edition</i> (Beyer, Jones, Leng, Huska, Petoff, Murphy; O’Reilly). and from the early release of <i>Platform Engineering at Google</i> (O’Reilly; 10 of 31 planned chapters). They don’t replace the books. Code and Terraform: <a href="https://github.com/phaniuk111/sre">github.com/phaniuk111/sre</a>.</p>
+</section>
+
+<div class="pager">
+  <button class="btn" id="prev">← Previous</button>
+  <button class="btn solid" id="done">Mark lesson complete</button>
+  <button class="btn" id="next">Next →</button>
+</div>
+</main>
+</div>
+
+<script>
+{
+const $=s=>document.querySelector(s);
+const PARTS={1:['I · SRE in context','var(--green)'],2:['II · Sociotechnical foundations','var(--red)'],3:['III · Awareness and preparedness','var(--blue)'],4:['IV · Infrastructure design','var(--orange)'],5:['V · Resilient products','var(--purple)'],6:['VI · Outlook','var(--teal)'],7:['Practice and synthesis','var(--inkline)'],P1:['Architecture and ecosystem design','var(--magenta)'],P2:['Execution and product approach','var(--lime)']};
+const ORDER=['1','2','3','4','5','6','P1','P2','7'];const BOOKS={'1':'Book 1 · Site Reliability Engineering','P1':'Book 2 · Platform Engineering at Google','7':'Both books'};
+const lessons=[...document.querySelectorAll('.lesson')];
+const chapters=lessons.filter(l=>l.dataset.ch);
+let done=new Set();
+try{done=new Set(JSON.parse(localStorage.getItem('sre_done')||'[]').map(String))}catch(e){}
+const save=()=>{try{localStorage.setItem('sre_done',JSON.stringify([...done]))}catch(e){}};
+lessons.forEach(l=>{l.style.setProperty('--c',PARTS[l.dataset.part][1]);if(l.dataset.part==='7'||l.id==='start')l.style.setProperty('--ct','var(--bg)')});
+$('#start').style.setProperty('--c','var(--ink)');
+
+const side=$('#side');
+const byPart={};
+lessons.forEach((l,i)=>{(byPart[l.dataset.part]=byPart[l.dataset.part]||[]).push([l,i])});
+side.innerHTML='<div class="sidewrap">'+ORDER.filter(p=>byPart[p]).map(p=>[p,byPart[p]]).map(([p,arr])=>(BOOKS[p]?'<div class="book">'+BOOKS[p]+'</div>':'')+'<div><div class="part">'+PARTS[p][0]+'</div><ol class="stations">'+arr.map(([l,i],k)=>'<li class="'+(k===0?'first ':'')+(k===arr.length-1?'last':'')+'" style="--c:'+PARTS[p][1]+(p==='7'?';--ct:var(--bg)':'')+'"><a href="#'+l.id+'" data-i="'+i+'"><span class="dot">'+l.dataset.dot+'</span><span class="t">'+l.dataset.title+'</span></a></li>').join('')+'</ol></div>').join('')+'</div>';
+
+document.querySelectorAll('.quiz[data-answer]').forEach(q=>{
+  const ans=+q.dataset.answer,btns=[...q.querySelectorAll('button')];
+  btns.forEach((b,i)=>b.addEventListener('click',()=>{
+    btns.forEach(x=>x.classList.remove('right','wrong'));
+    b.classList.add(i===ans?'right':'wrong');
+    if(i!==ans)btns[ans].classList.add('right');
+    q.classList.add('answered');
+  }));
+});
+
+const prog=$('#prog'),progtxt=$('#progtxt'),prev=$('#prev'),next=$('#next'),doneBtn=$('#done');
+let cur=0;
+const render=()=>{
+  lessons.forEach((l,i)=>{l.hidden=i!==cur});
+  side.querySelectorAll('a').forEach(a=>{const l=lessons[+a.dataset.i];a.classList.toggle('on',+a.dataset.i===cur);a.parentElement.classList.toggle('done',!!l.dataset.ch&&done.has(l.dataset.ch))});
+  prev.disabled=cur===0;next.disabled=cur===lessons.length-1;
+  const ch=lessons[cur].dataset.ch;
+  doneBtn.hidden=!ch;
+  if(ch)doneBtn.textContent=done.has(ch)?'Completed ✓ (undo)':'Mark lesson complete';
+  const n=chapters.filter(l=>done.has(l.dataset.ch)).length;
+  prog.style.width=(n/chapters.length*100)+'%';
+  progtxt.textContent=n+' of '+chapters.length+' chapters';
+  const on=side.querySelector('a.on');
+  if(on&&side.scrollWidth>side.clientWidth)side.scrollLeft=on.offsetLeft-side.clientWidth/2+20;
+  else if(on&&side.scrollHeight>side.clientHeight){const r=on.offsetTop;if(r<side.scrollTop||r>side.scrollTop+side.clientHeight-60)side.scrollTop=r-side.clientHeight/2}
+};
+const go=(i,scroll)=>{
+  cur=Math.max(0,Math.min(lessons.length-1,i));
+  if(location.hash!=='#'+lessons[cur].id){try{history.replaceState(null,'','#'+lessons[cur].id)}catch(e){}}
+  render();if(scroll)window.scrollTo(0,0);
+};
+const fromHash=()=>{const i=lessons.findIndex(l=>'#'+l.id===location.hash);go(i>=0?i:0,true)};
+window.addEventListener('hashchange',fromHash);
+prev.addEventListener('click',()=>go(cur-1,true));
+next.addEventListener('click',()=>go(cur+1,true));
+doneBtn.addEventListener('click',()=>{
+  const ch=lessons[cur].dataset.ch;if(!ch)return;
+  if(done.has(ch)){done.delete(ch);save();render();return}
+  done.add(ch);save();
+  if(cur<lessons.length-1)go(cur+1,true);else render();
+});
+document.addEventListener('click',e=>{const a=e.target.closest('a[href^="#"]');if(!a)return;const i=lessons.findIndex(l=>'#'+l.id===a.getAttribute('href'));if(i>=0){e.preventDefault();go(i,true)}});
+
+/* error budget calculator */
+const fmtMin=m=>m>=1440?(m/1440).toFixed(m>=14400?0:1)+' days':m>=120?(m/60).toFixed(1)+' h':m>=1?m.toFixed(1)+' min':(m*60).toFixed(0)+' s';
+const heroSvg=$('#heroSvg');
+function hero(){
+  const slo=+$('#slo').value,days=+$('#win').value,err=+$('#err').value;
+  const budget=1-slo,burn=err/budget,minutes=budget*days*1440,exhaustDays=days/burn;
+  $('#bigOut').textContent=fmtMin(minutes);
+  $('#fBurn').textContent=(burn<10?burn.toFixed(1):burn.toFixed(0))+'×';
+  $('#fExh').textContent=burn<=1?'never':fmtMin(exhaustDays*1440);
+  $('#fAlert').textContent=burn>=14.4?'page':burn>=6?'page (6h)':burn>=1?'ticket':'healthy';
+  const W=heroSvg.clientWidth,H=heroSvg.clientHeight;if(!W||!H)return;
+  const padL=W<520?8:44,padB=30,top=22,plotW=W-padL-8,plotH=H-padB-top;
+  const x=d=>padL+d/days*plotW,y=f=>top+(1-Math.max(0,f))*plotH;
+  const pts=[];for(let i=0;i<=60;i++){const d=days*i/60;pts.push([x(d),y(1-d/exhaustDays)])}
+  const area=`M${padL},${top+plotH} L${pts.map(p=>p.join(',')).join(' L')} L${x(days)},${top+plotH} Z`;
+  const ticks=W<520?'':[0,.5,1].map(f=>`<text x="${padL-8}" y="${y(f)+5}" text-anchor="end" font-size="13" fill="currentColor" opacity=".6">${f*100}%</text><line x1="${padL}" x2="${x(days)}" y1="${y(f)}" y2="${y(f)}" stroke="currentColor" opacity=".12"/>`).join('');
+  const exX=exhaustDays<days?x(exhaustDays):null;
+  heroSvg.innerHTML=`${ticks}<path d="${area}" style="fill:var(--red)" opacity=".9"/>
+   <path d="M${x(0)},${y(1)} L${x(days)},${y(0)}" stroke="currentColor" stroke-width="2" stroke-dasharray="6 6" fill="none" opacity=".55"/>
+   <text x="${padL+8}" y="${top-6}" font-size="14" font-weight="600" fill="currentColor">Error budget left</text>
+   <text x="${x(days)}" y="${H-8}" text-anchor="end" font-size="13" fill="currentColor" opacity=".7">${days}-day window →</text>
+   <text x="${padL}" y="${H-8}" font-size="13" fill="currentColor" opacity=".7">dashed = burn rate 1×</text>
+   ${exX?`<line x1="${exX}" x2="${exX}" y1="${top}" y2="${top+plotH}" stroke="currentColor" stroke-width="2"/><text x="${Math.min(exX+6,W-130)}" y="${top+18}" font-size="13" font-weight="600" fill="currentColor">empty on day ${exhaustDays.toFixed(1)}</text>`:''}`;
+}
+['#slo','#win','#err'].forEach(s=>$(s).addEventListener('change',hero));
+new ResizeObserver(hero).observe(heroSvg);hero();
+
+/* burn lab */
+function burnLab(){
+  const slo=+$('#b_slo').value,b=1-slo,l=+$('#b_long').value/100,s=+$('#b_short').value/100;
+  $('#b_longv').textContent=(l*100).toFixed(2)+'%';$('#b_shortv').textContent=(s*100).toFixed(2)+'%';
+  const rl=l/b,rs=s/b;$('#b_out').textContent=rl.toFixed(1)+'× burn (1h)';
+  const rules=[['Page: 2% in 1h',14.4],['Page: 5% in 6h',6],['Ticket: 10% in 3d',1]];
+  $('#b_pills').innerHTML=rules.map(([n,t])=>`<span class="pill ${rl>t&&rs>t?'on':'off'}">${n}${rl>t&&rs>t?' fires':''}</span>`).join('');
+}
+['#b_slo','#b_long','#b_short'].forEach(s=>$(s).addEventListener('input',burnLab));burnLab();
+
+/* dependency lab */
+let deps=[['API Gateway',99.95],['Lambda',99.95],['DynamoDB',99.99]];
+function compLab(){
+  $('#deps').innerHTML=deps.map((d,i)=>`<div class="deprow"><input aria-label="Dependency name" value="${d[0].replace(/"/g,'')}" data-i="${i}" data-k="0" type="text"><input aria-label="Availability percent" type="number" step="0.01" min="0" max="100" value="${d[1]}" data-i="${i}" data-k="1"><button aria-label="Remove" data-rm="${i}" style="padding:0">×</button></div>`).join('');
+  const a=deps.map(d=>d[1]/100),serial=$('#mode').value==='serial';
+  const v=serial?a.reduce((p,q)=>p*q,1):1-a.reduce((p,q)=>p*(1-q),1);
+  $('#c_out').textContent=(v*100).toFixed(4).replace(/0+$/,'').replace(/\.$/,'')+'%';
+  $('#c_note').textContent=serial?`Best possible availability if every call must succeed: ${((1-v)*30*1440).toFixed(1)} minutes of failure per 30 days. You can't promise more than this without redundancy.`:'Hedged reads fail only if all fail. This assumes failures are independent, which shared databases, zones or networks quietly break.';
+}
+$('#deps').addEventListener('change',e=>{const t=e.target;if(t.dataset.i!==undefined){deps[+t.dataset.i][+t.dataset.k]=t.dataset.k==='1'?+t.value:t.value;compLab();}});
+$('#deps').addEventListener('click',e=>{const r=e.target.dataset.rm;if(r!==undefined&&deps.length>1){deps.splice(+r,1);compLab();}});
+$('#addDep').addEventListener('click',()=>{deps.push(['New dependency',99.9]);compLab();});
+$('#mode').addEventListener('change',compLab);compLab();
+
+/* wilson lab */
+function wilsonLower(k,n,z){const p=k/n,z2=z*z,den=1+z2/n,c=(p+z2/(2*n))/den,h=z*Math.sqrt(p*(1-p)/n+z2/(4*n*n))/den;return c-h}
+function wLab(){const n=Math.max(1,Math.floor(+$('#w_n').value||1)),p=+$('#w_p').value,z=+$('#w_z').value;
+  let k=0;while(k<=n&&wilsonLower(k,n,z)<p)k++;
+  $('#w_out').textContent=k>n?'never (too little data)':`${k} of ${n} (${(k/n*100).toFixed(1)}%)`;}
+['#w_n','#w_p','#w_z'].forEach(s=>$(s).addEventListener('input',wLab));wLab();
+
+/* flashcards */
+const cards=[
+/*CARDS*/
+];
+let order=cards.map((_,i)=>i),ci=0,flipped=false;
+function showCard(){const c=cards[order[ci]];$('#cardFace').textContent=flipped?c[1]:c[0];$('#cardHint').textContent=flipped?'Answer':'Question · click to reveal';$('#card').classList.toggle('flip',flipped);$('#cardPos').textContent=`${ci+1} / ${cards.length}`;}
+$('#card').addEventListener('click',()=>{flipped=!flipped;showCard()});
+$('#card').addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();flipped=!flipped;showCard()}});
+$('#nextC').addEventListener('click',()=>{ci=(ci+1)%cards.length;flipped=false;showCard()});
+$('#prevC').addEventListener('click',()=>{ci=(ci-1+cards.length)%cards.length;flipped=false;showCard()});
+$('#shufC').addEventListener('click',()=>{order.sort(()=>Math.random()-.5);ci=0;flipped=false;showCard()});
+showCard();
+
+/* quiz: options are shuffled each time so the answer's position tells you nothing */
+const quiz=[
+/*QUIZ*/
+];
+let qi=0,score=0,answered=false,qorder=[];
+function showQ(){const q=quiz[qi];answered=false;qorder=q[1].map((_,i)=>i).sort(()=>Math.random()-.5);
+  $('#qbox').innerHTML=`<b>${qi+1} of ${quiz.length}. ${q[0]}</b>`+qorder.map(i=>`<button type="button" class="opt" data-i="${i}">${q[1][i]}</button>`).join('')+`<div id="qexpl"></div>`;
+  $('#qscore').textContent=qi?`Score: ${score} of ${qi} so far.`:'Interview-style questions across the whole book. Each one explains the answer.';}
+$('#qbox').addEventListener('click',e=>{const b=e.target.closest('.opt');if(!b||answered)return;answered=true;const q=quiz[qi],i=+b.dataset.i;
+  if(i===q[2])score++;document.querySelectorAll('#qbox .opt').forEach(o=>{const j=+o.dataset.i;if(j===q[2])o.classList.add('right');else if(j===i)o.classList.add('wrong')});
+  $('#qexpl').innerHTML=`<div class="expl"><b>${i===q[2]?'Correct.':'Not quite.'}</b> ${q[3]}</div>`;$('#qscore').textContent=`Score: ${score} of ${qi+1} so far.`;});
+$('#qnext').addEventListener('click',()=>{if(qi<quiz.length-1){qi++;showQ()}else{$('#qbox').innerHTML=`<b>Done: ${score} of ${quiz.length}.</b><p>Re-read the lessons for any you missed, then restart.</p>`}});
+$('#qreset').addEventListener('click',()=>{qi=0;score=0;showQ()});
+showQ();
+
+/* drills */
+const drills=[
+/*DRILLS*/
+];
+$('#drillList').innerHTML=drills.map(d=>`<details class="drill"><summary>${d[0]}</summary>${d[1]}</details>`).join('');
+
+fromHash();
+}
+</script>
+</body>
+</html>

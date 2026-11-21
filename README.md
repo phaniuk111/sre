@@ -35,6 +35,19 @@ The book is an early release: ten chapters were published when this was written,
 | 22 AI with platform engineering | [`poc-19-ai-platform-signals`](poc-19-ai-platform-signals) model freshness, drift (PSI), confidence gate, silent-failure SLO, model promotion gate | SageMaker Pipelines, Feature Store, Model Registry, Model Monitor, Bedrock Guardrails |
 | 10 Layers, 12 Shared fate, 24 Education, and all of the above | [`docs/platform/`](docs/platform) full study notes for the ten chapters, a shared-fate contract (resources, rights, responsibilities), and product templates (jobs to be done, roadmap, deprecation, education plan) | n/a |
 
+## Reading notes and synthesis
+Built in passes: chapter summaries first, then a synthesis across both books. [`docs/progress.md`](docs/progress.md) records the state and how to rebuild.
+
+| File | What it is |
+|---|---|
+| [`docs/executive-summary.md`](docs/executive-summary.md) | Both books on one page, and where they meet |
+| [`docs/knowledge-map.md`](docs/knowledge-map.md) | 91 concepts in 12 themes, each with chapters and the POC that implements it |
+| [`docs/requirements.md`](docs/requirements.md) | 57 things a team or platform should have in place, as a checklist with sources |
+| [`docs/claims.md`](docs/claims.md) | Numbers to know cold, then figures extracted from every chapter |
+| [`docs/chapters/`](docs/chapters) | One summary per chapter: 23 SRE, 10 platform |
+
+The course page itself is in [`course/`](course): `index.html` opens in any browser, and `build.py` rebuilds it.
+
 ## Study guide
 An interactive course with one lesson per chapter (diagrams, AWS mapping, interview practice, quick checks, exercises that point at these POCs) plus labs, flashcards, a quiz and interview drills is published as a private Claude artifact: https://claude.ai/artifact/Q35uEdK1hrKUhbZ15vWvVy (share it from its page if you want others to see it). It covers both books: all 23 SRE chapters and the 10 published platform engineering chapters, with redrawn versions of the key diagrams, 190 flashcards, 72 quiz questions and 21 interview drills. The diagram notes are also in [`docs/diagrams-and-rereads.md`](docs/diagrams-and-rereads.md).
 
