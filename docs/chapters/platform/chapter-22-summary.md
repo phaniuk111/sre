@@ -28,6 +28,7 @@ One term to know: the **configured model** is the complete set of code, data and
 - Why AI needs its own platform
 - The quality attributes, applied to AI
 - AI for platforms
+- Names to recognise
 
 ## Terms
 

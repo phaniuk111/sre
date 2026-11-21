@@ -26,6 +26,7 @@ The chapter makes a sharper point than “people work better when they aren’t 
 - Why universities can’t do it for us
 - Why education belongs with the platform
 - Education and AI
+- Names to recognise
 
 ## Claims and numbers
 

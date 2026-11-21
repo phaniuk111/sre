@@ -30,6 +30,7 @@ The judgement behind this: an imperceptible slowdown or a little opt-out work fo
 - Shifting optimisations down
 - Connect efficiency to business value
 - Three lessons
+- Names to recognise
 
 ## Claims and numbers
 
@@ -38,7 +39,7 @@ The judgement behind this: an imperceptible slowdown or a little opt-out work fo
 
 ## Terms
 
-Common infrastructure, Fleet-wide observability, Central optimisation, Savings, The scheduler hides placement, The aggregate showed surprises, Profile-guided optimisation, made automatic, random on purpose, application productivity metric, Defaults make it practical, Outliers reveal bad metrics, Proxies and Goodhart, Take the long view
+Common infrastructure, Fleet-wide observability, Central optimisation, Savings, The scheduler hides placement, The aggregate showed surprises, Profile-guided optimisation, made automatic, random on purpose, application productivity metric, Defaults make it practical, Outliers reveal bad metrics, Proxies and Goodhart, Take the long view, Google-Wide Profiling (GWP), AutoFDO, TCMalloc
 
 ## Interview line
 

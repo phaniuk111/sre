@@ -34,6 +34,7 @@ That last point defines the goal. **Assurance** is confidence that a requirement
 - Measuring the guarantees
 - Security with AI in the loop
 - Assembling your own
+- Names to recognise
 
 ## Claims and numbers
 

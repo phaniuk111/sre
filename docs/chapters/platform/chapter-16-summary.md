@@ -30,6 +30,11 @@ The chapter is kind about motive: teams rarely decide to trade reliability for s
 - Six capabilities to shift down
 - The reliability of the platform itself
 - What the organisation gets
+- Names to recognise
+
+## Claims and numbers
+
+- Failure domains and N+1 : Survive the loss of a zone or region; say which domain you mean.
 
 ## Terms
 

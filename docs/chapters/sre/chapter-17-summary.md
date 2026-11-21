@@ -38,6 +38,7 @@ Google's principles cover risk management, change management, dependency managem
 
 ## Claims and numbers
 
+- Failure domains and N+1 : Survive the loss of a zone or region; say which domain you mean.
 - Alignment matters: two regions with two zones each lose 25% of capacity per zone, while one zone per region without anti-affinity loses 50%.
 - Degrade to roughly 80% quality for 20% of the compute.
 - On AWS Multi-AZ and cells; Route 53 ARC zonal shift and zonal autoshift; static stability; SDK adaptive retries; API Gateway and WAF throttles; SQS buffering; AppConfig flags; Incident Manager replicated across Regions; break-glass IAM roles.

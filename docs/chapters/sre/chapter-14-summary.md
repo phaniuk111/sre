@@ -45,7 +45,7 @@ Watch for drift. **Canaries** send production traffic to a subset during an incu
 
 ## Terms
 
-Versioned, Observable, Independent, Safe, VOIS, Canaries, DiRT, Client-focused change supervision, Fault injection, Formal methods, Agentic testing, Client-focused supervision, Syntax, Semantic, Dynamic, Canary
+Versioned, Observable, Independent, Safe, VOIS, Canaries, DiRT, Client-focused change supervision, Fault injection, Formal methods, Agentic testing, Client-focused supervision, Across both books, Progressive rollout, Canary analysis, Configuration as code
 
 ## On AWS
 

@@ -105,10 +105,14 @@ for ch, q in X.NEWQ.items():
     quiz_ch.setdefault(ch, []).append(q)
     QUIZ.append(q)
 import extras2 as X2
+import extras3 as X3
+import synthesis as SY
+CARDS += X3.CARDS
 for ch, q in X2.NEWQUIZ.items():
     quiz_ch.setdefault(ch, []).insert(0, q)
     QUIZ.append(q)
 CARDS += X2.NEWCARDS
+QUIZ += X3.QUIZ
 DRILLS += X2.NEWDRILLS
 
 
@@ -176,6 +180,8 @@ for n in range(1, 24):
         cut = m1.end() if m1 else 0
         body = '<h2>The big picture</h2>' + head[:cut] + e.get('top', '') + head[cut:] + tail
     body += X2.PICS.get(n, '')
+    body += X3.SRE_ADD.get(n, '')
+    body += X3.connections(f'ch-{n}', SY.MAP)
     dx = card('dx', n)
     q2 = None
     if n in X2.MORE:
@@ -215,6 +221,10 @@ import pe, pe2, pe3, pe4
 PE_PART = {'P1': 'Architecture and ecosystem design', 'P2': 'Execution and product approach'}
 for d in pe.L:
     body = d['body']
+    if d['id'] in X3.PE_NAMES:
+        body += X3.names(X3.PE_NAMES[d['id']])
+    if d['id'] in X3.PE_FINAL:
+        body += X3.connections(d['id'], SY.MAP)
     for m in re.finditer(r'<p>(.*?)</p>', body, re.S):
         assert len(strip(m.group(1))) < 640, ('long paragraph', d['id'], strip(m.group(1))[:80])
     tail = ''
@@ -249,7 +259,6 @@ labs = re.findall(r'<div class="lab">(.*?)</div>\s*(?=<div class="lab">|$)', OLD
 
 page = open(os.path.join(HERE, 'shell.html'), encoding='utf-8').read()
 page = page.replace('</style>', X2.CSS + '</style>', 1)
-import synthesis as SY
 page = page.replace('</style>', SY.CSS + '</style>', 1)
 page = page.replace('<div class="pager">', '\n\n'.join(SY.lessons()) + '\n\n<div class="pager">', 1)
 page = page.replace('</body>', '<script>' + SY.JS + '</script>\n</body>', 1)

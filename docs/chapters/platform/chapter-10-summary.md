@@ -25,12 +25,17 @@ The chapter follows an internal screenshot tool called SnipIt through every laye
 - Six layers of platform engineering
 - One tool, six layers
 - Using the layers in practice
+- Names to recognise
 
 ## Claims and numbers
 
 - Prototype Started in 2009 as a 20% project.
 - Product For more than 15 years a tiny team, often one person part-time, kept it running.
 - Infrastructure It reached 8 billion screenshots with no major rework, because it ran on App Engine.
+
+## Terms
+
+SnipIt, App Engine, Pace layers, Shearing layers
 
 ## Interview line
 

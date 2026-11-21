@@ -27,6 +27,7 @@ The costs go beyond wasted investment: lower productivity and morale, burnout, l
 - Why it is a business matter
 - Cultivating it: build with, not for
 - Measuring it
+- Names to recognise
 
 ## Claims and numbers
 
@@ -34,7 +35,7 @@ The costs go beyond wasted investment: lower productivity and morale, burnout, l
 
 ## Terms
 
-platform paradox, It ignores their workflow, The broccoli problem, broccoli, Feedback loops, Cognitive load, Flow state, Productivity, People, Innovation, Risk, champions
+platform paradox, It ignores their workflow, The broccoli problem, broccoli, Feedback loops, Cognitive load, Flow state, Productivity, People, Innovation, Risk, champions, Broccoli Man, DevEx framework, HEART, Across both books
 
 ## Interview line
 

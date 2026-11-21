@@ -33,7 +33,7 @@ The old pyramid was mostly reactive and left culture and data integrity implicit
 
 ## Terms
 
-hierarchy of production health, emergent reliability, The inverted pyramid, Objective understanding, Automation, Dev and ops integrated, Length, Frequency, Scope
+hierarchy of production health, emergent reliability, The inverted pyramid, Across both books, Toil, Objective understanding, Automation, Dev and ops integrated, Length, Frequency, Scope
 
 ## Interview line
 

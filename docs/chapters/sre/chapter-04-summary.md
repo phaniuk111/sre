@@ -37,6 +37,7 @@ Neither means zero accountability: a "just culture" separates honest mistakes an
 
 ## Claims and numbers
 
+- Reaching 99.999% depends on culture as much as on technology.
 - DORA found that teams strong in modern operations practices are 1.4× more likely to report better delivery and operational performance and 1.8× more likely to report better business outcomes.
 - Teams with good documentation are 3.5× more likely to adopt SRE practices.
 - People who went through SRE onboarding scored 15 to 49 percentage points higher on top-box confidence than those who did general onboarding.
@@ -45,7 +46,7 @@ Neither means zero accountability: a "just culture" separates honest mistakes an
 
 ## Terms
 
-Learning, Confidence, Behaviour, Culture, Avoid heroics, Blamelessness, blame awareness, Brownfield, crucial conversation, Greenfield, just culture, pathological, bureaucratic, generative, grounded scale, the crucial conversation
+Learning, Confidence, Behaviour, Culture, Avoid heroics, Blamelessness, blame awareness, Brownfield, crucial conversation, Greenfield, Across both books, Psychological safety, just culture, pathological, bureaucratic, generative
 
 ## On AWS
 

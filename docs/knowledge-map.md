@@ -14,8 +14,8 @@ How reliable is reliable enough, and how the answer drives decisions.
 | **Error budget policy** | What changes as the budget shrinks: business as usual, growing trade-offs, freeze | S8 | POC 01 |
 | **Critical user journey** | A user goal and its tasks; SLOs are defined from it downward | S8, S9 | POC 02 |
 | **Low-traffic alerting** | Page only when a confidence interval’s lower bound exceeds the threshold | S8, S9 | POC 01 |
-| **Risk profile** | A service’s tier and remaining budget set its rollout policy automatically | P16 | POC 16 |
-| **The nines** | Each extra nine cuts allowed downtime tenfold and costs far more than the last | P16 | POC 16 |
+| **Risk profile** | A service’s tier and remaining budget set its rollout policy automatically | S8, P16 | POC 16 |
+| **The nines** | Each extra nine cuts allowed downtime tenfold and costs far more than the last | S2, S8, P16 | POC 16 |
 
 ## Seeing the system
 

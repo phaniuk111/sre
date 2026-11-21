@@ -41,6 +41,7 @@ Latency and availability needs belong to *traffic*, not to the service, so tag t
 ## Claims and numbers
 
 - Case: Google Meet in 2020 saw regional growth of up to 400×, handled with adaptive long-running incident response, separate workstreams, pooled resources, control knobs (load shedding, lower video quality) and attention to burnout.
+- Across both books Ideas in this lesson that the platform engineering book also covers, from the knowledge map:Failure domains and N+1 : Survive the loss of a zone or region; say which domain you mean.
 - Provisioning for every edge case is like aiming for 100% availability.
 - Simple autoscaling rules (add two instances above 70% CPU for five minutes, remove one below 40% with a floor of five) cover most services.
 - Typical cloud SLAs are 99.5% for a zone and 99.99% for multi-region services.

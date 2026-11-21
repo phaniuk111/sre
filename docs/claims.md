@@ -68,6 +68,7 @@ Statements that carry a figure, extracted mechanically from the chapter lessons 
 
 ### SRE chapter 4
 
+- Reaching 99.999% depends on culture as much as on technology.
 - DORA found that teams strong in modern operations practices are 1.4× more likely to report better delivery and operational performance and 1.8× more likely to report better business outcomes.
 - Teams with good documentation are 3.5× more likely to adopt SRE practices.
 - People who went through SRE onboarding scored 15 to 49 percentage points higher on top-box confidence than those who did general onboarding.
@@ -160,6 +161,7 @@ Statements that carry a figure, extracted mechanically from the chapter lessons 
 ### SRE chapter 15
 
 - Case: Google Meet in 2020 saw regional growth of up to 400×, handled with adaptive long-running incident response, separate workstreams, pooled resources, control knobs (load shedding, lower video quality) and attention to burnout.
+- Across both books Ideas in this lesson that the platform engineering book also covers, from the knowledge map:Failure domains and N+1 : Survive the loss of a zone or region; say which domain you mean.
 - Provisioning for every edge case is like aiming for 100% availability.
 - Simple autoscaling rules (add two instances above 70% CPU for five minutes, remove one below 40% with a floor of five) cover most services.
 - Typical cloud SLAs are 99.5% for a zone and 99.99% for multi-region services.
@@ -181,6 +183,7 @@ Statements that carry a figure, extracted mechanically from the chapter lessons 
 
 ### SRE chapter 17
 
+- Failure domains and N+1 : Survive the loss of a zone or region; say which domain you mean.
 - Alignment matters: two regions with two zones each lose 25% of capacity per zone, while one zone per region without anti-affinity loses 50%.
 - Degrade to roughly 80% quality for 20% of the compute.
 - On AWS Multi-AZ and cells; Route 53 ARC zonal shift and zonal autoshift; static stability; SDK adaptive retries; API Gateway and WAF throttles; SQS buffering; AppConfig flags; Incident Manager replicated across Regions; break-glass IAM roles.
@@ -246,6 +249,10 @@ Statements that carry a figure, extracted mechanically from the chapter lessons 
 
 - Existing code is the expensive part, and the Android numbers show a way through: writing new code in memory-safe languages took memory-safety bugs from over 70% of the total to 24% in six years, without rewriting the old code.
 - Between 60% and 70% of high-severity vulnerabilities in large C and C++ codebases are memory-safety bugs.
+
+### Platform chapter 16
+
+- Failure domains and N+1 : Survive the loss of a zone or region; say which domain you mean.
 
 ### Platform chapter 18
 

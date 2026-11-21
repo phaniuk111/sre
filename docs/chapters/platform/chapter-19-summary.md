@@ -28,6 +28,7 @@ The chapter’s example: a developer asks for a dashboard of build logs. The job
 - The platform product manager
 - The lifecycle
 - A scorecard with three views
+- Names to recognise
 
 ## Claims and numbers
 
@@ -35,7 +36,7 @@ The chapter’s example: a developer asks for a dashboard of build logs. The job
 
 ## Terms
 
-A defined customer, A clear value proposition, An indefinite lifecycle, Shape the vision, Be the customer’s voice, Translate in both directions, Prioritise, golden path, brownout
+A defined customer, A clear value proposition, An indefinite lifecycle, Shape the vision, Be the customer’s voice, Translate in both directions, Prioritise, golden path, brownout, JTBD, TTFHW, COGS, Across both books
 
 ## Interview line
 

@@ -29,6 +29,7 @@ One warning on performance. Couple for speed only after other options are exhaus
 - Patterns that loosen coupling
 - Antipatterns that tighten it by accident
 - Finding coupling nobody intended
+- Names to recognise
 
 ## Claims and numbers
 

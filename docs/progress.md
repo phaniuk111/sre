@@ -24,8 +24,12 @@ Resume file for the reading workflow. Read this first after a context reset.
 | Knowledge map | `docs/knowledge-map.md` | 91 concepts, 12 themes |
 | Requirements | `docs/requirements.md` | 57 requirements, each with source and POC |
 | Long-form notes | `docs/full-reading-notes.md`, `docs/diagrams-and-rereads.md`, `docs/platform/platform-engineering-notes.md` | done |
-| Course | `course/index.html`, built by `course/build.py`; published as a private artifact | 34 chapter lessons + 9 practice and synthesis pages |
+| Course | `course/index.html`, built by `course/build.py`; published as a private artifact | 34 chapter lessons + 9 practice and synthesis pages; 200 flashcards, 74 quiz questions |
+| Gap check (pass 3) | `course/extras3.py` | raw notes compared with the course: 9 missing ideas added to SRE lessons; "names to recognise" tables in 10 platform lessons; links between the books on 22 lessons |
 | POCs | `poc-01` … `poc-19` | 96 tests pass; Terraform parses, not applied |
+
+## Gap check
+After any new reading, compare the raw notes with the course text: every number and every named concept in the notes should appear in a lesson. Script the comparison (numbers with units, capitalised terms), then read the misses by hand. Most are names described in plain words; add those as "names to recognise". The rest are real gaps.
 
 ## Rebuild
 ```bash
@@ -48,3 +52,4 @@ Synthesis content lives in `course/synthesis.py` (one source for both the docs a
 | 2026-11-20 | All SRE figures viewed; chapters 1–3 and 9 re-read |
 | 2026-11-21 | Platform book read; 11 lessons; POCs 12–19 |
 | 2026-11-21 | Workflow formalised: chapter summaries, claims, executive summary, knowledge map, requirements, this file; synthesis pages added to the course |
+| 2026-11-21 | Gap check of notes against course; findings, Google names and cross-book links added; "Your turn" layout fixed |

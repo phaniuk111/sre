@@ -38,7 +38,7 @@ What's changing: **shift left becomes shift down** (managed services and opinion
 
 ## Terms
 
-Trailing, Leading, shift down, A, training ROI, B, charter template, C, example charter (gShoe), D, production meeting minutes, G, statistics and ML, Your turn
+Trailing, Leading, Across both books, Shift down, A, training ROI, B, charter template, C, example charter (gShoe), D, production meeting minutes, G, statistics and ML, Your turn
 
 ## Takeaways
 
