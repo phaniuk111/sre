@@ -1,0 +1,43 @@
+{
+  "spans": [
+    {"kind": "rpc", "caller": "web", "callee": "orders"},
+    {"kind": "rpc", "caller": "orders", "callee": "pricing"},
+    {"kind": "rpc", "caller": "pricing", "callee": "orders"},
+    {"kind": "rpc", "caller": "orders", "callee": "payments"},
+    {"kind": "publish", "caller": "orders", "topic": "order-events"},
+    {"kind": "consume", "caller": "shipping", "topic": "order-events"},
+    {"kind": "consume", "caller": "analytics", "topic": "order-events"},
+    {"kind": "publish", "caller": "payments", "topic": "payment-events"},
+    {"kind": "consume", "caller": "ledger", "topic": "payment-events"}
+  ],
+  "schemas": {"payment-events": true},
+  "table_access": [
+    {"service": "orders", "table": "orders", "mode": "w"},
+    {"service": "shipping", "table": "orders", "mode": "w"},
+    {"service": "analytics", "table": "orders", "mode": "r"},
+    {"service": "payments", "table": "payments", "mode": "w"},
+    {"service": "ledger", "table": "payments", "mode": "r"},
+    {"service": "pricing", "table": "prices", "mode": "w"}
+  ],
+  "deploys": [
+    {"id": "d1", "services": ["orders", "shipping"]},
+    {"id": "d2", "services": ["orders", "shipping"]},
+    {"id": "d3", "services": ["orders", "shipping", "pricing"]},
+    {"id": "d4", "services": ["orders", "shipping"]},
+    {"id": "d5", "services": ["payments"]},
+    {"id": "d6", "services": ["web"]},
+    {"id": "d7", "services": ["orders", "shipping"]},
+    {"id": "d8", "services": ["ledger"]}
+  ],
+  "configs": {
+    "platform-settings.yaml": {
+      "regions": ["web", "orders"], "feature_flags": ["web"], "customer_overrides": ["orders", "pricing"],
+      "db_endpoints": ["orders", "payments"], "retry_limits": ["shipping"], "tax_tables": ["pricing"],
+      "ledger_accounts": ["ledger"], "report_schedule": ["analytics"], "payment_providers": ["payments"], "carrier_keys": ["shipping"]
+    },
+    "pricing.yaml": {"currencies": ["pricing"], "rounding": ["pricing"]}
+  },
+  "chaos": [
+    {"domain": "eu-west-1a", "placed_in_domain": ["web", "orders"], "impacted": ["web", "orders", "ledger"]}
+  ]
+}

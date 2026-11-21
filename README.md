@@ -1,10 +1,10 @@
-# SRE 2nd Edition → AWS: hands-on POCs for interview prep
+# SRE and platform engineering → AWS: hands-on POCs for interview prep
 
-Proofs of concept that turn the ideas in *Site Reliability Engineering, 2nd Edition* (O'Reilly, 2026) into **working code and Terraform on AWS**. Each POC has a README with a concept-to-AWS map and interview talking points, Python you can run and test locally, and Terraform for the AWS side.
+Proofs of concept that turn the ideas in two books into **working code and Terraform on AWS**: *Site Reliability Engineering, 2nd Edition* (O'Reilly, 2026), POCs 01–11, and the early release of *Platform Engineering at Google* (O'Reilly), POCs 12–19. Each POC has a README with a concept-to-AWS map and interview talking points, Python you can run and test locally, and Terraform for the AWS side.
 
-> These are my own implementations and explanations, written as study material. They don't reproduce the book. Buy or borrow it for the full argument and case studies.
+> These are my own implementations and explanations, written as study material. They don't reproduce the books. Buy or borrow them for the full argument and case studies.
 
-## Map: chapter → POC → AWS services
+## Book 1 map: SRE chapter → POC → AWS services
 | Book part / chapter | POC | AWS services used |
 |---|---|---|
 | III · 8 SLOs, App. E composing SLOs | [`poc-01-slo-error-budget`](poc-01-slo-error-budget) error budgets, multi-window burn-rate alerts, Wilson-interval low-traffic alerting, SLO composition, bad-minute SLOs | CloudWatch metric math, composite alarms, dashboards, SNS (Application Signals SLOs as alternative) |
@@ -20,8 +20,23 @@ Proofs of concept that turn the ideas in *Site Reliability Engineering, 2nd Edit
 | VI · 19–23 AI & SRE | [`poc-11-ai-ops-guardrails`](poc-11-ai-ops-guardrails) autonomy levels L0–L4, reversible atomic actions, progressive authorization | Bedrock / Q Developer agents, ARC, Lambda |
 | I–II · 1–7 Context, culture, org | [`docs/`](docs) concept map, culture/org cheat sheet, interview question bank, full-reading notes for chapters 4–23 | n/a |
 
+## Book 2 map: *Platform Engineering at Google* chapter → POC → AWS services
+The book is an early release: ten chapters were published when this was written, out of a planned thirty-one. Chapter numbers are the ones planned for the final book.
+
+| Chapter | POC | AWS services used |
+|---|---|---|
+| 9 Coupling | [`poc-12-coupling-discovery`](poc-12-coupling-discovery) finds shared databases, implicit queue coupling, distributed monoliths, junk-drawer configs, call cycles and hidden physical dependencies from traces, access logs, deploy history and chaos results | X-Ray / Application Signals, CloudTrail, EventBridge, Schema Registry, FIS |
+| 15 Security (Safe Coding) | [`poc-13-safe-coding`](poc-13-safe-coding) a `TrustedSql` type and safe database wrapper that make SQL injection inexpressible, plus a CI conformance checker | RDS Data API / Aurora / Athena parameters, CodeBuild |
+| 15 Security (supply chain), 16 Reliability (break-glass), 12 Shared fate | [`poc-14-supply-chain-gate`](poc-14-supply-chain-gate) signed attestations, a deploy gate with SLSA-level policy, bad-change blocking, audited break-glass | AWS Signer, Lambda code signing, ECR, CloudTrail, EventBridge, SNS |
+| 15 Security (Safe Deployment) | [`poc-15-safe-deployment`](poc-15-safe-deployment) versioned blueprints with locked invariants, drift and conformance report | CDK / Terraform modules, Service Catalog, Config, cfn-guard, Security Hub |
+| 16 Deep dive: reliability | [`poc-16-risk-profile-rollouts`](poc-16-risk-profile-rollouts) rollout policy from service tier and error budget, drain invariants with break-glass, platform SLOs that count system-caused failures only | CodeDeploy deployment configs, AppConfig, Route 53 ARC safety rules, CloudWatch |
+| 14 Deep dive: efficiency | [`poc-17-efficiency-apm`](poc-17-efficiency-apm) application productivity metrics, growth-or-regression classifier, on-by-default rollout decision, wasted-work estimate | CloudWatch EMF and metric math, Container Insights, CUR, Compute Optimizer, a continuous profiler |
+| 18 Developer experience, 19 Platform as a product | [`poc-18-platform-scorecard`](poc-18-platform-scorecard) user, system and business scorecard; DORA metrics for adopters against non-adopters; deprecation brownout plan | EventBridge pipeline events, CUR with cost allocation tags, CloudTrail |
+| 22 AI with platform engineering | [`poc-19-ai-platform-signals`](poc-19-ai-platform-signals) model freshness, drift (PSI), confidence gate, silent-failure SLO, model promotion gate | SageMaker Pipelines, Feature Store, Model Registry, Model Monitor, Bedrock Guardrails |
+| 10 Layers, 12 Shared fate, 24 Education, and all of the above | [`docs/platform/`](docs/platform) full study notes for the ten chapters, a shared-fate contract (resources, rights, responsibilities), and product templates (jobs to be done, roadmap, deprecation, education plan) | n/a |
+
 ## Study guide
-An interactive course with one lesson per chapter (diagrams, AWS mapping, interview practice, quick checks, exercises that point at these POCs) plus labs, flashcards, a quiz and interview drills is published as a private Claude artifact: https://claude.ai/artifact/Q35uEdK1hrKUhbZ15vWvVy (share it from its page if you want others to see it). It includes a deep dive from a full read of every chapter and redrawn versions of the book's key diagrams, with 146 flashcards, 50 quiz questions and 18 interview drills. The diagram notes are also in [`docs/diagrams-and-rereads.md`](docs/diagrams-and-rereads.md).
+An interactive course with one lesson per chapter (diagrams, AWS mapping, interview practice, quick checks, exercises that point at these POCs) plus labs, flashcards, a quiz and interview drills is published as a private Claude artifact: https://claude.ai/artifact/Q35uEdK1hrKUhbZ15vWvVy (share it from its page if you want others to see it). It covers both books: all 23 SRE chapters and the 10 published platform engineering chapters, with redrawn versions of the key diagrams, 190 flashcards, 72 quiz questions and 21 interview drills. The diagram notes are also in [`docs/diagrams-and-rereads.md`](docs/diagrams-and-rereads.md).
 
 The same deep-dive material is in [`docs/full-reading-notes.md`](docs/full-reading-notes.md): case studies (Paris outage, Maps STPA/CAST, Google Meet at COVID scale, Traffic Director, Persistent Disk, Azure, Disney, Spotify, Waymo), the numbers worth memorising, and an interview angle for each chapter.
 
@@ -39,3 +54,6 @@ Each Terraform folder is standalone: `cd poc-XX/terraform && terraform init && t
 3. `poc-05` → `poc-04` → `poc-06` (change safety, resilience, proving it)
 4. `poc-07` → `poc-08` (capacity and data)
 5. `poc-09` → `poc-10` → `poc-11` (automation, platforms, AI)
+6. `poc-13` → `poc-14` → `poc-15` (shift security down: code, supply chain, configuration)
+7. `poc-16` → `poc-12` → `poc-17` (reliability by default, coupling, efficiency)
+8. `poc-18` → `poc-19` (the platform as a product, and platforms for AI)

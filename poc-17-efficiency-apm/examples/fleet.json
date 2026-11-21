@@ -1,0 +1,20 @@
+{
+  "changes": {
+    "video-transcode": {"before": {"work": 100000, "cpu_seconds": 50000}, "after": {"work": 120000, "cpu_seconds": 60000}},
+    "search-frontend": {"before": {"work": 800000, "cpu_seconds": 40000}, "after": {"work": 800000, "cpu_seconds": 48000}},
+    "checkout":        {"before": {"work": 200000, "cpu_seconds": 30000}, "after": {"work": 230000, "cpu_seconds": 30000}},
+    "reports":         {"before": {"work": 5000, "cpu_seconds": 9000},   "after": {"work": 5100, "cpu_seconds": 9100}}
+  },
+  "series": {
+    "search-frontend": {"work": [100, 140, 180, 220, 160, 120], "cpu_seconds": [10, 14, 19, 22, 16, 12]},
+    "nightly-batch":   {"work": [4, 4, 4, 4, 4, 5], "cpu_seconds": [300, 900, 250, 1200, 700, 400]},
+    "checkout":        {"work": [50, 60, 80, 70, 65, 55], "cpu_seconds": [8, 9, 13, 11, 10, 9]}
+  },
+  "optimisation": [
+    {"service": "search-frontend", "fleet_share": 0.30, "cpu_change": -0.04},
+    {"service": "video-transcode", "fleet_share": 0.25, "cpu_change": -0.02},
+    {"service": "checkout",        "fleet_share": 0.10, "cpu_change": 0.004},
+    {"service": "ledger",          "fleet_share": 0.03, "cpu_change": 0.09},
+    {"service": "everything-else", "fleet_share": 0.32, "cpu_change": -0.01}
+  ]
+}
