@@ -14,7 +14,7 @@
    TYPE Figtree 800 titles, Figtree body
    LAYOUT laptop: sticky route map left, one lesson right; phone: station strip on top, lesson below */
 :root{color-scheme:light dark;--bg:light-dark(#ffffff,#0e1116);--ink:light-dark(#0e1116,#e9edf3);--mute:light-dark(#4b5563,#a3acb9);--rule:light-dark(#e3e6ea,#262c36);--panel:light-dark(#f4f6f8,#161b23);
-  --green:#00875a;--red:#d92b1f;--blue:#0a5cff;--orange:#c05a00;--purple:#7a3cff;--teal:#007f8c;--magenta:#c0158a;--lime:#4a7a00;--inkline:light-dark(#0e1116,#c9d1dc);
+  --green:#00875a;--red:#d92b1f;--blue:#0a5cff;--orange:#c05a00;--purple:#7a3cff;--teal:#007f8c;--magenta:#c0158a;--lime:#4a7a00;--ember:#c2410c;--rust:#9a3412;--amber:#a16207;--cyan:#0e7490;--inkline:light-dark(#0e1116,#c9d1dc);
   --link:light-dark(#0a4fd6,#8ab4ff);--soft:var(--mute);--c:var(--ink);--ct:#fff}
 :root[data-theme=light]{color-scheme:light}
 :root[data-theme=dark]{color-scheme:dark}
@@ -184,7 +184,7 @@ input[type=range]{width:100%;accent-color:var(--red);min-height:44px}
 <section class="lesson" id="start" data-part="1" data-dot="0" data-title="Start here">
 <div class="meta"><span class="chip">Start here</span>Two books · 33 chapter lessons</div>
 <h1>Learn SRE and platform engineering well enough to teach them</h1>
-<p>This course walks you through two books, one lesson per chapter: all 23 chapters of <i>Site Reliability Engineering, 2nd Edition</i>, and the 10 chapters published so far of <i>Platform Engineering at Google</i>. I’m your tutor: each lesson explains the ideas in plain words, shows them as a picture, and then makes you practise saying them the way you would in an interview. Everything is written in my own words and mapped to AWS.</p>
+<p>This course walks you through four books, one lesson per chapter: all 23 chapters of <i>Site Reliability Engineering, 2nd Edition</i>, the 10 chapters published so far of <i>Platform Engineering at Google</i>, and the two newest observability books on O’Reilly, <i>Mastering Prometheus</i> (2024) and <i>Observability with Grafana</i> (2024), 15 chapters each. I’m your tutor: each lesson explains the ideas in plain words, shows them as a picture, and then makes you practise saying them the way you would in an interview. Everything is written in my own words and mapped to AWS.</p>
 <div class="learn"><b>Every lesson follows the same pattern</b><ul>
 <li><b>The big picture</b>: the chapter’s argument in short paragraphs, with a diagram.</li>
 <li><b>Going deeper</b>: the case studies, numbers and named models interviewers probe for.</li>
@@ -213,7 +213,7 @@ input[type=range]{width:100%;accent-color:var(--red);min-height:44px}
 <p>You will learn exactly where these numbers come from in the lesson on SLOs. If you only have an hour before an interview, do that lesson first.</p>
 
 <h2>The route map</h2>
-<p>The SRE book has six parts and the platform book adds two more. Each is a coloured line on the map, and the last line is practice.</p>
+<p>The SRE book has six parts, and the platform, Prometheus and Grafana books add two each. Each is a coloured line on the map, and the last line is practice.</p>
 <div class="parts">
   <a href="#ch-1" style="--c:var(--green)"><b>I · SRE in context</b><span>What SRE is, why it pays, what the cloud changed</span></a>
   <a href="#ch-4" style="--c:var(--red)"><b>II · Sociotechnical foundations</b><span>Culture, hiring, org design, engagement models</span></a>
@@ -223,6 +223,10 @@ input[type=range]{width:100%;accent-color:var(--red);min-height:44px}
   <a href="#ch-19" style="--c:var(--teal)"><b>VI · Outlook</b><span>AI, other environments, the future</span></a>
   <a href="#pe" style="--c:var(--magenta)"><b>Platform book · Architecture</b><span>Coupling, layers, shared fate, and deep dives on efficiency, security and reliability</span></a>
   <a href="#pe-7" style="--c:var(--lime)"><b>Platform book · Execution</b><span>Developer experience, platform as a product, AI, education</span></a>
+  <a href="#m" style="--c:var(--ember)"><b>Prometheus · Fundamentals</b><span>Architecture, the TSDB, PromQL semantics, discovery and relabeling, Alertmanager</span></a>
+  <a href="#m-6" style="--c:var(--rust)"><b>Prometheus · Scaling and operating</b><span>HA, sharding, tuning, Node Exporter, remote storage, Thanos, mixins, CI, SLOs, OpenTelemetry</span></a>
+  <a href="#g" style="--c:var(--amber)"><b>Grafana · Signals</b><span>Instrumentation, Loki and LogQL, Mimir, Tempo and TraceQL, Kubernetes and AWS</span></a>
+  <a href="#g-8" style="--c:var(--cyan)"><b>Grafana · Running observability</b><span>Dashboards, incidents, automation, platform architecture, RUM, profiling, load tests, DevOps</span></a>
   <a href="#labs" style="--c:var(--inkline)"><b>Practice and synthesis</b><span>Labs, {NCARDS} flashcards, {NQUIZ} quiz questions, {NDRILLS} interview drills, the AWS map, then an executive summary, knowledge map, requirements checklist and numbers to know</span></a>
 </div>
 
@@ -234,8 +238,12 @@ input[type=range]{width:100%;accent-color:var(--red);min-height:44px}
   <div class="tile" style="--c:var(--red)"><b>Days 11–14: people and future</b><span>Chapters 4–7 and 19–23. Then every drill, aloud. POC 11.</span></div>
   <div class="tile" style="--c:var(--magenta)"><b>Days 15–17: platform architecture</b><span>Platform lessons 1–6. Shift down, coupling, safe coding, risk profiles. POC 12 to 17.</span></div>
   <div class="tile" style="--c:var(--lime)"><b>Days 18–19: platform execution</b><span>Platform lessons 7–10. Developer experience, product thinking, AI, education. POC 18 and 19.</span></div>
+  <div class="tile" style="--c:var(--ember)"><b>Days 20–22: Prometheus internals</b><span>Prometheus lessons 1–5. Draw the TSDB, explain rate(), trace an alert through Alertmanager. POC 20 to 23.</span></div>
+  <div class="tile" style="--c:var(--rust)"><b>Days 23–25: Prometheus at scale</b><span>Prometheus lessons 6–14. HA, cardinality, Thanos versus Mimir versus AMP, SLO rules. POC 24 and 25.</span></div>
+  <div class="tile" style="--c:var(--amber)"><b>Days 26–27: logs and traces</b><span>Grafana lessons 1–6. Loki labels, LogQL, trace context, TraceQL, CloudWatch and X-Ray. POC 26 to 28.</span></div>
+  <div class="tile" style="--c:var(--cyan)"><b>Days 28–30: running observability</b><span>Grafana lessons 7–12. Dashboards, incidents, IaC, architecture, RUM, profiling, k6. POC 29 and 30.</span></div>
 </div>
-<p>When you have been through both books, finish with the four synthesis pages at the end of the map: <a href="#summary">executive summary</a>, <a href="#map">knowledge map</a>, <a href="#checklist">requirements checklist</a> and <a href="#numbers">numbers to know</a>.</p>
+<p>When you have been through the books, finish with the four synthesis pages at the end of the map: <a href="#summary">executive summary</a>, <a href="#map">knowledge map</a>, <a href="#checklist">requirements checklist</a> and <a href="#numbers">numbers to know</a>.</p>
 <div class="take"><b>How to study each lesson</b><ul><li>Read it once, then close it and explain it out loud without looking.</li><li>Answer the interview question aloud before you open the model answer.</li><li>Do the exercise. Running the code is what makes the ideas stick.</li></ul></div>
 </section>
 
@@ -259,7 +267,7 @@ input[type=range]{width:100%;accent-color:var(--red);min-height:44px}
 <section class="lesson" id="quiz" data-part="7" data-dot="C" data-title="Quiz">
 <div class="meta"><span class="chip">Practice</span>{NQUIZ} questions</div>
 <h1>Quiz</h1>
-<p id="qscore">Interview-style questions across both books. Each one explains the answer.</p>
+<p id="qscore">Interview-style questions across all four books. Each one explains the answer.</p>
 <div class="quiz" id="qbox"></div>
 <div class="row"><button class="solid" id="qnext">Next question</button><button id="qreset">Restart</button></div>
 </section>
@@ -277,7 +285,8 @@ input[type=range]{width:100%;accent-color:var(--red);min-height:44px}
 <p>One row per concept: what to say, which AWS services implement it, and the POC in the repo that shows it working.</p>
 <h2>Site Reliability Engineering</h2><div class="scroll">/*AWS*/</div>
 <h2>Platform Engineering at Google</h2>/*AWS2*/
-<p style="color:var(--mute);font-size:15px">Study notes written in my own words from <i>Site Reliability Engineering, 2nd Edition</i> (Beyer, Jones, Leng, Huska, Petoff, Murphy; O’Reilly). and from the early release of <i>Platform Engineering at Google</i> (O’Reilly; 10 of 31 planned chapters). They don’t replace the books. Code and Terraform: <a href="https://github.com/phaniuk111/sre">github.com/phaniuk111/sre</a>.</p>
+<h2>Mastering Prometheus and Observability with Grafana</h2>/*AWS3*/
+<p style="color:var(--mute);font-size:15px">Study notes written in my own words from <i>Site Reliability Engineering, 2nd Edition</i> (Beyer, Jones, Leng, Huska, Petoff, Murphy; O’Reilly). from the early release of <i>Platform Engineering at Google</i> (O’Reilly; 10 of 31 planned chapters), from <i>Mastering Prometheus</i> (William Hegedus; Packt, 2024) and from <i>Observability with Grafana</i> (Rob Chapman and Peter Holmes; Packt, 2024). They don’t replace the books. Code and Terraform: <a href="https://github.com/phaniuk111/sre">github.com/phaniuk111/sre</a>.</p>
 </section>
 
 <div class="pager">
@@ -291,8 +300,8 @@ input[type=range]{width:100%;accent-color:var(--red);min-height:44px}
 <script>
 {
 const $=s=>document.querySelector(s);
-const PARTS={1:['I · SRE in context','var(--green)'],2:['II · Sociotechnical foundations','var(--red)'],3:['III · Awareness and preparedness','var(--blue)'],4:['IV · Infrastructure design','var(--orange)'],5:['V · Resilient products','var(--purple)'],6:['VI · Outlook','var(--teal)'],7:['Practice and synthesis','var(--inkline)'],P1:['Architecture and ecosystem design','var(--magenta)'],P2:['Execution and product approach','var(--lime)']};
-const ORDER=['1','2','3','4','5','6','P1','P2','7'];const BOOKS={'1':'Book 1 · Site Reliability Engineering','P1':'Book 2 · Platform Engineering at Google','7':'Both books'};
+const PARTS={1:['I · SRE in context','var(--green)'],2:['II · Sociotechnical foundations','var(--red)'],3:['III · Awareness and preparedness','var(--blue)'],4:['IV · Infrastructure design','var(--orange)'],5:['V · Resilient products','var(--purple)'],6:['VI · Outlook','var(--teal)'],7:['Practice and synthesis','var(--inkline)'],P1:['Architecture and ecosystem design','var(--magenta)'],P2:['Execution and product approach','var(--lime)'],M1:['Prometheus · Fundamentals','var(--ember)'],M2:['Prometheus · Scaling and operating','var(--rust)'],G1:['Grafana · Signals','var(--amber)'],G2:['Grafana · Running observability','var(--cyan)']};
+const ORDER=['1','2','3','4','5','6','P1','P2','M1','M2','G1','G2','7'];const BOOKS={'1':'Book 1 · Site Reliability Engineering','P1':'Book 2 · Platform Engineering at Google','M1':'Book 3 · Mastering Prometheus','G1':'Book 4 · Observability with Grafana','7':'All four books'};
 const lessons=[...document.querySelectorAll('.lesson')];
 const chapters=lessons.filter(l=>l.dataset.ch);
 let done=new Set();

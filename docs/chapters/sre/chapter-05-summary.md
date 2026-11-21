@@ -48,7 +48,7 @@ Small and slow-growing teams can rely on mentoring, shadowing and starter projec
 
 ## Terms
 
-Checklist and starter project, Breakage labs, Shadow, Reverse shadow, On-call, hands-on breakage scenarios, Reactive, Proactive, Comprehensive, Long-term, Directional, Across both books, Education, SRE-SWE, SRE-SE, reverse shadowing
+Checklist and starter project, Breakage labs, Shadow, Reverse shadow, On-call, hands-on breakage scenarios, Reactive, Proactive, Comprehensive, Long-term, Directional, Across the books, Education, SRE-SWE, SRE-SE, reverse shadowing
 
 ## On AWS
 

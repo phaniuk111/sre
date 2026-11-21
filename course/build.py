@@ -257,6 +257,42 @@ CARDS += pe4.CARDS
 DRILLS += pe4.DRILLS
 PE_AWS = X.table(['Concept', 'What to say', 'AWS services', 'POC'], pe4.AWS_ROWS)
 
+# ------------------------------------------------------------------ tracks 3 and 4: Mastering Prometheus, Observability with Grafana
+import obs1, obs2, obs3, obs4, obs5
+import obs_pics
+for d in obs1.L + obs4.L:
+    body = d['body']
+    for head, fig in obs_pics.P.get(d['id'], []):
+        i = body.index(f'<h2>{head}</h2>')
+        nxt = [k for k in (body.find('<h2>', i + 4), body.find('<div class="deeper">', i)) if k > 0]
+        end = min(nxt) if nxt else len(body)
+        j = body.find('</p>', i, end)
+        j = j + 4 if j > 0 else end
+        body = body[:j] + fig + body[j:]
+    body += X3.connections(d['id'], SY.MAP)
+    for m in re.finditer(r'<p>(.*?)</p>', body, re.S):
+        assert len(strip(m.group(1))) < 640, ('long paragraph', d['id'], strip(m.group(1))[:80])
+    tail = ''
+    if d.get('say'):
+        tail += f'<div class="say"><b>Say it in an interview</b><p>{d["say"]}</p></div>'
+    if d.get('aws'):
+        tail += f'<div class="note aws"><b>On AWS</b>{d["aws"]}</div>'
+    if d.get('iq'):
+        tail += '<h2>Interview practice</h2><p>Answer aloud for two minutes before you open the model answer.</p>'
+        tail += ''.join(f'<div class="iq"><p class="iqq">{q}</p><details><summary>Show a model answer</summary>' + ''.join(f'<p>{a}</p>' for a in ans) + '</details></div>' for q, ans in d['iq'])
+    for i, q in enumerate(d.get('quiz', [])):
+        tail += quick(q, 9000 + len(lessons) * 10 + i)
+        QUIZ.append(q)
+    if d.get('turn'):
+        tail += f'<div class="ex"><b>Your turn</b>{d["turn"]}</div>'
+    tail += '<div class="take"><b>Key takeaways</b><ul>' + ''.join(f'<li>{t}</li>' for t in d['take']) + '</ul></div>'
+    mins = max(4, round(len(strip(body + tail).split()) / 190))
+    learn = '<div class="learn"><b>You will learn</b><ul>' + ''.join(f'<li>{t}</li>' for t in d['learn']) + '</ul></div>'
+    lessons.append(f'<section class="lesson" id="{d["id"]}" data-part="{d["part"]}"' + ('' if d['id'] in ('m', 'g') else f' data-ch="{d["id"]}"') + f' data-dot="{d["dot"]}" data-title="{d["nav"]}">\n<div class="meta">{d["meta"]} · {mins} min read</div>\n<h1>{d["h1"]}</h1>\n{learn}\n{body}\n{tail}\n</section>')
+CARDS += obs5.CARDS
+DRILLS += obs5.DRILLS
+OBS_AWS = X.table(['Concept', 'What to say', 'AWS services', 'Lesson, POC'], obs5.AWS_ROWS)
+
 OLD_LABS = re.search(r'<div class="labs">(.*?)</div>\s*</div>\s*</section>', SRC, re.S).group(1)
 labs = re.findall(r'<div class="lab">(.*?)</div>\s*(?=<div class="lab">|$)', OLD_LABS.strip() + '', re.S)
 
@@ -267,7 +303,7 @@ page = page.replace('<div class="pager">', '\n\n'.join(SY.lessons()) + '\n\n<div
 page = page.replace('</body>', '<script>' + SY.JS + '</script>\n</body>', 1)
 page = page.replace('/*LESSONS*/', '\n\n'.join(lessons))
 page = page.replace('/*LABS*/', OLD_LABS)
-page = page.replace('/*AWS*/', AWS_TABLE).replace('/*AWS2*/', PE_AWS)
+page = page.replace('/*AWS*/', AWS_TABLE).replace('/*AWS2*/', PE_AWS).replace('/*AWS3*/', OBS_AWS)
 js = lambda rows: ',\n'.join(json.dumps(r, ensure_ascii=False) for r in rows)
 page = page.replace('/*CARDS*/', js(CARDS)).replace('/*QUIZ*/', js(QUIZ)).replace('/*DRILLS*/', js(DRILLS))
 page = page.replace('{NCARDS}', str(len(CARDS))).replace('{NQUIZ}', str(len(QUIZ))).replace('{NDRILLS}', str(len(DRILLS)))

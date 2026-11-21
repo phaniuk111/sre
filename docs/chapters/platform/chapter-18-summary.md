@@ -35,7 +35,7 @@ The costs go beyond wasted investment: lower productivity and morale, burnout, l
 
 ## Terms
 
-platform paradox, It ignores their workflow, The broccoli problem, broccoli, Feedback loops, Cognitive load, Flow state, Productivity, People, Innovation, Risk, champions, Broccoli Man, DevEx framework, HEART, Across both books
+platform paradox, It ignores their workflow, The broccoli problem, broccoli, Feedback loops, Cognitive load, Flow state, Productivity, People, Innovation, Risk, champions, Broccoli Man, DevEx framework, HEART, Across the books
 
 ## Interview line
 

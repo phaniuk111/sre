@@ -31,7 +31,7 @@ Two of Google’s numbers show the dividend. A central improvement to the C++ me
 
 ## Terms
 
-shared fate, shared responsibility, resource, guardrail, friction is a directive, large-scale change, Resources, Rights, Responsibilities, permeability, guardian of intent, google3, Green-at-head, Large-scale change (LSC), TrustedSqlString, Across both books
+shared fate, shared responsibility, resource, guardrail, friction is a directive, large-scale change, Resources, Rights, Responsibilities, permeability, guardian of intent, google3, Green-at-head, Large-scale change (LSC), TrustedSqlString, Across the books
 
 ## Interview line
 

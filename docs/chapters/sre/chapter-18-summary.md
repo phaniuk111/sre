@@ -42,7 +42,7 @@ Useful lenses: the **garden** metaphor (direct versus indirect control); **Cynef
 
 ## Terms
 
-Golden path, Hint, Warning, Error, requirements plus curated solutions, garden, Cynefin, golden paths, desire paths, Shift down, legible, Build horizon, Across both books, Systems thinking, Direct versus indirect control, Legibility
+Golden path, Hint, Warning, Error, requirements plus curated solutions, garden, Cynefin, golden paths, desire paths, Shift down, legible, Build horizon, Across the books, Systems thinking, Direct versus indirect control, Legibility
 
 ## On AWS
 

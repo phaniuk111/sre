@@ -36,7 +36,7 @@ The chapter’s example: a developer asks for a dashboard of build logs. The job
 
 ## Terms
 
-A defined customer, A clear value proposition, An indefinite lifecycle, Shape the vision, Be the customer’s voice, Translate in both directions, Prioritise, golden path, brownout, JTBD, TTFHW, COGS, Across both books
+A defined customer, A clear value proposition, An indefinite lifecycle, Shape the vision, Be the customer’s voice, Translate in both directions, Prioritise, golden path, brownout, JTBD, TTFHW, COGS, Across the books, Platform as a product
 
 ## Interview line
 

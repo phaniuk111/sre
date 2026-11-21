@@ -38,7 +38,7 @@ Spotify shows a different balance. There's no central SRE organisation: teams ow
 
 ## Terms
 
-Centralised, Decentralised, hybrid, Incident Manager On-Call, charter, production meeting, When scorecards go wrong, IMOC, Absent, Reactive, Proactive, Strategic, Visionary, ProdEx, On AWS
+Centralised, Decentralised, hybrid, Incident Manager On-Call, charter, production meeting, When scorecards go wrong, Across the books, Sustainable on-call, IMOC, Absent, Reactive, Proactive, Strategic, Visionary, ProdEx
 
 ## On AWS
 

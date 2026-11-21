@@ -1,4 +1,4 @@
-"""Pass 2 of the reading workflow: synthesis across both books.
+"""Pass 2 of the reading workflow: synthesis across all four books.
 
 One source of truth for four things, rendered twice: as Markdown in docs/ and as
 lessons in the course page.
@@ -313,6 +313,123 @@ NUMBERS = [
 ]
 
 
+# ───────────────────────────────────────────────────────────── books 3 and 4: Mastering Prometheus (M) and Observability with Grafana (G)
+EXEC[0] = ('The books in one paragraph each', EXEC[0][1] + [
+    ('p', '<b>Mastering Prometheus</b> (Hegedus, 2024) goes underneath the query language. It explains how the time series database stores samples, how discovery and relabeling decide what is scraped, how Alertmanager routes and groups, and then how to scale: sharding, high availability, remote storage, Thanos, mixins, CI for rules, SLOs and OpenTelemetry. Its theme is that Prometheus is simple until it isn’t, and that most trouble is cardinality.'),
+    ('p', '<b>Observability with Grafana</b> (Chapman and Holmes, 2024) is the wider view: logs with Loki, metrics with Mimir and Prometheus, traces with Tempo, collected by OpenTelemetry and joined up in Grafana. Its second half is about running observability for an organisation: dashboards built for a person and a question, incident management, automation, platform architecture, real user monitoring, profiling, load testing and the DevOps life cycle.'),
+])
+EXEC.insert(3, ('What the two observability books add', [
+    ('ul', ['<b>Cardinality is the cost.</b> Every label value is a new series in memory, in the index and on the bill. Limit it at the scrape, review it in CI, and keep IDs out of labels. (M3, M7, G4, G15)',
+            '<b>Know what rate() really does.</b> It is reset-aware and extrapolates to the window edges; use $__rate_interval and at least four scrape intervals. (M3, G5)',
+            '<b>Alerting needs routing, not just rules.</b> Group, inhibit and silence in Alertmanager; send every Prometheus to every Alertmanager; add a dead man’s switch. (M5, M6, G9)',
+            '<b>Scale by federation of storage, not of servers.</b> HA pairs with a replica label, then remote write or Thanos for global queries and retention. (M6, M9, M10)',
+            '<b>Treat monitoring as code.</b> Mixins, unit-tested rules, Pint in pull requests, dashboards and alert rules in Terraform. (M11, M12, G10)',
+            '<b>Burn-rate SLO alerts are generated, not hand-written.</b> Request-based for steady traffic, window-based for low traffic. (M13, S8)',
+            '<b>Each signal stores different things.</b> Numbers in metrics, events in logs with few labels, high-cardinality context in traces; link them with exemplars and trace IDs. (G4, G5, G6, G11)',
+            '<b>Collect with a topology.</b> Node agents, one cluster agent and a gateway that does tail sampling and span metrics, with buffers sized for outages. (G10, G11, M14)',
+            '<b>Observability runs through the life cycle.</b> Local stacks while coding, SLO thresholds in load tests, annotations and automatic verification at deploy, RUM and profiles in operation. (G12, G13, G14)']),
+    ('table', ['Idea', 'In SRE or platform book', 'In the observability books'], [
+        ['SLOs and burn rate', 'Error budgets, multi-window alerts, low-traffic statistics (S8, S9)', 'Generated recording and alert rules, window-based SLOs, Pyrra and Sloth (M13)'],
+        ['Golden signals', 'Latency, traffic, errors, saturation everywhere (S9, P16)', 'Golden signals, RED and USE; dashboards built around them (G8, G9)'],
+        ['Incident roles', 'Commander, operations, communications (S10)', 'Commander, communications, technical lead, plus gold–silver–bronze (G9)'],
+        ['Configuration as code', 'Config is tested and rolled out like code (S14, P15)', 'Rule unit tests, Pint, mixins, Terraform for Grafana (M11, M12, G10)'],
+        ['Safe change', 'Canary analysis and automatic rollback (S14, P16)', 'Deployment annotations and verification queries in the pipeline (G14)'],
+        ['Fleet-wide profiling', 'One profiler shows the costliest shared component (P14)', 'Continuous profiling with Pyroscope, eBPF or SDKs (G13)'],
+        ['Platform SLOs', 'The platform needs stricter objectives (P16)', 'The observability platform needs its own SLOs and a disaster plan (G11, G15)'],
+    ]),
+]))
+EXEC[-1][1][0][1].append('The two Packt observability books were read in full once, figures included; corrections to their examples are noted in the lessons and POCs.')
+
+for theme, _, rows in MAP:
+    for i, (c, d, r, poc) in enumerate(rows):
+        add = {'SLI, SLO, SLA': ('M13, G9', '24'), 'Error budget': ('M13', '24'), 'Burn rate': ('M13', '24'), 'Low-traffic alerting': ('M13', '24'),
+               'Observability': ('M1, G1', ''), 'Four golden signals': ('G8, G9', '29'), 'Client-side telemetry': ('G12', '30'), 'Fleet-wide profiling': ('G13', '30'),
+               'Incident roles': ('G9', ''), 'Blameless postmortem': ('G9', ''), 'Configuration as code': ('M12, G10', '23, 29'), 'Automatic rollback': ('G14', '30'),
+               'Sustainable on-call': ('G9', ''), 'Golden path': ('G10', ''), 'Platform SLOs': ('G15', ''), 'Platform as a product': ('G15', ''),
+               'Progressive rollout': ('G14', '')}.get(c)
+        if add:
+            rows[i] = (c, d, f'{r}, {add[0]}', ', '.join(x for x in (poc, add[1]) if x))
+
+MAP += [
+    ('Metrics with Prometheus', 'How Prometheus stores, queries, alerts and scales.', [
+        ('Series and cardinality', 'A metric name plus one label set; every new value is a new series in memory and index', 'M3, M7, G5', '21'),
+        ('Head block, WAL and blocks', 'Two hours in memory with a write-ahead log, then immutable blocks compacted up to 31 days', 'M3, G5', '21'),
+        ('Inverted index', 'Sorted postings lists per label pair, intersected shortest first', 'M3', '21'),
+        ('rate, increase and irate', 'Reset-aware, extrapolated over the window; irate uses the last two samples', 'M3, G5', '20'),
+        ('Vector matching', 'on, ignoring, group_left and group_right; and, or, unless for alert logic', 'M3', '20'),
+        ('Relabeling', 'Rewrite targets before the scrape, series after it, and series before remote write', 'M4', '22'),
+        ('Service discovery', 'Kubernetes, EC2, file and HTTP discovery turn inventory into targets', 'M4', '22'),
+        ('Alertmanager routing', 'A tree of matchers with grouping, inhibition, silences and timers', 'M5, G9', '23'),
+        ('High availability', 'Identical pairs differing by a replica label; deduplicate at query or write', 'M6, M9, M10', '25'),
+        ('Sharding and federation', 'hashmod splits targets; federation only for small aggregates', 'M6', '22'),
+        ('Scrape limits', 'sample_limit and label limits fail a scrape that would explode cardinality', 'M7, G15', '21'),
+        ('Remote write', 'Sharded queues with backoff to long-term storage', 'M9, G5', '25'),
+        ('Thanos, Mimir, VictoriaMetrics', 'Object-storage blocks with a global query layer, central multi-tenant ingestion, or efficient local disks', 'M9, M10, G5', '25'),
+        ('Monitoring mixins', 'Jsonnet bundles of alerts, rules and dashboards, overridden through _config', 'M11', '29'),
+        ('Rule CI', 'promtool syntax and unit tests, Pint against live data, in pull requests', 'M12', '23'),
+        ('Window-based SLO', 'Count good and bad time windows instead of requests; suits low traffic', 'M13, S8', '24'),
+    ]),
+    ('Logs, traces and running observability', 'The rest of the Grafana stack, and observability as a platform.', [
+        ('Loki labels are the index', 'Few low-cardinality labels; everything else is filtered or parsed at query time', 'G4', '26'),
+        ('LogQL pipeline', 'Stream selector, line filters, parsers, typed label filters, formatting, metric functions', 'G4', '26'),
+        ('Trace context', 'W3C traceparent and baggage carried across every hop; X-Ray and B3 at the edges', 'G6, M14', '27'),
+        ('TraceQL', 'Select spansets by attributes and structure: child, descendant, sibling', 'G6', '27'),
+        ('Exemplars', 'A trace ID attached to a metric sample, linking a spike to an example request', 'G5', ''),
+        ('Tail sampling', 'Decide per whole trace in a gateway; keep errors and slow traces', 'G6, G11', '28'),
+        ('Collector topology', 'Node agents, a single cluster agent and a gateway, with buffers sized for outages', 'G10, G11, M14', '28'),
+        ('Connectors', 'spanmetrics and servicegraph derive RED metrics and service graphs from traces', 'G10', '28'),
+        ('RED and USE', 'Rate, errors, duration for requests; utilisation, saturation, errors for resources', 'G9, S9', ''),
+        ('Gold, silver, bronze', 'Strategic, tactical and operational levels of incident command', 'G9, S10', ''),
+        ('Dashboard purpose', 'Who is it for, what do they need, where will they view it', 'G8', '29'),
+        ('Dashboards and rules as code', 'Team folders, Terraform, linting in CI', 'G8, G10, M11', '29'),
+        ('Real user monitoring', 'Web Vitals at p75 and sessions linked to backend traces', 'G12', '30'),
+        ('Continuous profiling', 'Self time and total time; flame graph width is share of samples', 'G13, P14', '30'),
+        ('Load test types', 'Smoke, average, stress, spike, breakpoint, soak; thresholds from SLOs', 'G13, S15', '30'),
+        ('Deployment verification', 'Query telemetry after a deploy and roll back automatically', 'G14, S14, P16', '30'),
+        ('Observability cost', 'Plan what you need, drop at collection, isolate noisy environments', 'G15, M7', '21'),
+    ]),
+]
+
+REQS.insert(2, ('Metrics, logs and traces', [
+    ('Every scrape job has sample and label limits, and new metrics are reviewed for cardinality', 'M7, G15', '21'),
+    ('Prometheus runs as an HA pair sending to every Alertmanager in a cluster, with a dead man’s switch', 'M5, M6', '23, 25'),
+    ('Alert and recording rules have unit tests and are linted in pull requests', 'M12', '23'),
+    ('SLO burn-rate rules are generated from a spec, not written by hand', 'M13, S8', '24'),
+    ('Loki labels are few and low-cardinality; IDs live in the log line', 'G4', '26'),
+    ('W3C trace context is propagated everywhere, with conversion at AWS or B3 boundaries', 'G6, M14', '27'),
+    ('Collectors run as node agents, one cluster agent and a gateway, with buffers sized for a backend outage', 'G11', '28'),
+    ('Dashboards and alert rules live in Git, in team folders, applied with Terraform', 'G8, G10, M11', '29'),
+    ('Every deployment is annotated and verified automatically against telemetry', 'G14', '30'),
+    ('Load tests run with SLO thresholds, and their telemetry is kept out of production', 'G13', '30'),
+    ('The observability platform has its own SLOs, cost dashboards and a tested disaster plan', 'G15', ''),
+]))
+for g, rows in REQS:
+    for i, (req, r, poc) in enumerate(rows):
+        add = {'Monitoring does not depend on the systems it monitors': 'M5, M6', 'Paging alerts fire on burn rate, confirmed by a short window': 'M13',
+               'Anyone can declare an incident; roles are defined and practised': 'G9', 'User journeys are measured from the client side as well as the server': 'G12'}.get(req)
+        if add:
+            rows[i] = (req, f'{r}, {add}', poc)
+
+NUMBERS += [
+    ('2 hours', 'of samples in the Prometheus head block before it is cut into a block', 'M3'),
+    ('2h → 6h → 18h → 54h', 'compaction steps, up to 31 days or 10% of retention', 'M3'),
+    ('2 ms, at most 1% of the interval', 'scrape timestamp jitter Prometheus snaps away to keep timestamps cheap', 'M3'),
+    ('30 s / 5 m / 4 h', 'Alertmanager group_wait, group_interval and repeat_interval defaults', 'M5'),
+    ('2,500 / 500 / 200', 'remote write queue capacity, batch size and maximum shards', 'M9'),
+    ('30 seconds', 'of silence before Mimir’s HA tracker fails over to the other replica', 'M9'),
+    ('5 m after 40 h, 1 h after 10 days', 'Thanos downsampling', 'M10'),
+    ('Replication factor 3', 'needs two successful writes in Thanos Receive', 'M10'),
+    ('64 members, 8,192 bytes', 'W3C baggage limits', 'G6'),
+    ('3 to 5', 'SLIs per service', 'G9'),
+    ('1,440 against 8,640', 'queries a day per alert rule evaluated each minute against every 10 seconds', 'G9'),
+    ('LCP 2.5 s, INP 200 ms, CLS 0.1', 'good Core Web Vitals, judged at the 75th percentile', 'G12'),
+    ('15 seconds', 'default Pyroscope profiling interval', 'G13'),
+]
+
+M_LESSON = {1: 'm-1', 2: 'm-1', 3: 'm-3', 4: 'm-4', 5: 'm-5', 6: 'm-6', 7: 'm-7', 8: 'm-8', 9: 'm-9', 10: 'm-10', 11: 'm-11', 12: 'm-12', 13: 'm-13', 14: 'm-14', 15: 'm-14'}
+G_LESSON = {1: 'g-1', 2: 'g-2', 3: 'g-2', 4: 'g-4', 5: 'g-5', 6: 'g-6', 7: 'g-7', 8: 'g-8', 9: 'g-9', 10: 'g-10', 11: 'g-11', 12: 'g-12', 13: 'g-12', 14: 'g-14', 15: 'g-14'}
+
+
 # ───────────────────────────────────────────────────────────── rendering: Markdown
 def _md(t):
     t = re.sub(r'<b>(.*?)</b>', r'**\1**', t)
@@ -325,8 +442,8 @@ def _poc_md(poc):
 
 
 def write_docs():
-    out = ['# Executive summary: two books', '',
-           '*Synthesis (pass 2) of the chapter summaries in `docs/chapters/`. S8 means SRE book chapter 8; P15 means platform book chapter 15 in the final numbering.*', '']
+    out = ['# Executive summary: four books', '',
+           '*Synthesis (pass 2) of the chapter summaries in `docs/chapters/`. S8 means SRE book chapter 8; P15 means platform book chapter 15 in the final numbering; M = Mastering Prometheus, G = Observability with Grafana.*', '']
     for title, blocks in EXEC:
         out += [f'## {title}', '']
         for kind, *rest in blocks:
@@ -340,14 +457,14 @@ def write_docs():
     open(os.path.join(DOCS, 'executive-summary.md'), 'w', encoding='utf-8').write('\n'.join(out))
 
     out = ['# Knowledge map', '',
-           '*Twelve themes across both books. Each row is a concept, a one-line definition, where it is taught, and the POC that implements it. S = SRE book chapter, P = platform book chapter (final numbering).*', '']
+           f'*{len(MAP)} themes across all four books. Each row is a concept, a one-line definition, where it is taught, and the POC that implements it. S = SRE book chapter, P = platform book chapter (final numbering), M = Mastering Prometheus, G = Observability with Grafana.*', '']
     for theme, lead, rows in MAP:
         out += [f'## {theme}', '', lead, '', '| Concept | In one line | Chapters | Code |', '|---|---|---|---|']
         out += [f'| **{_md(c)}** | {_md(d)} | {r} | {_poc_md(poc)} |' for c, d, r, poc in rows] + ['']
     open(os.path.join(DOCS, 'knowledge-map.md'), 'w', encoding='utf-8').write('\n'.join(out))
 
     out = ['# Extracted requirements', '',
-           '*What the two books say a team or platform should have in place, as a checklist. Use it to assess a system, or to structure a "how would you improve this?" answer. S = SRE book chapter, P = platform book chapter (final numbering).*', '']
+           '*What the four books say a team or platform should have in place, as a checklist. Use it to assess a system, or to structure a "how would you improve this?" answer. S = SRE book chapter, P = platform book chapter (final numbering), M = Mastering Prometheus, G = Observability with Grafana.*', '']
     n = 0
     for group, rows in REQS:
         out += [f'## {group}', '', '| | Requirement | Source | Code |', '|---|---|---|---|']
@@ -357,7 +474,7 @@ def write_docs():
         out.append('')
     open(os.path.join(DOCS, 'requirements.md'), 'w', encoding='utf-8').write('\n'.join(out))
 
-    out = ['## Numbers to know cold', '', '*Curated from both books. The full mechanical extraction follows.*', '', '| Figure | What it is | Chapter |', '|---|---|---|']
+    out = ['## Numbers to know cold', '', '*Curated from all four books. The full mechanical extraction follows.*', '', '| Figure | What it is | Chapter |', '|---|---|---|']
     out += [f'| **{_md(a)}** | {_md(b)} | {c} |' for a, b, c in NUMBERS] + ['']
     return '\n'.join(out), n
 
@@ -369,16 +486,20 @@ def _table(head, rows, cls=''):
 
 
 def _ref(refs):
-    """S8 -> link to #ch-8; P15 -> link to the platform lesson for final chapter 15."""
+    """S8 -> SRE chapter 8; P15 -> platform lesson for final chapter 15; M3 -> Prometheus lesson; G9 -> Grafana lesson."""
     pe = {9: 1, 10: 2, 12: 3, 14: 4, 15: 5, 16: 6, 18: 7, 19: 8, 22: 9, 24: 10}
 
     def one(m):
         book, n = m.group(1), int(m.group(2))
         if book == 'S':
             return f'<a href="#ch-{n}">S{n}</a>'
+        if book == 'M':
+            return f'<a href="#{M_LESSON[n]}">M{n}</a>'
+        if book == 'G':
+            return f'<a href="#{G_LESSON[n]}">G{n}</a>'
         return f'<a href="#pe-{pe[n]}">P{n}</a>' if n in pe else m.group(0)
 
-    return re.sub(r'\b([SP])(\d+)\b', one, refs)
+    return re.sub(r'\b([SPMG])(\d+)\b', one, refs)
 
 
 def _poc(poc):
@@ -390,7 +511,7 @@ def lessons():
         return (f'<section class="lesson" id="{sec_id}" data-part="7" data-dot="{dot}" data-title="{nav}">\n'
                 f'<div class="meta"><span class="chip">{chip}</span>{sub}</div>\n<h1>{h1}</h1>\n{body}\n</section>')
 
-    ex = '<p>The short version of both books, and where they meet. S8 means SRE chapter 8; P15 means platform book chapter 15 in its final numbering. The references are links.</p>'
+    ex = '<p>The short version of all four books, and where they meet. S8 means SRE chapter 8; P15 means platform book chapter 15 in its final numbering; M3 means <i>Mastering Prometheus</i> chapter 3; G9 means <i>Observability with Grafana</i> chapter 9. The references are links.</p>'
     for title, blocks in EXEC:
         ex += f'<h2>{title}</h2>'
         for kind, *rest in blocks:
@@ -401,12 +522,12 @@ def lessons():
             elif kind == 'table':
                 ex += _table(rest[0], [[_ref(c) for c in r] for r in rest[1]])
 
-    km = '<p>Twelve themes across both books. Each row is a concept, a one-line definition, the lessons that teach it and the POC that implements it. Use it to find your way back to a topic, or cover the middle column and test yourself.</p>'
+    km = f'<p>{len(MAP)} themes across all four books. Each row is a concept, a one-line definition, the lessons that teach it and the POC that implements it. Use it to find your way back to a topic, or cover the middle column and test yourself.</p>'
     km += '<div class="parts">' + ''.join(f'<a href="#km-{i}" style="--c:var(--inkline)"><b>{t}</b><span>{len(rows)} concepts</span></a>' for i, (t, _, rows) in enumerate(MAP)) + '</div>'
     for i, (theme, lead, rows) in enumerate(MAP):
         km += f'<h2 id="km-{i}">{theme}</h2><p>{lead}</p>' + _table(['Concept', 'In one line', 'Lessons', 'Code'], [[f'<b>{c}</b>', d, _ref(r), _poc(poc)] for c, d, r, poc in rows])
 
-    rq = ('<p>What the two books say a team or platform should have in place. Tick what is true of a system you know. The gaps are your answer to “how would you improve this?”. Your ticks are kept in this browser.</p>'
+    rq = ('<p>What the four books say a team or platform should have in place. Tick what is true of a system you know. The gaps are your answer to “how would you improve this?”. Your ticks are kept in this browser.</p>'
           '<p id="reqScore" style="font-weight:800"></p>')
     n = 0
     for group, rows in REQS:
@@ -420,7 +541,7 @@ def lessons():
     nm = ('<p>Figures interviewers expect you to produce without looking. Cover the middle column and say what each one is.</p>'
           + _table(['Figure', 'What it is', 'Lesson'], [[f'<b>{a}</b>', b, _ref(c)] for a, b, c in NUMBERS]))
 
-    return [section('summary', 'F', 'Executive summary', 'Synthesis', 'Both books on one page', 'Executive summary', ex),
+    return [section('summary', 'F', 'Executive summary', 'Synthesis', 'All four books on one page', 'Executive summary', ex),
             section('map', 'G', 'Knowledge map', 'Synthesis', f'{sum(len(r) for _, _, r in MAP)} concepts in {len(MAP)} themes', 'Knowledge map', km),
             section('checklist', 'H', 'Requirements checklist', 'Synthesis', f'{n} requirements', 'Requirements checklist', rq),
             section('numbers', 'I', 'Numbers to know', 'Synthesis', f'{len(NUMBERS)} figures', 'Numbers to know cold', nm)]

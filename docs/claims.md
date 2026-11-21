@@ -2,7 +2,7 @@
 
 ## Numbers to know cold
 
-*Curated from both books. The full mechanical extraction follows.*
+*Curated from all four books. The full mechanical extraction follows.*
 
 | Figure | What it is | Chapter |
 |---|---|---|
@@ -43,10 +43,23 @@
 | **About 80%** | of cases a golden path’s defaults should cover | P18, P19 |
 | **Under 18 months** | of full-time work equals the hours in a computing degree | P24 |
 | **About fivefold in 15 years** | growth in US computing enrolment, without matching teaching staff | P24 |
+| **2 hours** | of samples in the Prometheus head block before it is cut into a block | M3 |
+| **2h → 6h → 18h → 54h** | compaction steps, up to 31 days or 10% of retention | M3 |
+| **2 ms, at most 1% of the interval** | scrape timestamp jitter Prometheus snaps away to keep timestamps cheap | M3 |
+| **30 s / 5 m / 4 h** | Alertmanager group_wait, group_interval and repeat_interval defaults | M5 |
+| **2,500 / 500 / 200** | remote write queue capacity, batch size and maximum shards | M9 |
+| **30 seconds** | of silence before Mimir’s HA tracker fails over to the other replica | M9 |
+| **5 m after 40 h, 1 h after 10 days** | Thanos downsampling | M10 |
+| **Replication factor 3** | needs two successful writes in Thanos Receive | M10 |
+| **64 members, 8,192 bytes** | W3C baggage limits | G6 |
+| **3 to 5** | SLIs per service | G9 |
+| **1,440 against 8,640** | queries a day per alert rule evaluated each minute against every 10 seconds | G9 |
+| **LCP 2.5 s, INP 200 ms, CLS 0.1** | good Core Web Vitals, judged at the 75th percentile | G12 |
+| **15 seconds** | default Pyroscope profiling interval | G13 |
 
 ## Extracted from each chapter
 
-Statements that carry a figure, extracted mechanically from the chapter lessons (`tools/build_reading_docs.py`) and grouped by chapter. They are in my own words; check the book before quoting a number in writing. Platform chapters use the final book's numbering.
+Statements that carry a figure, extracted mechanically from the chapter lessons (`tools/build_reading_docs.py`) and grouped by chapter. They are in my own words; check the book before quoting a number in writing. Platform chapters use the final book's numbering; Prometheus and Grafana chapters are the Packt books.
 
 
 ### SRE chapter 2
@@ -161,7 +174,7 @@ Statements that carry a figure, extracted mechanically from the chapter lessons 
 ### SRE chapter 15
 
 - Case: Google Meet in 2020 saw regional growth of up to 400×, handled with adaptive long-running incident response, separate workstreams, pooled resources, control knobs (load shedding, lower video quality) and attention to burnout.
-- Across both books Ideas in this lesson that the platform engineering book also covers, from the knowledge map:Failure domains and N+1 : Survive the loss of a zone or region; say which domain you mean.
+- Across the books Ideas in this lesson that the platform book and Observability with Grafana also cover, from the knowledge map:Failure domains and N+1 : Survive the loss of a zone or region; say which domain you mean.
 - Provisioning for every edge case is like aiming for 100% availability.
 - Simple autoscaling rules (add two instances above 70% CPU for five minutes, remove one below 40% with a floor of five) cover most services.
 - Typical cloud SLAs are 99.5% for a zone and 99.99% for multi-region services.
@@ -268,3 +281,83 @@ Statements that carry a figure, extracted mechanically from the chapter lessons 
 - All the lectures, labs and homework in a computing degree add up to less than 18 months of full-time work, and less than a third of the popular “10,000 hours to mastery” figure.
 - Enrolment in the US grew about fivefold in 15 years and teaching staff didn’t, so early courses are graded automatically on whether the output is right.
 - Being the person 10,000 Java engineers bring their questions to is another.
+
+### Prometheus chapter 3
+
+- The compactor merges three adjacent blocks into one three times as long (2h, 6h, 18h, 54h…), up to 31 days or a tenth of the retention period.
+- Head block, WAL and blocks : Two hours in memory with a write-ahead log, then immutable blocks compacted up to 31 days.
+- Head block, WAL and blocks : Two hours in memory with a write-ahead log, then immutable blocks compacted up to 31 days.
+
+### Prometheus chapter 4
+
+- For years the project refused new providers; the moratorium ended in late 2019 and the count went from 11 to about 25.
+
+### Prometheus chapter 5
+
+- The book’s table puts the third notification at 10:05:00, five minutes after the first alert.
+- Time intervals, receivers and inhibition. active_time_intervals and mute_time_intervals (added in 2022) reference named intervals built from weekdays, days of month (negative numbers count from the end), months, years, times and an IANA time zone.
+- That catches people out: an incident fixed at 17:05 never gets its “resolved” message if warnings only notify in business hours.
+- The standard rule mutes warnings and infos when a critical with the same namespace and alertname fires, which lets you keep a 90% disk warning and a 98% disk critical without double pages.
+- The author’s rule of thumb: warnings wait at least 15 minutes, criticals fire within 15.
+- The book expects the alert at 14 minutes.
+- That is true in Prometheus 2.x; Prometheus 3 made range selectors left-open, so max_over_time(.[5m]) turns true a minute earlier.
+- Testing at 15 minutes passes on both, which is the kind of robustness a test suite should have.
+
+### Prometheus chapter 6
+
+- Long-term storage : blocks max out at 31 days, so years of data means dozens of large independent databases on one disk.
+
+### Prometheus chapter 7
+
+- Prometheus snaps timestamps within 2 ms by default; --scrape.timestamp-tolerance raises that, up to 1% of the scrape interval.
+- In-flight queries are always tracked in queries.active in the data directory and logged after a crash. --query.max-concurrency (default 20, low for big setups) and --query.max-samples (default 50 million samples loaded, not returned) stop runaway queries.
+
+### Prometheus chapter 8
+
+- Alert on memory and I/O stalled time; it can replace naïve “95% memory used” alerts, which fire on healthy caches.
+
+### Prometheus chapter 10
+
+- It doesn’t save space: it adds a 5-minute version of raw data older than 40 hours and a 1-hour version of 5-minute data older than 10 days, each storing count, sum, min, max and a counter value.
+- In the book, a week-long p99 went from about 30 s to 20 s with the frontend, and to 15 s with a second querier.
+
+### Prometheus chapter 13
+
+- Two kinds of SLO. clamp_min(…, 1) stops endpoints with no traffic from producing missing results; the book admits the edge case where a single slow request still scores 100%.
+- The 30-day value is sum_over_time(…5m[30d]) / count_over_time(…5m[30d]), deliberately the same formula Sloth and Pyrra use.
+- Each bar is a burn-rate threshold, its short and long windows, and how quickly it would exhaust a 30-day budget.Alerting when the SLO is already broken is too late.
+- Burn-rate alerts compare the error ratio with burn × (1 − objective), which is what Sloth generates and what POC 24 emits and tests.
+- The book counts more than 80% fewer lines with Pyrra than writing the rules by hand.
+
+### Prometheus chapter 14
+
+- Traces The newest core signal and the best signal-to-noise, once sampled: keep 1% of normal requests, half of slow ones and all errors.
+
+### Grafana chapter 1
+
+- Downtime is expensive; the book quotes an estimate of about $9,000 a minute from a 2016 Ponemon study.
+- Tempo Traces on object storage, aiming to keep 100% of the read path; 2M+ spans per second at 1.0.
+
+### Grafana chapter 4
+
+- A bad label multiplies streams and chunks: twenty namespaces, sixty apps and three clusters is 3,600 streams; add a user ID with fifty thousand values and it is 180 million.
+
+### Grafana chapter 5
+
+- Prefer percentiles to averages: a p95 of 300 ms means 95% of requests were at least that fast, while an average hides the slow tail that users notice.
+- Head block, WAL and blocks : Two hours in memory with a write-ahead log, then immutable blocks compacted up to 31 days.
+
+### Grafana chapter 9
+
+- With an agreed SLI (“errors in a 15-minute period”) and SLO (“no more than 3% of requests in 10 minutes”), writing an alert is just translating the sentence into PromQL or LogQL.
+- The book’s rule is the percentage of 5xx responses over ten minutes with a threshold of 3, the SLO.
+- Its Insights page summarises 90 days of incidents and is meant for silver to review with gold.
+
+### Grafana chapter 12
+
+- Profiles are the fourth signal: which functions use CPU and memory, sampled continuously (every 15 seconds by default in Pyroscope, with a few percent overhead), so code behaviour can be tied to what users were doing.
+
+### Grafana chapter 14
+
+- DevOps (the first DevOps Days was 2009) brought developers, testers and operators together; Werner Vogels’ 2006 “you build it, you run it” became its slogan.
+- Treat the platform as a product that evolves; requirements from many customers; a 6- and 12-month roadmap.

@@ -1,12 +1,16 @@
-# Executive summary: two books
+# Executive summary: four books
 
-*Synthesis (pass 2) of the chapter summaries in `docs/chapters/`. S8 means SRE book chapter 8; P15 means platform book chapter 15 in the final numbering.*
+*Synthesis (pass 2) of the chapter summaries in `docs/chapters/`. S8 means SRE book chapter 8; P15 means platform book chapter 15 in the final numbering; M = Mastering Prometheus, G = Observability with Grafana.*
 
-## The two books in one paragraph each
+## The books in one paragraph each
 
 **Site Reliability Engineering, 2nd Edition** describes how to run software so that it is as reliable as its users need and no more. It treats operations as an engineering problem, makes reliability measurable through service level objectives and error budgets, and organises everything else as a pyramid, the hierarchy of production health: culture at the base, then awareness, preparedness, infrastructure design, resilient products and, at the top, platforms that make services reliable by default.
 
 **Platform Engineering at Google** starts where that pyramid ends. Its claim is that security, reliability and efficiency can’t be delivered by asking every developer to be careful. They have to be moved down into the languages, libraries, pipelines and infrastructure that all code is built on, so that experts solve each problem once and every team inherits the result. Only ten of its thirty-one planned chapters are published.
+
+**Mastering Prometheus** (Hegedus, 2024) goes underneath the query language. It explains how the time series database stores samples, how discovery and relabeling decide what is scraped, how Alertmanager routes and groups, and then how to scale: sharding, high availability, remote storage, Thanos, mixins, CI for rules, SLOs and OpenTelemetry. Its theme is that Prometheus is simple until it isn’t, and that most trouble is cardinality.
+
+**Observability with Grafana** (Chapman and Holmes, 2024) is the wider view: logs with Loki, metrics with Mimir and Prometheus, traces with Tempo, collected by OpenTelemetry and joined up in Grafana. Its second half is about running observability for an organisation: dashboards built for a person and a question, incident management, automation, platform architecture, real user monitoring, profiling, load testing and the DevOps life cycle.
 
 ## What the SRE book argues
 
@@ -30,6 +34,28 @@
 - **One optimisation, every team.** Shared foundations let you see the whole fleet and fix the biggest consumer once, on by default. (P14)
 - **A platform nobody uses is worth nothing.** Design the experience, run the platform as a product, and measure adopters against non-adopters. (P18, P19)
 - **AI amplifies what is already there.** Good platforms and current documentation make assistants useful; poor ones make the mess arrive faster. (P22, P24)
+
+## What the two observability books add
+
+- **Cardinality is the cost.** Every label value is a new series in memory, in the index and on the bill. Limit it at the scrape, review it in CI, and keep IDs out of labels. (M3, M7, G4, G15)
+- **Know what rate() really does.** It is reset-aware and extrapolates to the window edges; use $__rate_interval and at least four scrape intervals. (M3, G5)
+- **Alerting needs routing, not just rules.** Group, inhibit and silence in Alertmanager; send every Prometheus to every Alertmanager; add a dead man’s switch. (M5, M6, G9)
+- **Scale by federation of storage, not of servers.** HA pairs with a replica label, then remote write or Thanos for global queries and retention. (M6, M9, M10)
+- **Treat monitoring as code.** Mixins, unit-tested rules, Pint in pull requests, dashboards and alert rules in Terraform. (M11, M12, G10)
+- **Burn-rate SLO alerts are generated, not hand-written.** Request-based for steady traffic, window-based for low traffic. (M13, S8)
+- **Each signal stores different things.** Numbers in metrics, events in logs with few labels, high-cardinality context in traces; link them with exemplars and trace IDs. (G4, G5, G6, G11)
+- **Collect with a topology.** Node agents, one cluster agent and a gateway that does tail sampling and span metrics, with buffers sized for outages. (G10, G11, M14)
+- **Observability runs through the life cycle.** Local stacks while coding, SLO thresholds in load tests, annotations and automatic verification at deploy, RUM and profiles in operation. (G12, G13, G14)
+
+| Idea | In SRE or platform book | In the observability books |
+|---|---|---|
+| SLOs and burn rate | Error budgets, multi-window alerts, low-traffic statistics (S8, S9) | Generated recording and alert rules, window-based SLOs, Pyrra and Sloth (M13) |
+| Golden signals | Latency, traffic, errors, saturation everywhere (S9, P16) | Golden signals, RED and USE; dashboards built around them (G8, G9) |
+| Incident roles | Commander, operations, communications (S10) | Commander, communications, technical lead, plus gold–silver–bronze (G9) |
+| Configuration as code | Config is tested and rolled out like code (S14, P15) | Rule unit tests, Pint, mixins, Terraform for Grafana (M11, M12, G10) |
+| Safe change | Canary analysis and automatic rollback (S14, P16) | Deployment annotations and verification queries in the pipeline (G14) |
+| Fleet-wide profiling | One profiler shows the costliest shared component (P14) | Continuous profiling with Pyroscope, eBPF or SDKs (G13) |
+| Platform SLOs | The platform needs stricter objectives (P16) | The observability platform needs its own SLOs and a disaster plan (G11, G15) |
 
 ## Where the two books meet
 
@@ -61,3 +87,4 @@ Example: “We shouldn’t rely on reviewers to catch SQL injection. I’d wrap 
 - Twenty-one chapters of the platform book are not published yet, including the ones that define ecosystem types, shifting down and golden paths.
 - SRE appendices E and F were read once, not twice. Citation-only footnotes in the platform book were skipped.
 - These are study notes in my own words. They don’t replace either book.
+- The two Packt observability books were read in full once, figures included; corrections to their examples are noted in the lessons and POCs.

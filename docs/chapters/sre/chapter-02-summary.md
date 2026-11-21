@@ -41,7 +41,7 @@ The cost of unreliability is more than lost sales. There's churn, the opportunit
 
 ## Terms
 
-sublinear scaling, Customers, The CFO, Product teams, The SRE team, atrophy, A number worth remembering, Across both books, The nines, Mature organisation
+sublinear scaling, Customers, The CFO, Product teams, The SRE team, atrophy, A number worth remembering, Across the books, Error budget, The nines, Mature organisation
 
 ## Interview line
 

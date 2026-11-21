@@ -46,7 +46,7 @@ Neither means zero accountability: a "just culture" separates honest mistakes an
 
 ## Terms
 
-Learning, Confidence, Behaviour, Culture, Avoid heroics, Blamelessness, blame awareness, Brownfield, crucial conversation, Greenfield, Across both books, Psychological safety, just culture, pathological, bureaucratic, generative
+Learning, Confidence, Behaviour, Culture, Avoid heroics, Blamelessness, blame awareness, Brownfield, crucial conversation, Greenfield, Across the books, Blameless postmortem, Psychological safety, just culture, pathological, bureaucratic
 
 ## On AWS
 

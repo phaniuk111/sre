@@ -93,14 +93,14 @@ def lesson(sec_id):
         if n_p >= 4:
             break
     outline = [md(h) for h in re.findall(r"<h2>(.*?)</h2>", body, re.S)]
-    poc = re.search(r"POC [\d ·]+\d", meta)
+    poc = re.search(r"POC [\d ·,]+\d", meta)
     return dict(title=title, meta=meta, learn=learn, summary=paras, outline=outline, claims=claims_from(body), terms=terms_from(body),
                 say=md(say.group(1)) if say else "", aws=md(aws.group(1)) if aws else "", take=take, poc=poc.group(0) if poc else "")
 
 
-def write_chapter(book, n, sec_id, coverage):
+def write_chapter(book, n, sec_id, coverage, suffix=""):
     d = lesson(sec_id)
-    lines = [f"# {book['short']} chapter {n}: {d['title']}", "",
+    lines = [f"# {book['short']} chapter {n}{' (' + suffix.strip('-') + ')' if suffix else ''}: {d['title']}", "",
              f"*{book['name']}. Course lesson: `#{sec_id}`." + (f" Code: {d['poc']}." if d["poc"] else "") + f" Read: {coverage}.*", "",
              "## Summary", ""] + [p + "\n" for p in d["summary"]]
     lines += ["## Key ideas", ""] + [f"- {x}" for x in d["learn"]] + [""]
@@ -114,7 +114,7 @@ def write_chapter(book, n, sec_id, coverage):
     if d["aws"]:
         lines += ["## On AWS", "", d["aws"], ""]
     lines += ["## Takeaways", ""] + [f"- {x}" for x in d["take"]] + [""]
-    path = os.path.join(ROOT, "docs", "chapters", book["dir"], f"chapter-{n:02d}-summary.md")
+    path = os.path.join(ROOT, "docs", "chapters", book["dir"], f"chapter-{n:02d}{suffix}-summary.md")
     os.makedirs(os.path.dirname(path), exist_ok=True)
     open(path, "w", encoding="utf-8").write("\n".join(lines))
     return d
@@ -131,13 +131,24 @@ for k, n in PE_FINAL.items():
     d = write_chapter(PE, n, f"pe-{k}", "full text, one pass; all figures seen")
     rows += [("Platform", n, c) for c in d["claims"]]
 
+PROM = dict(name="Mastering Prometheus (William Hegedus, Packt, 2024)", short="Prometheus", dir="prometheus")
+GRAF = dict(name="Observability with Grafana (Rob Chapman and Peter Holmes, Packt, 2024)", short="Grafana", dir="grafana")
+OBS_READ = "full text, one pass; all figures seen"
+for n, sec, suffix in [(1, "m-1", ""), (3, "m-3", ""), (3, "m-3q", "-promql")] + [(n, f"m-{n}", "") for n in range(4, 15)]:
+    d = write_chapter(PROM, n, sec, OBS_READ + ("; lesson covers chapters 1–2" if n == 1 else "; lesson covers chapters 14–15" if n == 14 else ""), suffix)
+    rows += [("Prometheus", n, c) for c in d["claims"]]
+for n, sec, note in [(1, "g-1", ""), (2, "g-2", "; lesson covers chapters 2–3"), (4, "g-4", ""), (5, "g-5", ""), (6, "g-6", ""), (7, "g-7", ""), (8, "g-8", ""),
+                     (9, "g-9", ""), (10, "g-10", ""), (11, "g-11", ""), (12, "g-12", "; lesson covers chapters 12–13"), (14, "g-14", "; lesson covers chapters 14–15")]:
+    d = write_chapter(GRAF, n, sec, OBS_READ + note)
+    rows += [("Grafana", n, c) for c in d["claims"]]
+
 sys.path.insert(0, os.path.join(ROOT, "course"))
 import synthesis  # noqa: E402
 
 curated, _ = synthesis.write_docs()
 out = ["# Claims and numbers", "", curated, "## Extracted from each chapter", "",
        "Statements that carry a figure, extracted mechanically from the chapter lessons (`tools/build_reading_docs.py`) and grouped by chapter. "
-       "They are in my own words; check the book before quoting a number in writing. Platform chapters use the final book's numbering.", ""]
+       "They are in my own words; check the book before quoting a number in writing. Platform chapters use the final book's numbering; Prometheus and Grafana chapters are the Packt books.", ""]
 last = None
 for book, n, c in rows:
     if (book, n) != last:
@@ -145,4 +156,4 @@ for book, n, c in rows:
         last = (book, n)
     out.append(f"- {c}")
 open(os.path.join(ROOT, "docs", "claims.md"), "w", encoding="utf-8").write("\n".join(out) + "\n")
-print(len(rows), "claims;", 33, "chapter files")
+print(len(rows), "claims;", 33 + 14 + 12, "chapter files")

@@ -1,6 +1,6 @@
 # SRE and platform engineering → AWS: hands-on POCs for interview prep
 
-Proofs of concept that turn the ideas in two books into **working code and Terraform on AWS**: *Site Reliability Engineering, 2nd Edition* (O'Reilly, 2026), POCs 01–11, and the early release of *Platform Engineering at Google* (O'Reilly), POCs 12–19. Each POC has a README with a concept-to-AWS map and interview talking points, Python you can run and test locally, and Terraform for the AWS side.
+Proofs of concept that turn the ideas in four books into **working code and Terraform on AWS**: *Site Reliability Engineering, 2nd Edition* (O'Reilly, 2026), POCs 01–11; the early release of *Platform Engineering at Google* (O'Reilly), POCs 12–19; and the two newest Prometheus and Grafana books on O'Reilly, *Mastering Prometheus* (William Hegedus, Packt, 2024) and *Observability with Grafana* (Rob Chapman and Peter Holmes, Packt, 2024), POCs 20–30. Each POC has a README with a concept-to-AWS map and interview talking points, Python you can run and test locally, and Terraform for the AWS side.
 
 > These are my own implementations and explanations, written as study material. They don't reproduce the books. Buy or borrow them for the full argument and case studies.
 
@@ -35,21 +35,40 @@ The book is an early release: ten chapters were published when this was written,
 | 22 AI with platform engineering | [`poc-19-ai-platform-signals`](poc-19-ai-platform-signals) model freshness, drift (PSI), confidence gate, silent-failure SLO, model promotion gate | SageMaker Pipelines, Feature Store, Model Registry, Model Monitor, Bedrock Guardrails |
 | 10 Layers, 12 Shared fate, 24 Education, and all of the above | [`docs/platform/`](docs/platform) full study notes for the ten chapters, a shared-fate contract (resources, rights, responsibilities), and product templates (jobs to be done, roadmap, deprecation, education plan) | n/a |
 
+## Book 3 map: *Mastering Prometheus* chapter → POC → AWS services
+| Chapter | POC | AWS services used |
+|---|---|---|
+| 3 Data model and PromQL | [`poc-20-promql-semantics`](poc-20-promql-semantics) a small PromQL evaluator: extrapolated rate/increase, irate, histogram_quantile, vector matching with group_left, set operators, bool | Amazon Managed Service for Prometheus (same PromQL) |
+| 3 TSDB, 7 Optimising | [`poc-21-tsdb-internals`](poc-21-tsdb-internals) Gorilla bit costs and scrape jitter, postings intersection, compaction ranges, cardinality report and scrape limits | AMP active-series quotas, CloudWatch usage metrics |
+| 4 Service discovery, 6 Sharding | [`poc-22-relabel-discovery-sharding`](poc-22-relabel-discovery-sharding) relabel actions incl. hashmod, EC2 discovery with tag labelmap, HTTP SD validation, sharding and resharding churn | EC2, IAM (IRSA), AMP remote write |
+| 5 Alerting, 12 CI | [`poc-23-alert-routing-and-rule-ci`](poc-23-alert-routing-and-rule-ci) Alertmanager routing tree, group timers, inhibition, alert states, rule linting; promtool unit tests and Pint in CI | AMP Alertmanager with SNS receivers, Incident Manager |
+| 13 SLOs | [`poc-24-slo-burn-rate-rules`](poc-24-slo-burn-rate-rules) burn-rate rule generator (request- and window-based), simulator for outages and blips | AMP rule groups namespaces |
+| 9 Remote storage, 10 Thanos | [`poc-25-remote-write-and-thanos`](poc-25-remote-write-and-thanos) queue sizing, backoff, HA dedup in Thanos/Mimir/VictoriaMetrics, downsampling, query splitting and caching, hash rings and quorum | AMP, S3 with lifecycle rules |
+
+## Book 4 map: *Observability with Grafana* chapter → POC → AWS services
+| Chapter | POC | AWS services used |
+|---|---|---|
+| 4 Loki and LogQL | [`poc-26-logql-and-log-labels`](poc-26-logql-and-log-labels) a LogQL pipeline (filters, parsers, typed label filters, formatting, unwrap, metric queries) and a label-design checker | CloudWatch Logs Insights equivalents, Loki on S3 |
+| 2, 6 Traces and TraceQL | [`poc-27-trace-context-and-traceql`](poc-27-trace-context-and-traceql) W3C traceparent, B3, Jaeger and X-Ray conversion, baggage limits, sampling, structural TraceQL, span metrics, service graph | AWS X-Ray, ADOT |
+| 7 Cloud, 10 IaC, 11 Architecture | [`poc-28-adot-collector-eks`](poc-28-adot-collector-eks) node agent, single cluster agent and gateway with load-balanced tail sampling, connectors, SigV4 exporters | ADOT on EKS, AMP, X-Ray, CloudWatch Logs, IRSA |
+| 8 Dashboards, 10 IaC | [`poc-29-grafana-as-code-amg`](poc-29-grafana-as-code-amg) golden-signals dashboard generator and linter; Terraform for workspace, data source, folders, dashboards and alert rules | Amazon Managed Grafana, IAM Identity Center |
+| 12 RUM, 13 Pyroscope and k6, 14 DevOps | [`poc-30-performance-feedback-loop`](poc-30-performance-feedback-loop) k6 thresholds from SLOs, deployment verification gate, Web Vitals scoring, profile top table and flame graph | CloudWatch RUM, CodeDeploy alarms, k6 on EKS |
+
 ## Reading notes and synthesis
-Built in passes: chapter summaries first, then a synthesis across both books. [`docs/progress.md`](docs/progress.md) records the state and how to rebuild.
+Built in passes: chapter summaries first, then a synthesis across all four books. [`docs/progress.md`](docs/progress.md) records the state and how to rebuild.
 
 | File | What it is |
 |---|---|
-| [`docs/executive-summary.md`](docs/executive-summary.md) | Both books on one page, and where they meet |
-| [`docs/knowledge-map.md`](docs/knowledge-map.md) | 91 concepts in 12 themes, each with chapters and the POC that implements it |
-| [`docs/requirements.md`](docs/requirements.md) | 57 things a team or platform should have in place, as a checklist with sources |
+| [`docs/executive-summary.md`](docs/executive-summary.md) | All four books on one page, and where they meet |
+| [`docs/knowledge-map.md`](docs/knowledge-map.md) | 124 concepts in 14 themes, each with chapters and the POC that implements it |
+| [`docs/requirements.md`](docs/requirements.md) | 68 things a team or platform should have in place, as a checklist with sources |
 | [`docs/claims.md`](docs/claims.md) | Numbers to know cold, then figures extracted from every chapter |
-| [`docs/chapters/`](docs/chapters) | One summary per chapter: 23 SRE, 10 platform |
+| [`docs/chapters/`](docs/chapters) | One summary per lesson: 23 SRE, 10 platform, 14 Prometheus, 12 Grafana |
 
 The course page itself is in [`course/`](course): `index.html` opens in any browser, and `build.py` rebuilds it.
 
 ## Study guide
-An interactive course with one lesson per chapter (diagrams, AWS mapping, interview practice, quick checks, exercises that point at these POCs) plus labs, flashcards, a quiz and interview drills is published as a private Claude artifact: https://claude.ai/artifact/Q35uEdK1hrKUhbZ15vWvVy (share it from its page if you want others to see it). It covers both books: all 23 SRE chapters and the 10 published platform engineering chapters, with redrawn versions of the key diagrams, 190 flashcards, 72 quiz questions and 21 interview drills. The diagram notes are also in [`docs/diagrams-and-rereads.md`](docs/diagrams-and-rereads.md).
+An interactive course with one lesson per chapter (diagrams, AWS mapping, interview practice, quick checks, exercises that point at these POCs) plus labs, flashcards, a quiz and interview drills is published as a private Claude artifact: https://claude.ai/artifact/Q35uEdK1hrKUhbZ15vWvVy (share it from its page if you want others to see it). It covers all four books: 23 SRE chapters, the 10 published platform engineering chapters, and both 15-chapter observability books, with redrawn versions of the key diagrams, 250 flashcards, 126 quiz questions and 31 interview drills. The diagram notes are also in [`docs/diagrams-and-rereads.md`](docs/diagrams-and-rereads.md).
 
 The same deep-dive material is in [`docs/full-reading-notes.md`](docs/full-reading-notes.md): case studies (Paris outage, Maps STPA/CAST, Google Meet at COVID scale, Traffic Director, Persistent Disk, Azure, Disney, Spotify, Waymo), the numbers worth memorising, and an interview angle for each chapter.
 
@@ -70,3 +89,7 @@ Each Terraform folder is standalone: `cd poc-XX/terraform && terraform init && t
 6. `poc-13` → `poc-14` → `poc-15` (shift security down: code, supply chain, configuration)
 7. `poc-16` → `poc-12` → `poc-17` (reliability by default, coupling, efficiency)
 8. `poc-18` → `poc-19` (the platform as a product, and platforms for AI)
+9. `poc-21` → `poc-20` → `poc-22` → `poc-23` (how Prometheus stores, queries, discovers and alerts)
+10. `poc-24` → `poc-25` (SLO rules and scaling past one server)
+11. `poc-26` → `poc-27` → `poc-28` (logs, traces and the collector on EKS)
+12. `poc-29` → `poc-30` (dashboards as code, and observability across the delivery life cycle)

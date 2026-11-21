@@ -1,6 +1,6 @@
 # SRE chapter 14: Testing for reliability
 
-*Site Reliability Engineering, 2nd Edition. Course lesson: `#ch-14`. Code: POC 05. Read: full text, two passes.*
+*Site Reliability Engineering, 2nd Edition. Course lesson: `#ch-14`. Code: POC 05, 06. Read: full text, two passes.*
 
 ## Summary
 
@@ -45,7 +45,7 @@ Watch for drift. **Canaries** send production traffic to a subset during an incu
 
 ## Terms
 
-Versioned, Observable, Independent, Safe, VOIS, Canaries, DiRT, Client-focused change supervision, Fault injection, Formal methods, Agentic testing, Client-focused supervision, Across both books, Progressive rollout, Canary analysis, Configuration as code
+Versioned, Observable, Independent, Safe, VOIS, Canaries, DiRT, Client-focused change supervision, Fault injection, Formal methods, Agentic testing, Client-focused supervision, Testing monitoring itself, Across the books, Progressive rollout, Canary analysis
 
 ## On AWS
 

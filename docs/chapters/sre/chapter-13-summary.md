@@ -46,7 +46,7 @@ To decide, combine quantifiable costs and benefits (engineers underestimate main
 
 ## Terms
 
-inherent system behaviour, Detect and alert, Suggest, Act and notify, ironies of automation, automation snowball, Toil, Detect, Triage, Mitigate, Resolve, Learn, Remediate, Across both books, inherent behaviour, relay
+inherent system behaviour, Detect and alert, Suggest, Act and notify, ironies of automation, automation snowball, Toil, Detect, Triage, Mitigate, Resolve, Learn, Remediate, Across the books, inherent behaviour, relay
 
 ## On AWS
 

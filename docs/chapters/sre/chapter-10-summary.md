@@ -14,6 +14,8 @@ Define your terms. An **incident** means users are having a bad time, important 
 
 **AI in incident response:** start with detection and triage (the worst case is over-escalation), summaries, dynamic dashboards and hypotheses. Allow production changes only with guardrails, where each change is reversible and atomic (action, validation and automatic rollback in one audited transaction).
 
+The Grafana book adds a **gold–silver–bronze** structure above the incident roles here: responders work at bronze, managers own the tactical plan at silver, and senior leaders own strategy, legal and media at gold. Agreeing those levels in advance is what lets a serious incident escalate cleanly (Grafana ch 9).
+
 ## Key ideas
 
 - the IMAG roles and how an incident moves through its lifecycle

@@ -121,31 +121,84 @@ PE_LESSON = {9: 'pe-1', 10: 'pe-2', 12: 'pe-3', 14: 'pe-4', 15: 'pe-5', 16: 'pe-
 PE_FINAL = {v: k for k, v in PE_LESSON.items()}
 
 
+BOOK_NAME = {'S': 'the SRE book', 'P': 'the platform book', 'M': 'Mastering Prometheus', 'G': 'Observability with Grafana'}
+
+
+def _lesson_maps():
+    import synthesis as SY
+    return {'S': {n: f'ch-{n}' for n in range(1, 24)}, 'P': PE_LESSON, 'M': SY.M_LESSON, 'G': SY.G_LESSON}
+
+
 def _refs(refs):
-    s, pch = set(), set()
-    for book, a, b in re.findall(r'\b([SP])(\d+)(?:–[SP]?(\d+))?', refs):
-        nums = range(int(a), int(b or a) + 1)
-        (s if book == 'S' else pch).update(nums)
-    return s, pch
+    """'S8, P15, M3–M5' -> {'S': {8}, 'P': {15}, 'M': {3, 4, 5}}"""
+    out = {}
+    for book, a, b in re.findall(r'\b([SPMG])(\d+)(?:–[SPMG]?(\d+))?', refs):
+        out.setdefault(book, set()).update(range(int(a), int(b or a) + 1))
+    return out
+
+
+def _home(lesson_id):
+    """Which book and chapters a lesson teaches."""
+    if lesson_id == 'm-3q':
+        return 'M', {3}
+    maps = _lesson_maps()
+    for book, m in maps.items():
+        chs = {n for n, lid in m.items() if lid == lesson_id}
+        if chs:
+            return book, chs
+    return None, set()
+
+
+def _label(book, n):
+    return {'S': f'SRE ch {n}', 'P': f'platform ch {n}', 'M': f'Prometheus ch {n}', 'G': f'Grafana ch {n}'}[book]
 
 
 def connections(lesson_id, MAP):
-    """Concepts from the knowledge map that this lesson shares with the other book."""
-    if lesson_id.startswith('ch-'):
-        mine, other_book = int(lesson_id[3:]), 'P'
-    else:
-        mine, other_book = PE_FINAL[lesson_id], 'S'
-    rows = []
+    """Concepts from the knowledge map that this lesson shares with the other books."""
+    mine_book, mine = _home(lesson_id)
+    if not mine_book:
+        return ''
+    maps = _lesson_maps()
+    rows, others = [], set()
     for theme, _, concepts in MAP:
         for concept, definition, refs, poc in concepts:
-            s, pch = _refs(refs)
-            here = mine in (s if other_book == 'P' else pch)
-            there = pch if other_book == 'P' else s
-            if here and there:
-                links = ', '.join(f'<a href="#{PE_LESSON[n]}">platform ch {n}</a>' if other_book == 'P' else f'<a href="#ch-{n}">SRE ch {n}</a>' for n in sorted(there) if other_book == 'S' or n in PE_LESSON)
-                if links:
-                    rows.append(f'<li><b>{concept}</b>: {definition}. See {links}.</li>')
+            r = _refs(refs)
+            if not (r.get(mine_book, set()) & mine):
+                continue
+            links, seen = [], set()
+            for book in 'SPMG':
+                if book == mine_book:
+                    continue
+                for n in sorted(r.get(book, ())):
+                    lid = maps[book].get(n)
+                    if lid and lid not in seen:
+                        seen.add(lid)
+                        links.append(f'<a href="#{lid}">{_label(book, n)}</a>')
+                        others.add(book)
+            if links:
+                rows.append(f'<li><b>{concept}</b>: {definition}. See {", ".join(links)}.</li>')
     if not rows:
         return ''
-    other = 'the platform engineering book' if other_book == 'P' else 'the SRE book'
-    return f'<div class="note"><b>Across both books</b>Ideas in this lesson that {other} also covers, from the <a href="#map">knowledge map</a>:<ul>{"".join(rows)}</ul></div>'
+    names = [BOOK_NAME[b] for b in 'SPMG' if b in others]
+    other = names[0] if len(names) == 1 else ', '.join(names[:-1]) + ' and ' + names[-1]
+    return f'<div class="note"><b>Across the books</b>Ideas in this lesson that {other} also cover{"s" if len(names) == 1 else ""}, from the <a href="#map">knowledge map</a>:<ul>{"".join(rows)}</ul></div>'
+
+
+# ───────────────────────────────────────────────── pass 4 fold-back: what the observability books add to SRE chapters
+OBS_BRIDGE = {
+    8: note('Implementing this in Prometheus',
+            '<p>This chapter explains multiwindow burn-rate alerting as a concept. <a href="#m-13">Mastering Prometheus chapter 13</a> turns it into rules: recording rules for the error ratio over 5 minutes, 30 minutes, 1, 2 and 6 hours, 1 and 3 days, and alert expressions that join a long and a short window with <code>and</code>, so a page needs a sustained burn that is still happening. Tools such as Sloth and Pyrra generate the whole set from a short spec, which is safer than writing them by hand.</p>'
+            '<p>For low-traffic services the Prometheus book offers a window-based SLO: count good and bad time windows instead of requests, so one failed request in a quiet hour doesn’t swamp the ratio. It is a practical alternative to the confidence-interval approach described here. One trap the book itself falls into: burn rate must be computed from the <i>error</i> ratio, not the success ratio. <a href="https://github.com/phaniuk111/sre">POC 24</a> generates and simulates these rules.</p>'),
+    9: note('Doing it with the Prometheus and Grafana stack',
+            '<p>Testing hypotheses quickly depends on moving between signals. The Grafana book’s answer is correlation by design: <b>exemplars</b> attach a trace ID to a metric sample, Loki <b>derived fields</b> turn a trace ID in a log line into a link, and <b>span metrics</b> give RED metrics for every operation from the traces themselves (<a href="#g-5">Grafana ch 5</a>, <a href="#g-6">ch 6</a>).</p>'
+            '<p>Each signal stores what it is good at: numbers in metrics with few labels, events in logs indexed only by a handful of labels, and high-cardinality context such as customer IDs in spans. The customer-centric invariant in this chapter is a black-box probe (the blackbox exporter, or CloudWatch Synthetics) plus real user monitoring (<a href="#g-12">Grafana ch 12</a>), and the universal alerts every service inherits are what monitoring mixins package (<a href="#m-11">Prometheus ch 11</a>).</p>'),
+    10: note('Two additions from the Grafana book',
+             '<p>The Grafana book adds a <b>gold–silver–bronze</b> structure above the incident roles here: responders work at bronze, managers own the tactical plan at silver, and senior leaders own strategy, legal and media at gold. Agreeing those levels in advance is what lets a serious incident escalate cleanly (<a href="#g-9">Grafana ch 9</a>).</p>'
+             '<p>Tooling matters for the communications role too. Alertmanager grouping and inhibition stop one failure from producing a hundred pages (<a href="#m-5">Prometheus ch 5</a>), and incident tools such as Grafana Incident or AWS Systems Manager Incident Manager record the timeline automatically, so the postmortem starts from facts.</p>'),
+    14: note('Testing monitoring itself',
+             '<p>Alert and recording rules are configuration and deserve the same tests. <code>promtool test rules</code> runs unit tests with synthetic series and checks exactly when an alert fires and with which labels; Pint lints rules against a live Prometheus and comments on pull requests (<a href="#m-12">Prometheus ch 12</a>). Load tests belong in the release pipeline with thresholds taken from SLOs (<a href="#g-12">Grafana ch 13</a>), and after deploy, verification queries can trigger the automatic rollback this chapter calls for (<a href="#g-14">Grafana ch 14</a>).</p>'),
+    15: note('Capacity tests and the capacity of monitoring',
+             '<p>The Grafana book’s load test types map onto capacity questions: stress for a sustained peak, spike for a surge, breakpoint for where the service breaks, soak for slow leaks (<a href="#g-12">Grafana ch 13</a>). And monitoring has its own capacity limit: every new label value is a new series, so scrape limits and cardinality reviews are capacity planning for Prometheus (<a href="#m-7">Prometheus ch 7</a>).</p>'),
+}
+for _k, _v in OBS_BRIDGE.items():
+    SRE_ADD[_k] = SRE_ADD.get(_k, '') + _v
