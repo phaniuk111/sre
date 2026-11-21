@@ -1,0 +1,359 @@
+{
+  "uid": "checkout-golden-signals",
+  "title": "checkout: golden signals",
+  "tags": [
+    "golden-signals",
+    "checkout"
+  ],
+  "description": "Is checkout healthy right now, and who can fix it if not. For on-call and service managers.",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "refresh": "1m",
+  "schemaVersion": 39,
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {
+          "value": "amp"
+        }
+      },
+      {
+        "name": "namespace",
+        "type": "query",
+        "datasource": {
+          "uid": "${datasource}"
+        },
+        "query": "label_values(kube_namespace_labels, namespace)"
+      },
+      {
+        "name": "service",
+        "type": "query",
+        "datasource": {
+          "uid": "${datasource}"
+        },
+        "query": "label_values(http_server_requests_total{namespace=\"$namespace\"}, service)",
+        "current": {
+          "value": "checkout"
+        }
+      }
+    ]
+  },
+  "annotations": {
+    "list": [
+      {
+        "name": "Deployments",
+        "enable": true,
+        "datasource": {
+          "uid": "${datasource}"
+        },
+        "expr": "changes(kube_deployment_status_observed_generation{namespace=\"$namespace\", deployment=\"$service\"}[2m]) > 0",
+        "iconColor": "purple",
+        "titleFormat": "Deployed $service"
+      }
+    ]
+  },
+  "links": [
+    {
+      "title": "Runbook",
+      "url": "https://runbooks.example.com/checkout",
+      "type": "link"
+    }
+  ],
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Traffic",
+      "description": "Requests per second across all pods. Compare with the same time last week.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(http_server_requests_total{namespace=\"$namespace\", service=\"$service\"}[$__rate_interval]))",
+          "legendFormat": "",
+          "range": true,
+          "instant": false
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "graphMode": "area"
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Errors",
+      "description": "Share of requests answered with a 5xx. Turns red above the SLO's error budget rate.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 6,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(http_server_requests_total{namespace=\"$namespace\", service=\"$service\", code=~\"5..\"}[$__rate_interval])) / sum(rate(http_server_requests_total{namespace=\"$namespace\", service=\"$service\"}[$__rate_interval]))",
+          "legendFormat": "",
+          "range": true,
+          "instant": false
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0.01
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "graphMode": "area"
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Latency p95",
+      "description": "95th percentile request duration. The SLO target is 300 ms.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_request_duration_seconds_bucket{namespace=\"$namespace\", service=\"$service\"}[$__rate_interval])))",
+          "legendFormat": "",
+          "range": true,
+          "instant": false
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 0.3
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "graphMode": "area"
+      }
+    },
+    {
+      "id": 4,
+      "type": "gauge",
+      "title": "Saturation",
+      "description": "CPU used as a share of the CPU limit, busiest pod. Above 80% the service throttles.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 18,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "max(sum by (pod) (rate(container_cpu_usage_seconds_total{namespace=\"$namespace\", container=\"checkout\"}[$__rate_interval])) / sum by (pod) (kube_pod_container_resource_limits{namespace=\"$namespace\", container=\"checkout\", resource=\"cpu\"}))",
+          "legendFormat": "",
+          "range": true,
+          "instant": false
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 0.7
+              },
+              {
+                "color": "red",
+                "value": 0.8
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Requests by status",
+      "description": "Request rate split by status code, to see whether errors replace or add to traffic.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 24,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (code) (rate(http_server_requests_total{namespace=\"$namespace\", service=\"$service\"}[$__rate_interval]))",
+          "legendFormat": "{{code}}",
+          "range": true,
+          "instant": false
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "type": "row",
+      "title": "Checkout team \u2014 checkout, cart",
+      "collapsed": true,
+      "gridPos": {
+        "x": 0,
+        "y": 12,
+        "w": 24,
+        "h": 1
+      },
+      "panels": [
+        {
+          "id": 1006,
+          "type": "text",
+          "title": "Contact Checkout team",
+          "description": "How to engage this team during an incident.",
+          "gridPos": {
+            "x": 0,
+            "y": 13,
+            "w": 6,
+            "h": 4
+          },
+          "options": {
+            "mode": "markdown",
+            "content": "**On call:** Grafana OnCall: checkout-primary  \n**Chat:** #checkout  \n**Runbook:** https://runbooks.example.com/checkout"
+          }
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "row",
+      "title": "Payments team \u2014 payment",
+      "collapsed": true,
+      "gridPos": {
+        "x": 0,
+        "y": 13,
+        "w": 24,
+        "h": 1
+      },
+      "panels": [
+        {
+          "id": 1007,
+          "type": "text",
+          "title": "Contact Payments team",
+          "description": "How to engage this team during an incident.",
+          "gridPos": {
+            "x": 0,
+            "y": 14,
+            "w": 6,
+            "h": 4
+          },
+          "options": {
+            "mode": "markdown",
+            "content": "**On call:** PagerDuty: payments  \n**Chat:** #payments  \n**Runbook:** https://runbooks.example.com/payments"
+          }
+        }
+      ]
+    }
+  ]
+}

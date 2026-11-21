@@ -1,0 +1,6 @@
+# Thanos sidecar / store / compactor object storage on S3 (credentials from IRSA, no keys here)
+type: S3
+config:
+  bucket: thanos-blocks-EXAMPLE
+  endpoint: s3.eu-west-2.amazonaws.com
+  region: eu-west-2

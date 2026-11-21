@@ -1,0 +1,71 @@
+# DaemonSet: one per node. Receives OTLP from pods on the node, reads kubelet stats, host metrics and
+# container logs, and forwards everything to the gateway.
+mode: daemonset
+extensions:
+  health_check: {}
+  file_storage:
+    directory: /var/lib/otelcol/buffer
+receivers:
+  otlp:
+    protocols:
+      grpc: {endpoint: 0.0.0.0:4317}
+      http: {endpoint: 0.0.0.0:4318}
+  kubeletstats:
+    collection_interval: 60s
+    auth_type: serviceAccount
+    endpoint: ${env:K8S_NODE_NAME}:10250
+    metric_groups: [node, pod, container]
+  hostmetrics:
+    collection_interval: 60s
+    scrapers: {cpu: {}, memory: {}, filesystem: {}, network: {}, load: {}, disk: {}}
+  filelog:
+    include: [/var/log/pods/*/*/*.log]
+    exclude: [/var/log/pods/*/otel-collector*/*.log]
+    start_at: end
+    include_file_path: true
+    operators:
+      - type: container
+processors:
+  memory_limiter: {check_interval: 1s, limit_percentage: 80, spike_limit_percentage: 25}
+  k8sattributes:
+    auth_type: serviceAccount
+    filter: {node_from_env_var: K8S_NODE_NAME}
+    extract:
+      metadata: [k8s.namespace.name, k8s.pod.name, k8s.deployment.name, k8s.node.name]
+      labels:
+        - tag_name: team
+          key: app.kubernetes.io/team
+          from: pod
+    pod_association:
+      - sources: [{from: resource_attribute, name: k8s.pod.ip}]
+      - sources: [{from: resource_attribute, name: k8s.pod.uid}]
+      - sources: [{from: connection}]
+  batch: {}
+exporters:
+  loadbalancing/traces:
+    # tail sampling needs every span of a trace on the same gateway replica
+    routing_key: traceID
+    protocol:
+      otlp: {tls: {insecure: true}}
+    resolver:
+      dns: {hostname: otel-gateway-headless.observability.svc, port: 4317}
+  otlp/gateway:
+    endpoint: otel-gateway.observability.svc:4317
+    tls: {insecure: true}
+    sending_queue: {enabled: true, storage: file_storage, queue_size: 5000}
+    retry_on_failure: {enabled: true, max_elapsed_time: 900s}
+service:
+  extensions: [health_check, file_storage]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, k8sattributes, batch]
+      exporters: [loadbalancing/traces]
+    metrics:
+      receivers: [otlp, kubeletstats, hostmetrics]
+      processors: [memory_limiter, k8sattributes, batch]
+      exporters: [otlp/gateway]
+    logs:
+      receivers: [otlp, filelog]
+      processors: [memory_limiter, k8sattributes, batch]
+      exporters: [otlp/gateway]

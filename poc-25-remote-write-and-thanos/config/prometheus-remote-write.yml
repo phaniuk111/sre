@@ -1,0 +1,23 @@
+# kube-prometheus-stack values: two replicas remote-writing to AMP with SigV4.
+prometheus:
+  serviceAccount:
+    annotations:
+      eks.amazonaws.com/role-arn: arn:aws:iam::111122223333:role/amp-remote-write
+  prometheusSpec:
+    replicas: 2
+    replicaExternalLabelName: __replica__   # AMP deduplicates HA pairs that share `cluster` and differ in `__replica__`
+    externalLabels:
+      cluster: platform-eu-west-2
+    remoteWrite:
+      - url: https://aps-workspaces.eu-west-2.amazonaws.com/workspaces/ws-EXAMPLE/api/v1/remote_write
+        sigv4:
+          region: eu-west-2
+        queueConfig:
+          capacity: 2500
+          maxSamplesPerSend: 500     # capacity >= 3x this
+          minShards: 10              # ~ samples per second / capacity
+          maxShards: 200
+        writeRelabelConfigs:
+          - sourceLabels: [__name__]
+            regex: "apiserver_request_duration_seconds_bucket|etcd_request_duration_seconds_bucket"
+            action: drop

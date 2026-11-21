@@ -1,0 +1,64 @@
+# The routing tree from Mastering Prometheus chapter 5, with continue, grouping, business hours,
+# inhibition and receivers on AWS (SNS for paging, a Slack webhook for chat).
+global:
+  resolve_timeout: 5m
+route:
+  receiver: fallthrough
+  group_by: [alertname, service, environment]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 24h        # the default 4h tends to cause alert fatigue
+  routes:
+    - receiver: slack-devops
+      continue: true
+      matchers:
+        - team = devops
+      routes:
+        - receiver: pagerduty-devops
+          matchers:
+            - environment = production
+    - receiver: default
+      matchers:
+        - environment = production
+        - namespace != default
+        - team =~ (devops|sre)
+        - service !~ ^(api.+)
+    - receiver: sre-warnings
+      matchers:
+        - severity = warning
+      active_time_intervals: [business-hours]
+time_intervals:
+  - name: business-hours
+    time_intervals:
+      - weekdays: ["monday:friday"]
+        times:
+          - start_time: "09:00"
+            end_time: "17:00"
+        location: Europe/London
+inhibit_rules:
+  - source_matchers: [severity="critical"]
+    target_matchers: [severity=~"warning|info"]
+    equal: [namespace, alertname]
+receivers:
+  - name: fallthrough
+    sns_configs:
+      - topic_arn: arn:aws:sns:eu-west-2:111122223333:alerts-fallthrough
+        sigv4:
+          region: eu-west-2
+  - name: slack-devops
+    slack_configs:
+      - channel: "#devops-alerts"
+        api_url_file: /etc/alertmanager/secrets/slack-url
+        send_resolved: true
+  - name: pagerduty-devops
+    pagerduty_configs:
+      - routing_key_file: /etc/alertmanager/secrets/pd-devops
+  - name: default
+    sns_configs:
+      - topic_arn: arn:aws:sns:eu-west-2:111122223333:alerts-default
+        sigv4:
+          region: eu-west-2
+  - name: sre-warnings
+    slack_configs:
+      - channel: "#sre-warnings"
+        api_url_file: /etc/alertmanager/secrets/slack-url

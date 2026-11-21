@@ -1,0 +1,27 @@
+# promtool test rules config/unit-test.yml
+rule_files:
+  - rules.yml
+evaluation_interval: 1m
+tests:
+  - interval: 1m
+    input_series:
+      - series: 'probe_success{instance="server1", job="blackbox_ssh"}'
+        values: "1 1 1 1 0+0x12"
+      - series: 'probe_success{instance="server2", job="blackbox_ssh"}'
+        values: "1 1 1 _ 1+0x12"
+    alert_rule_test:
+      - alertname: SSHDown
+        eval_time: 9m
+        exp_alerts: []
+      - alertname: SSHDown
+        eval_time: 15m
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              team: sre
+              instance: server1
+              job: blackbox_ssh
+            exp_annotations:
+              summary: No successful SSH probe in the last five minutes.
+              description: "Cannot SSH to server1 for at least 10 minutes."
+              runbook_url: https://runbooks.example.com/ssh-down

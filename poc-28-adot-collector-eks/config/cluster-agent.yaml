@@ -1,0 +1,35 @@
+# Deployment with exactly ONE replica: cluster-level metrics and Kubernetes events from the API
+# server. Running it on every node would duplicate every event and metric.
+mode: deployment
+replicas: 1
+extensions:
+  health_check: {}
+receivers:
+  k8s_cluster:
+    auth_type: serviceAccount
+    node_conditions_to_report: [Ready, MemoryPressure, DiskPressure]
+    allocatable_types_to_report: [cpu, memory]
+  k8sobjects:
+    auth_type: serviceAccount
+    objects:
+      - name: events
+        mode: watch
+        group: events.k8s.io
+processors:
+  memory_limiter: {check_interval: 1s, limit_percentage: 80, spike_limit_percentage: 25}
+  batch: {}
+exporters:
+  otlp/gateway:
+    endpoint: otel-gateway.observability.svc:4317
+    tls: {insecure: true}
+service:
+  extensions: [health_check]
+  pipelines:
+    metrics:
+      receivers: [k8s_cluster]
+      processors: [memory_limiter, batch]
+      exporters: [otlp/gateway]
+    logs:
+      receivers: [k8sobjects]
+      processors: [memory_limiter, batch]
+      exporters: [otlp/gateway]

@@ -1,0 +1,33 @@
+# Copy to .github/workflows/ in the repository that holds your Prometheus and Alertmanager config.
+name: observability-config
+on:
+  pull_request:
+    paths: ["monitoring/**"]
+jobs:
+  prometheus:
+    runs-on: ubuntu-latest
+    container: quay.io/prometheus/prometheus:v2.53.0
+    steps:
+      - uses: actions/checkout@v4
+      - run: promtool check config monitoring/prometheus.yml
+      - run: promtool check rules monitoring/rules.yml
+      - run: promtool test rules monitoring/unit-test.yml
+  alertmanager:
+    runs-on: ubuntu-latest
+    container: quay.io/prometheus/alertmanager:v0.27.0
+    steps:
+      - uses: actions/checkout@v4
+      - run: amtool check-config monitoring/alertmanager.yml
+      # regression tests for the routing tree: label set -> expected receivers
+      - run: |
+          amtool config routes test --config.file=monitoring/alertmanager.yml --verify.receivers=pagerduty-devops,default team=devops environment=production
+          amtool config routes test --config.file=monitoring/alertmanager.yml --verify.receivers=slack-devops team=devops environment=testing
+  pint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: prymitive/pint-action@v1
+        with:
+          token: ${{ github.token }}
+          config: monitoring/.pint.hcl
