@@ -1,0 +1,109 @@
+# promtool test rules rules/checkout-slo.test.yml
+# Synthetic edge traffic at 10 requests a second (600 a minute). Each test is one exercise from
+# EXERCISES.md, written down so CI can prove the rules still behave that way.
+rule_files:
+  - checkout-slo.yml
+evaluation_interval: 1m
+
+tests:
+  - name: healthy traffic (0.05% slow) raises nothing
+    interval: 1m
+    input_series:
+      - series: 'edge_request_duration_seconds_count{route="POST /checkout",code="200"}'
+        values: '0+600x180'
+      - series: 'edge_request_duration_seconds_bucket{route="POST /checkout",code="200",le="2"}'
+        values: '0+599.7x180'
+    promql_expr_test:
+      - expr: journey:checkout_error_ratio:rate1h < bool 0.001
+        eval_time: 3h
+        exp_samples:
+          - labels: '{}'
+            value: 1
+    alert_rule_test:
+      - {eval_time: 3h, alertname: CheckoutBudgetBurnFast, exp_alerts: []}
+      - {eval_time: 3h, alertname: CheckoutBudgetBurnSlow, exp_alerts: []}
+      - {eval_time: 3h, alertname: CheckoutBudgetBurnTicket, exp_alerts: []}
+
+  - name: checkout down for 15 minutes pages, then clears after the fix
+    interval: 1m
+    input_series:
+      # healthy for an hour, then every request gets 502 from 61m to 75m, then healthy again
+      - series: 'edge_request_duration_seconds_count{route="POST /checkout",code="200"}'
+        values: '0+600x60 36000x14 36600+600x14'
+      - series: 'edge_request_duration_seconds_bucket{route="POST /checkout",code="200",le="2"}'
+        values: '0+600x60 36000x14 36600+600x14'
+      - series: 'edge_request_duration_seconds_count{route="POST /checkout",code="502"}'
+        values: '0x60 600+600x14 9000x15'
+    alert_rule_test:
+      - {eval_time: 60m, alertname: CheckoutBudgetBurnFast, exp_alerts: []}
+      - eval_time: 70m
+        alertname: CheckoutBudgetBurnFast
+        exp_alerts:
+          - exp_labels: {severity: page, journey: checkout}
+            exp_annotations:
+              summary: Checkout is burning its error budget 14.4x too fast
+              runbook: https://github.com/phaniuk111/sre/tree/main/poc-31-checkout-journey-slo-lab#runbook
+      # five minutes after the fix the short window is clean, so the page stops,
+      # even though the last hour still looks terrible
+      - {eval_time: 85m, alertname: CheckoutBudgetBurnFast, exp_alerts: []}
+
+  - name: a two-minute blip at 5% errors pages nobody
+    interval: 1m
+    input_series:
+      - series: 'edge_request_duration_seconds_count{route="POST /checkout",code="200"}'
+        values: '0+600x60 36570+570x1 37740+600x30'
+      - series: 'edge_request_duration_seconds_bucket{route="POST /checkout",code="200",le="2"}'
+        values: '0+600x60 36570+570x1 37740+600x30'
+      - series: 'edge_request_duration_seconds_count{route="POST /checkout",code="502"}'
+        values: '0x60 30+30x1 60x30'
+    alert_rule_test:
+      - {eval_time: 65m, alertname: CheckoutBudgetBurnFast, exp_alerts: []}
+      - {eval_time: 80m, alertname: CheckoutBudgetBurnFast, exp_alerts: []}
+
+  - name: slow successes are bad events too
+    interval: 1m
+    input_series:
+      # every request still answers 200, but after 60m none of them is under 2 seconds
+      - series: 'edge_request_duration_seconds_count{route="POST /checkout",code="200"}'
+        values: '0+600x90'
+      - series: 'edge_request_duration_seconds_bucket{route="POST /checkout",code="200",le="2"}'
+        values: '0+600x60 36000x30'
+    alert_rule_test:
+      - eval_time: 70m
+        alertname: CheckoutBudgetBurnFast
+        exp_alerts:
+          - exp_labels: {severity: page, journey: checkout}
+            exp_annotations:
+              summary: Checkout is burning its error budget 14.4x too fast
+              runbook: https://github.com/phaniuk111/sre/tree/main/poc-31-checkout-journey-slo-lab#runbook
+
+  - name: malformed requests (400) are not valid events
+    interval: 1m
+    input_series:
+      - series: 'edge_request_duration_seconds_count{route="POST /checkout",code="200"}'
+        values: '0+600x90'
+      - series: 'edge_request_duration_seconds_bucket{route="POST /checkout",code="200",le="2"}'
+        values: '0+600x90'
+      - series: 'edge_request_duration_seconds_count{route="POST /checkout",code="400"}'
+        values: '0+100x90'
+    promql_expr_test:
+      - expr: journey:checkout_error_ratio:rate1h
+        eval_time: 90m
+        exp_samples:
+          - labels: 'journey:checkout_error_ratio:rate1h'
+            value: 0
+
+  - name: without a 2-second bucket the SLI is empty and nothing can ever fire
+    interval: 1m
+    input_series:
+      - series: 'edge_request_duration_seconds_count{route="POST /checkout",code="502"}'
+        values: '0+600x30'
+      - series: 'edge_request_duration_seconds_bucket{route="POST /checkout",code="200",le="2.5"}'
+        values: '0x30'
+    promql_expr_test:
+      - expr: journey:checkout_good:rate5m
+        eval_time: 20m
+        exp_samples: []
+      - expr: journey:checkout_error_ratio:rate5m
+        eval_time: 20m
+        exp_samples: []

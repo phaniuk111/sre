@@ -1,0 +1,18 @@
+# Solution to exercise 10: roll several SLIs into one journey SLO with the "bad minute" rule
+# (SRE book 2nd ed., chapter 9). Use it when no single request covers the whole journey.
+# A minute is bad if ANY hard step was bad in that minute. Recommendations is soft, so it is left out.
+groups:
+  - name: checkout-bad-minute
+    interval: 15s
+    rules:
+      - record: dep:checkout_dependency_error_ratio:rate1m
+        expr: |
+          1 - sum by (dep) (rate(checkout_dependency_attempts_total{outcome="ok"}[1m]))
+            / sum by (dep) (rate(checkout_dependency_attempts_total[1m]))
+      # 1 if any hard dependency's error ratio over the last minute was above 0.1%, else 0
+      - record: journey:checkout_bad_minute:bool
+        expr: max(dep:checkout_dependency_error_ratio:rate1m{dep!="recommendations"} > bool 0.001)
+      # share of good minutes in the last hour (this rule runs every 15 s, so it averages
+      # four verdicts per minute, close enough for a lab)
+      - record: journey:checkout_good_minutes:ratio_1h
+        expr: 1 - avg_over_time(journey:checkout_bad_minute:bool[1h])

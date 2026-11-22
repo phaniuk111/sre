@@ -1,0 +1,29 @@
+# Solution to exercise 8: an internal SLO for payment, measured the way checkout experiences it.
+# The journey is 99.9%. By the rule of the extra nine, payment holds 99.99% of checkout's calls,
+# so its budget ratio is 0.0001. Load it next to the journey rules:
+#   prometheus/prometheus.local.yml -> rule_files: [../rules/checkout-slo.yml, ../solutions/internal-slos.yml]
+groups:
+  - name: checkout-internal-slos
+    interval: 15s
+    rules:
+      - record: dep:checkout_dependency_error_ratio:rate5m
+        expr: |
+          1 - sum by (dep) (rate(checkout_dependency_attempts_total{outcome="ok"}[5m]))
+            / sum by (dep) (rate(checkout_dependency_attempts_total[5m]))
+      - record: dep:checkout_dependency_error_ratio:rate1h
+        expr: |
+          1 - sum by (dep) (rate(checkout_dependency_attempts_total{outcome="ok"}[1h]))
+            / sum by (dep) (rate(checkout_dependency_attempts_total[1h]))
+      # A dependency missing its internal SLO is the payment team's problem to fix, so it opens a
+      # ticket for them rather than paging checkout's on-call (the journey alert already does that).
+      - alert: PaymentInternalSLOBurnFast
+        expr: |
+          dep:checkout_dependency_error_ratio:rate1h{dep="payment"} > (14.4 * 0.0001)
+          and
+          dep:checkout_dependency_error_ratio:rate5m{dep="payment"} > (14.4 * 0.0001)
+        for: 2m
+        labels:
+          severity: ticket
+          owner: payment-team
+        annotations:
+          summary: Payment is burning its internal SLO (99.99% of checkout's calls) 14.4x too fast

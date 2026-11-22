@@ -1,0 +1,7 @@
+apiVersion: 1
+providers:
+  - name: checkout-lab
+    folder: Checkout lab
+    type: file
+    options:
+      path: /var/lib/grafana/dashboards

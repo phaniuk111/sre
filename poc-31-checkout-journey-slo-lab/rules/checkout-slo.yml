@@ -1,0 +1,103 @@
+# Checkout journey SLO: 99.9% of valid checkout attempts are confirmed (2xx) in under 2 seconds,
+# measured at the edge over 30 days. Error budget ratio = 1 - 0.999 = 0.001.
+#   valid = every attempt except malformed requests (400)
+#   good  = 2xx answered in 2 s or less (declined cards answer 200, so they count as good)
+groups:
+  - name: checkout-journey-sli
+    interval: 15s
+    rules:
+      # ---- the journey SLI, one set per window ----------------------------------------------------
+      - record: journey:checkout_valid:rate5m
+        expr: sum(rate(edge_request_duration_seconds_count{route="POST /checkout", code!="400"}[5m]))
+      - record: journey:checkout_good:rate5m
+        expr: sum(rate(edge_request_duration_seconds_bucket{route="POST /checkout", code=~"2..", le=~"2(\\.0)?"}[5m]))
+      - record: journey:checkout_error_ratio:rate5m
+        expr: 1 - journey:checkout_good:rate5m / journey:checkout_valid:rate5m
+
+      - record: journey:checkout_valid:rate30m
+        expr: sum(rate(edge_request_duration_seconds_count{route="POST /checkout", code!="400"}[30m]))
+      - record: journey:checkout_good:rate30m
+        expr: sum(rate(edge_request_duration_seconds_bucket{route="POST /checkout", code=~"2..", le=~"2(\\.0)?"}[30m]))
+      - record: journey:checkout_error_ratio:rate30m
+        expr: 1 - journey:checkout_good:rate30m / journey:checkout_valid:rate30m
+
+      - record: journey:checkout_valid:rate1h
+        expr: sum(rate(edge_request_duration_seconds_count{route="POST /checkout", code!="400"}[1h]))
+      - record: journey:checkout_good:rate1h
+        expr: sum(rate(edge_request_duration_seconds_bucket{route="POST /checkout", code=~"2..", le=~"2(\\.0)?"}[1h]))
+      - record: journey:checkout_error_ratio:rate1h
+        expr: 1 - journey:checkout_good:rate1h / journey:checkout_valid:rate1h
+
+      - record: journey:checkout_valid:rate6h
+        expr: sum(rate(edge_request_duration_seconds_count{route="POST /checkout", code!="400"}[6h]))
+      - record: journey:checkout_good:rate6h
+        expr: sum(rate(edge_request_duration_seconds_bucket{route="POST /checkout", code=~"2..", le=~"2(\\.0)?"}[6h]))
+      - record: journey:checkout_error_ratio:rate6h
+        expr: 1 - journey:checkout_good:rate6h / journey:checkout_valid:rate6h
+
+      - record: journey:checkout_valid:rate3d
+        expr: sum(rate(edge_request_duration_seconds_count{route="POST /checkout", code!="400"}[3d]))
+      - record: journey:checkout_good:rate3d
+        expr: sum(rate(edge_request_duration_seconds_bucket{route="POST /checkout", code=~"2..", le=~"2(\\.0)?"}[3d]))
+      - record: journey:checkout_error_ratio:rate3d
+        expr: 1 - journey:checkout_good:rate3d / journey:checkout_valid:rate3d
+
+      - record: journey:checkout_error_ratio:rate30d
+        expr: |
+          1 - sum(rate(edge_request_duration_seconds_bucket{route="POST /checkout", code=~"2..", le=~"2(\\.0)?"}[30d]))
+            / sum(rate(edge_request_duration_seconds_count{route="POST /checkout", code!="400"}[30d]))
+      - record: journey:checkout_error_budget_remaining:ratio
+        expr: 1 - journey:checkout_error_ratio:rate30d / 0.001
+
+      # ---- for comparison: checkout's own view, and each dependency as checkout sees it ----------
+      - record: service:checkout_own_success:ratio_rate5m
+        expr: |
+          sum(rate(checkout_requests_total{code=~"2.."}[5m]))
+            / sum(rate(checkout_requests_total{code!="400"}[5m]))
+      - record: dep:checkout_dependency_success:ratio_rate5m
+        expr: |
+          sum by (dep) (rate(checkout_dependency_attempts_total{outcome="ok"}[5m]))
+            / sum by (dep) (rate(checkout_dependency_attempts_total[5m]))
+
+  - name: checkout-journey-alerts
+    interval: 15s
+    rules:
+      - alert: CheckoutBudgetBurnFast
+        # 14.4x burn = 2% of the 30-day budget in one hour. The 5m window lets it stop soon after a fix.
+        expr: |
+          journey:checkout_error_ratio:rate1h > (14.4 * 0.001)
+          and
+          journey:checkout_error_ratio:rate5m > (14.4 * 0.001)
+        for: 2m
+        labels:
+          severity: page
+          journey: checkout
+        annotations:
+          summary: Checkout is burning its error budget 14.4x too fast
+          runbook: https://github.com/phaniuk111/sre/tree/main/poc-31-checkout-journey-slo-lab#runbook
+      - alert: CheckoutBudgetBurnSlow
+        # 6x burn = 5% of the budget in six hours.
+        expr: |
+          journey:checkout_error_ratio:rate6h > (6 * 0.001)
+          and
+          journey:checkout_error_ratio:rate30m > (6 * 0.001)
+        for: 5m
+        labels:
+          severity: page
+          journey: checkout
+        annotations:
+          summary: Checkout is burning its error budget 6x too fast
+          runbook: https://github.com/phaniuk111/sre/tree/main/poc-31-checkout-journey-slo-lab#runbook
+      - alert: CheckoutBudgetBurnTicket
+        # 1x burn over three days = 10% of the budget: the slow leak that would empty it by month end.
+        expr: |
+          journey:checkout_error_ratio:rate3d > (1 * 0.001)
+          and
+          journey:checkout_error_ratio:rate6h > (1 * 0.001)
+        for: 30m
+        labels:
+          severity: ticket
+          journey: checkout
+        annotations:
+          summary: Checkout is slowly spending its error budget
+          runbook: https://github.com/phaniuk111/sre/tree/main/poc-31-checkout-journey-slo-lab#runbook

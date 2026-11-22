@@ -54,6 +54,14 @@ The book is an early release: ten chapters were published when this was written,
 | 8 Dashboards, 10 IaC | [`poc-29-grafana-as-code-amg`](poc-29-grafana-as-code-amg) golden-signals dashboard generator and linter; Terraform for workspace, data source, folders, dashboards and alert rules | Amazon Managed Grafana, IAM Identity Center |
 | 12 RUM, 13 Pyroscope and k6, 14 DevOps | [`poc-30-performance-feedback-loop`](poc-30-performance-feedback-loop) k6 thresholds from SLOs, deployment verification gate, Web Vitals scoring, profile top table and flame graph | CloudWatch RUM, CodeDeploy alarms, k6 on EKS |
 
+## Hands-on lab: one SLO across several services
+[`poc-31-checkout-journey-slo-lab`](poc-31-checkout-journey-slo-lab) is a runnable shop with these parts:
+* a load balancer, a checkout service and five dependencies, with steady traffic;
+* Prometheus, running the journey SLI and multiwindow burn-rate alerts;
+* optionally, Grafana through Docker.
+
+Its [11 exercises](poc-31-checkout-journey-slo-lab/EXERCISES.md) have you break it and watch the SLO react: kill checkout, inject random failures and outages, add retries, make a dependency hard, add slow tails, write internal SLOs and the bad-minute rule. It also covers the `le="2.0"` trap in Prometheus 3. The same rules deploy to Amazon Managed Service for Prometheus with Terraform. It covers SRE chapter 8, chapter 9 and Appendix E, and *Mastering Prometheus* chapter 13.
+
 ## Reading notes and synthesis
 Built in passes: chapter summaries first, then a synthesis across all four books. [`docs/progress.md`](docs/progress.md) records the state and how to rebuild.
 
@@ -93,3 +101,4 @@ Each Terraform folder is standalone: `cd poc-XX/terraform && terraform init && t
 10. `poc-24` → `poc-25` (SLO rules and scaling past one server)
 11. `poc-26` → `poc-27` → `poc-28` (logs, traces and the collector on EKS)
 12. `poc-29` → `poc-30` (dashboards as code, and observability across the delivery life cycle)
+13. `poc-31` (hands-on: set one SLO for a multi-service journey, then break it and watch the alerts)
