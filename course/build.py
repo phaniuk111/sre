@@ -258,9 +258,9 @@ DRILLS += pe4.DRILLS
 PE_AWS = X.table(['Concept', 'What to say', 'AWS services', 'POC'], pe4.AWS_ROWS)
 
 # ------------------------------------------------------------------ tracks 3 and 4: Mastering Prometheus, Observability with Grafana
-import obs1, obs2, obs3, obs4, obs5
+import obs1, obs2, obs3, obs4, obs5, slo_track
 import obs_pics
-for d in obs1.L + obs4.L:
+for d in obs1.L + obs4.L + slo_track.L:
     body = d['body']
     for head, fig in obs_pics.P.get(d['id'], []):
         i = body.index(f'<h2>{head}</h2>')
@@ -289,8 +289,8 @@ for d in obs1.L + obs4.L:
     mins = max(4, round(len(strip(body + tail).split()) / 190))
     learn = '<div class="learn"><b>You will learn</b><ul>' + ''.join(f'<li>{t}</li>' for t in d['learn']) + '</ul></div>'
     lessons.append(f'<section class="lesson" id="{d["id"]}" data-part="{d["part"]}"' + ('' if d['id'] in ('m', 'g') else f' data-ch="{d["id"]}"') + f' data-dot="{d["dot"]}" data-title="{d["nav"]}">\n<div class="meta">{d["meta"]} · {mins} min read</div>\n<h1>{d["h1"]}</h1>\n{learn}\n{body}\n{tail}\n</section>')
-CARDS += obs5.CARDS
-DRILLS += obs5.DRILLS
+CARDS += obs5.CARDS + slo_track.CARDS
+DRILLS += obs5.DRILLS + slo_track.DRILLS
 OBS_AWS = X.table(['Concept', 'What to say', 'AWS services', 'Lesson, POC'], obs5.AWS_ROWS)
 
 OLD_LABS = re.search(r'<div class="labs">(.*?)</div>\s*</div>\s*</section>', SRC, re.S).group(1)
@@ -306,7 +306,7 @@ page = page.replace('/*LABS*/', OLD_LABS)
 page = page.replace('/*AWS*/', AWS_TABLE).replace('/*AWS2*/', PE_AWS).replace('/*AWS3*/', OBS_AWS)
 js = lambda rows: ',\n'.join(json.dumps(r, ensure_ascii=False) for r in rows)
 page = page.replace('/*CARDS*/', js(CARDS)).replace('/*QUIZ*/', js(QUIZ)).replace('/*DRILLS*/', js(DRILLS))
-page = page.replace('{NCARDS}', str(len(CARDS))).replace('{NQUIZ}', str(len(QUIZ))).replace('{NDRILLS}', str(len(DRILLS)))
+page = page.replace('{NLESSONS}', str(page.count(' data-ch='))).replace('{NCARDS}', str(len(CARDS))).replace('{NQUIZ}', str(len(QUIZ))).replace('{NDRILLS}', str(len(DRILLS)))
 assert '/*' not in page.split('<body>')[1].split('<script>')[0], 'unfilled slot'
 open(os.path.join(HERE, 'index.html'), 'w', encoding='utf-8').write(page)
 assert USED == set(FIXES), set(FIXES) - USED

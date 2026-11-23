@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SRE Interview Tutor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;800&family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* VOICE a patient tutor: one chapter at a time, plain words, then practice
    IDEA a metro map of the book: every chapter is a station, every part of the book is a coloured line
@@ -167,19 +167,511 @@ input[type=range]{width:100%;accent-color:var(--red);min-height:44px}
 }
 @media(max-width:600px){table{font-size:13px}th,td{padding:6px 4px}.flow{flex-direction:column}.box{flex:none}.arr{align-self:flex-start;transform:rotate(90deg);margin-left:20px}.top a{display:none}.controls,.facts{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.seq li{grid-template-columns:minmax(0,52px) minmax(0,1fr)}}
 @media(prefers-reduced-motion:reduce){.bar i{transition:none}}
+
+:root{
+  color-scheme:dark;
+  --bg:#0b0d11;--panel:#12151b;--panel2:#171b23;--rule:#232833;--rule2:#2f3644;
+  --ink:#e8ebf1;--ink2:#c2c8d3;--mute:#8b93a3;--inkline:#c9d1dc;
+  --accent:#5eead4;--accent-ink:#04201b;--accent-soft:rgba(94,234,212,.10);
+  --warnc:#fbbf24;--warn-soft:rgba(251,191,36,.08);
+  --blue:#7c9cff;--green:#34d399;--amber:#fbbf24;--red:#f87171;--purple:#a78bfa;--teal:#2dd4bf;--aws:#fb923c;--rose:#f472b6;
+  --code:#080a0e;--codeink:#dde5ee;
+  --display:'Manrope',system-ui,sans-serif;--sans:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace;
+  --r:12px;
+}
+:root[data-theme=light]{
+  color-scheme:light;
+  --bg:#fbfbf9;--panel:#f2f3f0;--panel2:#eceee9;--rule:#e1e3de;--rule2:#cfd3cc;
+  --ink:#0e1116;--ink2:#2b313b;--mute:#5b6472;--inkline:#0e1116;
+  --accent:#0f766e;--accent-ink:#ffffff;--accent-soft:rgba(15,118,110,.08);
+  --warnc:#b45309;--warn-soft:rgba(180,83,9,.07);
+  --blue:#2f5bd3;--green:#059669;--amber:#b45309;--red:#dc2626;--purple:#6d28d9;--teal:#0f766e;--aws:#c2410c;--rose:#be185d;
+}
+body{font:16.5px/1.7 var(--sans);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss01"}
+a{color:var(--accent);text-underline-offset:3px;text-decoration-thickness:1px}
+h1,h2,h3,.top b{font-family:var(--display)}
+h1{font-size:clamp(32px,4.2vw,46px);font-weight:800;letter-spacing:-.035em;line-height:1.06;margin:8px 0 18px}
+h2{font-size:clamp(22px,2.3vw,27px);font-weight:700;letter-spacing:-.025em;margin:48px 0 12px}
+h3{font-size:17.5px;font-weight:700;letter-spacing:-.01em}
+p,li{color:var(--ink2)}
+p b,li b,td b{color:var(--ink)}
+code{font-family:var(--mono)}
+p code,li code,td code{background:var(--panel2);border:1px solid var(--rule);border-radius:5px;padding:0 5px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+::selection{background:var(--accent);color:var(--accent-ink)}
+
+/* ---------- top bar ---------- */
+.top{background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--rule);gap:22px;padding:12px max(3vw,18px);min-height:60px}
+.top b{font-size:16px;font-weight:800;letter-spacing:-.02em;display:flex;align-items:center;gap:9px;color:var(--ink)}
+.top b i{width:16px;height:16px;border-radius:4px;background:var(--accent);display:inline-block;box-shadow:inset 0 0 0 3px var(--bg),0 0 0 1px var(--accent)}
+.top b small{font:500 11.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.top nav{display:flex;gap:20px;margin-left:auto}
+.top nav a{font:500 14px var(--sans);color:var(--ink2);text-decoration:none}
+.top nav a:hover,.top nav a.on{color:var(--ink)}
+.top .bar{max-width:120px;height:4px;background:var(--rule)}
+.top .bar i{background:var(--accent)}
+.top small#progtxt{font:500 12px var(--mono);color:var(--mute)}
+.themebtn{min-height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--rule2);background:transparent;color:var(--ink2);font:500 12.5px var(--mono);cursor:pointer}
+.themebtn:hover{color:var(--ink);border-color:var(--mute)}
+
+/* ---------- sidebar: parts collapse, lessons are a quiet list ---------- */
+.side{border-right:1px solid var(--rule);padding:22px 10px 48px 16px;scrollbar-width:thin}
+.side .home-link{display:flex;align-items:center;gap:10px;margin:0 0 14px;padding:8px 10px;border-radius:8px;text-decoration:none;color:var(--ink2);font:600 14px var(--sans)}
+.side .home-link:hover,.side .home-link.on{background:var(--panel);color:var(--ink)}
+.side details{border-top:1px solid var(--rule)}
+.side details:last-child{border-bottom:1px solid var(--rule)}
+.side summary{list-style:none;display:flex;align-items:baseline;gap:10px;padding:11px 8px;cursor:pointer;border-radius:8px}
+.side summary::-webkit-details-marker{display:none}
+.side summary:hover{background:var(--panel)}
+.side summary .pn{font:600 11.5px var(--mono);color:var(--accent);letter-spacing:.04em;flex:none}
+.side summary .pt{font:600 14px var(--sans);color:var(--ink);flex:1;line-height:1.3}
+.side summary .pc{font:500 11.5px var(--mono);color:var(--mute);flex:none}
+.side details[open] summary .pt{color:var(--ink)}
+.part{display:none}
+.stations{padding:0 0 10px 0}
+.stations li::before{display:none}
+.stations a{gap:10px;min-height:36px;padding:5px 8px;border-radius:7px;font-size:14px;color:var(--ink2)}
+.stations a:hover{background:var(--panel);color:var(--ink)}
+.stations a.on{background:var(--panel2);color:var(--ink);font-weight:600;box-shadow:inset 2px 0 0 var(--accent)}
+.dot{width:auto;height:auto;min-width:26px;border:0;border-radius:0;background:none;font:500 11.5px var(--mono);color:var(--mute);place-items:start;z-index:auto}
+.done .dot{background:none;color:var(--accent)}
+.done .dot::after{content:" ✓"}
+
+/* ---------- lesson header ---------- */
+main{max-width:880px;padding-top:40px}
+.chip{display:none}
+.meta{font:500 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin:0 0 4px}
+.meta .pnum{color:var(--accent)}
+.meta code{font-size:11px;text-transform:none;letter-spacing:0;background:none;border:0;padding:0}
+
+/* ---------- one family of panels ---------- */
+.learn,.note,.warn,.ex,.take,.quiz,.wid,details.ans{border:1px solid var(--rule);border-radius:var(--r);background:var(--panel);padding:16px 20px;margin:24px 0}
+.learn b,.note>b,.warn>b,.ex>b,.take>b,.wid>b,.quiz>b{font:600 11.5px var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;display:block}
+.quiz>b{font:600 16px var(--sans);letter-spacing:0;text-transform:none;color:var(--ink)}
+.learn{border-left:0;background:linear-gradient(var(--panel),var(--panel)) padding-box;position:relative}
+.learn::before{content:"";position:absolute;left:-1px;top:14px;bottom:14px;width:2px;background:var(--accent);border-radius:2px}
+.warn{background:var(--warn-soft);border-color:color-mix(in srgb,var(--warnc) 35%,var(--rule))}
+.warn>b{color:var(--warnc)}
+.ex{border-style:solid}
+.take{background:var(--panel);color:var(--ink2);border-top:2px solid var(--accent)}
+.take li{color:var(--ink2)}
+.take code{background:var(--panel2)}
+.quiz button{border-radius:9px;border-color:var(--rule2);background:var(--bg);font:15.5px var(--sans);color:var(--ink)}
+.quiz button:hover{border-color:var(--mute);background:var(--bg)}
+.quiz button.right{border-color:var(--green);background:color-mix(in srgb,var(--green) 12%,var(--bg))}
+.quiz button.wrong{border-color:var(--red);background:color-mix(in srgb,var(--red) 10%,var(--bg))}
+details.ans summary{font:600 15px var(--sans);color:var(--ink)}
+.wid{background:var(--panel)}
+.wid .btn,.btn{border-radius:9px;border:1px solid var(--rule2);font:600 14px var(--sans);background:transparent;color:var(--ink)}
+.btn.solid{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn:hover{border-color:var(--mute)}
+.res .big,.big{font-family:var(--mono);letter-spacing:-.02em}
+
+/* flows: thin outlined steps, accent only on the top edge */
+.box{border:1px solid var(--rule2);border-top:2px solid var(--c,var(--accent));background:var(--panel);border-radius:10px}
+.box b{font:600 14.5px var(--sans);color:var(--ink)}
+.arr{color:var(--mute);font-weight:400}
+
+/* tables */
+table{font-size:14.5px}
+th{font:600 11px var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--mute);border-bottom:1px solid var(--rule2)}
+td{border-bottom:1px solid var(--rule);color:var(--ink2)}
+td.num{font-family:var(--mono);font-size:13.5px}
+
+/* code */
+.cb pre{border:1px solid var(--rule);border-radius:10px;background:var(--code)}
+.cb .fn{font:500 12px var(--mono);color:var(--mute)}
+.cb button{font:500 12px var(--mono);border-radius:7px}
+
+/* diagrams */
+.dg .dgs{background:var(--panel);border-color:var(--rule);border-radius:var(--r)}
+.dg figcaption{font-size:14px;color:var(--mute)}
+.loopnote{font-size:14px;color:var(--mute)}
+.layout-strip div{border-radius:10px}
+
+/* pager */
+.pager{border-top:1px solid var(--rule);margin-top:48px}
+
+/* ================= HOME ================= */
+body.home .side{display:none}
+body.home .layout{grid-template-columns:minmax(0,1fr);max-width:none}
+body.home main{max-width:none;padding:0}
+body.home .pager{display:none}
+#home[hidden]{display:none}
+#home{--w:1180px}
+.hwrap{max-width:var(--w);margin:0 auto;padding:0 max(3vw,20px)}
+.eyebrow{font:600 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin:0 0 14px;display:flex;align-items:center;gap:10px;max-width:none}
+.eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.eyebrow.nodot::before{display:none}
+.hhead p.eyebrow,.split p.eyebrow{color:var(--accent);font-size:12px;max-width:none;margin:0 0 14px}
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center;padding:84px 0 72px}
+.hero h1{font-size:clamp(42px,6.2vw,76px);line-height:.98;letter-spacing:-.045em;margin:0 0 22px;max-width:12ch}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.hero .lead{font:500 clamp(19px,1.8vw,23px)/1.4 var(--display);letter-spacing:-.01em;color:var(--ink);margin:0 0 16px;max-width:30ch}
+.hero p{max-width:52ch;font-size:16px}
+.cta{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin:28px 0 22px}
+.cta a.primary{display:inline-flex;align-items:center;gap:10px;min-height:48px;padding:0 22px;border-radius:10px;background:var(--accent);color:var(--accent-ink);font:700 15px var(--sans);text-decoration:none}
+.cta a.ghost{color:var(--ink);font:600 15px var(--sans);text-decoration:none}
+.cta a.ghost:hover{color:var(--accent)}
+.byline{font:500 11.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.heroart svg{width:100%;height:auto;display:block}
+.stack-strip{border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);background:var(--panel)}
+.stack-strip .hwrap{display:flex;align-items:center;gap:28px;flex-wrap:wrap;padding-top:20px;padding-bottom:20px}
+.stack-strip .lab{font:500 11.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--mute);padding-right:20px;border-right:1px solid var(--rule2)}
+.stack-strip span.t{font:700 15px var(--display);color:var(--ink2);letter-spacing:-.01em}
+.hsec{padding:88px 0}
+.hsec+.hsec{border-top:1px solid var(--rule)}
+.hhead{display:flex;justify-content:space-between;align-items:flex-end;gap:32px;flex-wrap:wrap;margin-bottom:34px}
+.hhead h2{font-size:clamp(30px,3.6vw,44px);font-weight:800;letter-spacing:-.04em;line-height:1.05;margin:0;max-width:18ch}
+.hhead p{max-width:34ch;margin:0;color:var(--mute);font-size:15.5px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--rule);border-radius:var(--r);background:var(--panel);overflow:hidden}
+.kpi{padding:22px 22px 20px;border-right:1px solid var(--rule);text-decoration:none;color:inherit;display:block;position:relative}
+.kpi:last-child{border-right:0}
+.kpi:hover{background:var(--panel2)}
+.kpi small{display:block;font:500 11px var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--mute);margin-bottom:14px}
+.kpi b{font:700 clamp(30px,3.2vw,40px)/1 var(--display);letter-spacing:-.04em;color:var(--ink)}
+.kpi b sub{font:500 15px var(--sans);letter-spacing:0;color:var(--ink2);vertical-align:baseline;margin-left:4px}
+.kpi span{display:block;margin-top:12px;font-size:13.5px;color:var(--mute);line-height:1.5}
+.kpi::after{content:"↗";position:absolute;right:18px;top:18px;color:var(--accent);font-size:14px}
+.fineprint{font-size:13.5px;color:var(--mute);margin-top:14px}
+.stages{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.stage{border:1px solid var(--rule);border-radius:var(--r);background:var(--panel);padding:22px;display:flex;flex-direction:column;min-height:320px;text-decoration:none;color:inherit}
+.stage:hover{border-color:var(--rule2);background:var(--panel2)}
+.stage .top2{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:22px}
+.stage .num{font:600 12px var(--mono);color:var(--mute);letter-spacing:.06em}
+.badge{font:600 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;border-radius:5px;border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);color:var(--accent);background:var(--accent-soft);white-space:nowrap}
+.badge.plan{border-color:var(--rule2);color:var(--mute);background:transparent}
+.badge.sim{border-color:color-mix(in srgb,var(--warnc) 45%,transparent);color:var(--warnc);background:var(--warn-soft)}
+.stage h3{font:800 22px/1.15 var(--display);letter-spacing:-.03em;margin:0 0 12px;color:var(--ink)}
+.stage p{font-size:14.5px;margin:0 0 14px;color:var(--ink2)}
+.stage .can{font-size:13.5px;color:var(--mute);margin:auto 0 0;padding-top:14px;border-top:1px solid var(--rule)}
+.stage .can b{display:block;font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin-bottom:4px}
+.stage .go{font:600 14px var(--sans);color:var(--accent);margin-top:14px}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start}
+.steps{list-style:none;margin:0;padding:0;counter-reset:s}
+.steps li{display:grid;grid-template-columns:44px 1fr;gap:6px 14px;padding:16px 0;border-bottom:1px solid var(--rule);max-width:none}
+.steps li:first-child{border-top:1px solid var(--rule)}
+.steps li::before{counter-increment:s;content:"0" counter(s);font:600 12px var(--mono);color:var(--accent);padding-top:4px;grid-row:span 2}
+.steps li b{font:700 16.5px var(--display);color:var(--ink);letter-spacing:-.01em}
+.steps li span{font-size:14.5px;color:var(--mute)}
+.cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.labcard{border:1px solid var(--rule);border-radius:var(--r);background:var(--panel);padding:22px;display:flex;flex-direction:column;text-decoration:none;color:inherit;min-height:250px}
+.labcard:hover{border-color:var(--rule2);background:var(--panel2)}
+.labcard .top2{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:10px}
+.labcard .num{font:600 12px var(--mono);color:var(--mute);letter-spacing:.06em}
+.labcard h3{font:800 20px/1.2 var(--display);letter-spacing:-.025em;margin:0 0 10px;color:var(--ink)}
+.labcard p{font-size:14.5px;margin:0 0 16px}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto}
+.tags span{font:500 11px var(--mono);color:var(--ink2);border:1px solid var(--rule2);border-radius:5px;padding:3px 7px}
+.labcard .go{font:600 14px var(--sans);color:var(--accent);margin-top:16px;display:flex;justify-content:space-between}
+.next{list-style:none;margin:0;padding:0}
+.next li{display:grid;grid-template-columns:40px 1fr auto;gap:4px 14px;align-items:baseline;padding:18px 0;border-bottom:1px solid var(--rule);max-width:none}
+.next li:first-child{border-top:1px solid var(--rule)}
+.next .ix{grid-column:1;grid-row:1;font:600 12px var(--mono);color:var(--accent)}
+.next b{grid-column:2;grid-row:1;font:700 17px var(--display);color:var(--ink);letter-spacing:-.015em}
+.next span.d{grid-column:2;grid-row:2;font-size:14px;color:var(--mute)}
+.next .badge{grid-column:3;grid-row:1;justify-self:end}
+.books{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.book{border:1px solid var(--rule);border-radius:10px;padding:16px;background:var(--panel)}
+.book small{display:block;font:600 11px var(--mono);letter-spacing:.06em;color:var(--accent);margin-bottom:8px;text-transform:uppercase}
+.book b{display:block;font:700 15px/1.3 var(--display);color:var(--ink);letter-spacing:-.01em}
+.book span{display:block;font-size:13px;color:var(--mute);margin-top:6px}
+.closer{border:1px solid var(--rule);border-radius:16px;background:radial-gradient(120% 140% at 50% 0%,var(--panel2),var(--panel));text-align:center;padding:72px 24px;margin:0 0 88px}
+.closer h2{font-size:clamp(28px,3.6vw,44px);font-weight:800;letter-spacing:-.04em;line-height:1.08;margin:0 auto 26px;max-width:22ch}
+.closer .eyebrow{justify-content:center;max-width:none}
+.closer p{max-width:none;margin-left:auto;margin-right:auto}
+.closer .cta{justify-content:center;margin:0 0 14px}
+.hfoot{border-top:1px solid var(--rule);padding:22px 0 30px}
+.hfoot .hwrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;font:500 12px var(--mono);color:var(--mute)}
+@media (max-width:1000px){
+  .hero{grid-template-columns:1fr;padding-top:56px}
+  .heroart{max-width:520px}
+  .kpis{grid-template-columns:1fr 1fr}.kpi:nth-child(2){border-right:0}.kpi:nth-child(-n+2){border-bottom:1px solid var(--rule)}
+  .stages{grid-template-columns:1fr 1fr}
+  .cards3{grid-template-columns:1fr}
+  .split{grid-template-columns:1fr;gap:28px}
+  .books{grid-template-columns:1fr 1fr}
+}
+@media (max-width:640px){
+  .top nav{display:none}
+  .hsec{padding:60px 0}
+  .kpis{grid-template-columns:1fr}.kpi{border-right:0;border-bottom:1px solid var(--rule)}.kpi:last-child{border-bottom:0}
+  .stages{grid-template-columns:1fr}.stage{min-height:0}
+  .books{grid-template-columns:1fr}
+  .stack-strip .lab{border-right:0;width:100%;padding:0}
+}
+/* mobile contents toggle */
+.tocbtn{display:none;width:100%;min-height:44px;align-items:center;justify-content:space-between;gap:10px;padding:0 14px;border:1px solid var(--rule2);border-radius:10px;background:var(--panel);color:var(--ink);font:600 14px var(--sans);cursor:pointer}
+.tocbtn span{font:500 12px var(--mono);color:var(--mute)}
+@media(max-width:900px){
+  .side{padding:12px 16px;overflow:visible}
+  .tocbtn{display:flex}
+  .side:not(.open)>:not(.tocbtn){display:none}
+  .side.open .home-link{margin-top:12px}
+  .stations{display:block}
+  .stations a{padding:6px 8px}
+  .stations a .t{display:inline}
+  .top .bar,.top small#progtxt{display:none}
+  main{padding-top:24px}
+}
+
+/* ---------- tutor additions on top of the course theme ---------- */
+:root{--magenta:#e05fb4;--lime:#9ccc4b;--ember:#fb923c;--rust:#f97362;--orange:#fb923c;--cyan:#22d3ee;--sky:#38bdf8}
+:root[data-theme=light]{--magenta:#c0158a;--lime:#4a7a00;--ember:#c2410c;--rust:#9a3412;--orange:#c05a00;--cyan:#0e7490;--sky:#0369a1}
+.side .sbook{font:600 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin:18px 8px 6px}
+.side .sbook:first-of-type{margin-top:4px}
+.side summary .pn{color:var(--c,var(--accent))}
+.stages.six{grid-template-columns:repeat(3,1fr)}
+.cards3.four{grid-template-columns:repeat(2,1fr)}
+.books.four{grid-template-columns:repeat(4,1fr)}
+@media (max-width:1000px){.stages.six{grid-template-columns:1fr 1fr}.books.four{grid-template-columns:1fr 1fr}.cards3.four{grid-template-columns:1fr}}
+@media (max-width:640px){.stages.six,.books.four{grid-template-columns:1fr}}
+.cb{position:relative;margin:16px 0}
+.cb pre{margin:0;background:var(--code);color:var(--codeink);border:1px solid var(--rule);border-radius:10px;padding:16px;overflow-x:auto;font:13.5px/1.6 var(--mono)}
+.cb pre code{background:none;border:0;padding:0;color:inherit;overflow-wrap:normal}
+.cb .fn{display:flex;align-items:center;min-height:34px;padding-right:90px;font:500 12px var(--mono);color:var(--mute);margin-bottom:6px}
+.cb .copy{position:absolute;right:0;top:0;min-height:30px;padding:0 12px;border-radius:7px;border:1px solid var(--rule2);background:var(--panel);color:var(--ink2);font:500 12px var(--mono);cursor:pointer}
+.cb.term pre{background:#05070a}
+.jcrow{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,1.4fr);gap:10px;align-items:center;margin:6px 0}
+.jcrow label{font-weight:600;color:var(--ink)}
+.jcrow select{font:inherit;font-size:14px;padding:6px 8px;border:1px solid var(--rule2);border-radius:8px;background:var(--bg);color:var(--ink)}
+#jc .jcrow:first-of-type{grid-template-columns:minmax(0,1.2fr) minmax(0,2.4fr)}
+#jc_svg{width:100%;height:auto;margin-top:10px}
+@media (max-width:640px){.jcrow{grid-template-columns:1fr}}
+.lesson .chip{display:inline-block;color:var(--accent);background:none;padding:0;margin-right:10px;font:600 12px var(--mono);letter-spacing:.06em;border-radius:0}
+.stack-strip .lab{border:0;border-radius:0;padding:0 20px 0 0;border-right:1px solid var(--rule2)}
+@media (max-width:700px){.stack-strip .lab{border-right:0;padding:0}}
+.lesson .meta{margin:0 0 12px;line-height:1.6}
+.pic,figure.pic{background:var(--panel);border:1px solid var(--rule);border-radius:var(--r)}
+
 </style>
 </head>
 <body>
 <div class="top">
-  <b>SRE Interview Tutor</b>
-  <div class="bar" aria-label="Chapters learned"><i id="prog"></i></div>
-  <small id="progtxt">0 of 23 chapters</small>
-  <a href="https://github.com/phaniuk111/sre">POC repo on GitHub</a>
+  <b><i aria-hidden="true"></i>SRE Interview Tutor <small>/ course</small></b>
+  <nav aria-label="Course"><a href="#home">Overview</a><a href="#start">Lessons</a><a href="https://github.com/phaniuk111/sre">Labs ↗</a></nav>
+  <div class="bar" aria-label="Course progress"><i id="prog"></i></div>
+  <small id="progtxt">0 of 0 done</small>
+  <button class="themebtn" id="themebtn" type="button" aria-label="Switch colour theme">Light</button>
 </div>
 
 <div class="layout">
 <nav class="side" id="side" aria-label="Lessons"></nav>
 <main id="main">
+<section id="home" aria-label="Course overview">
+<div class="hwrap">
+  <div class="hero">
+    <div>
+      <p class="eyebrow">An SRE interview course</p>
+      <h1>From one SLO to a <em>reliable platform.</em></h1>
+      <p class="lead">Learn SRE, platform engineering and observability well enough to teach them. Know why every number comes out the way it does.</p>
+      <p>{NLESSONS} lessons across four books, one chapter at a time: what reliability means and costs, how Prometheus and Grafana measure it, how platforms make it the default, and how to set one SLO for a journey that crosses many services. Each lesson explains the idea, draws it, shows the AWS version, then checks you can say it in an interview.</p>
+      <div class="cta">
+        <a class="primary" href="#start">Start here <span aria-hidden="true">→</span></a>
+        <a class="ghost" href="#j-1">Jump to the hands-on SLO track →</a>
+      </div>
+      <p class="byline">{NLESSONS} lessons · 4 books · 31 POCs · 210 tests</p>
+    </div>
+    <div class="heroart">
+      <svg viewBox="0 0 520 440" role="img" aria-label="The reliability stack this course climbs, from the platform at the bottom to the customer's journey at the top">
+        <title>The reliability stack this course climbs</title>
+        <defs>
+          <pattern id="hgrid" width="22" height="22" patternUnits="userSpaceOnUse"><path d="M22 0H0V22" fill="none" style="stroke:var(--rule);stroke-width:1"/></pattern>
+          <radialGradient id="hglow" cx="50%" cy="55%" r="55%"><stop offset="0" style="stop-color:var(--accent);stop-opacity:.16"/><stop offset="1" style="stop-color:var(--accent);stop-opacity:0"/></radialGradient>
+        </defs>
+        <rect x="0" y="0" width="520" height="440" rx="16" style="fill:url(#hgrid);opacity:.55"/>
+        <rect x="0" y="0" width="520" height="440" rx="16" style="fill:url(#hglow)"/>
+        <g style="font-family:var(--mono)">
+          <rect x="70" y="360" width="380" height="46" rx="10" style="fill:var(--panel2);stroke:var(--accent);stroke-width:1.5"/>
+          <text x="92" y="388" style="fill:var(--ink);font:700 15px var(--display)">Platform · golden paths · shared fate</text>
+          <text x="428" y="388" text-anchor="end" style="fill:var(--accent);font-size:11px">PLATFORM</text>
+          <rect x="82" y="300" width="356" height="46" rx="10" style="fill:var(--panel);stroke:var(--rule2)"/>
+          <text x="104" y="328" style="fill:var(--ink);font:700 15px var(--display)">Metrics · TSDB · PromQL · alerts</text>
+          <text x="416" y="328" text-anchor="end" style="fill:var(--mute);font-size:11px">PROMETHEUS</text>
+          <rect x="94" y="240" width="332" height="46" rx="10" style="fill:var(--panel);stroke:var(--rule2)"/>
+          <text x="116" y="268" style="fill:var(--ink);font:700 15px var(--display)">Logs · traces · dashboards</text>
+          <text x="404" y="268" text-anchor="end" style="fill:var(--mute);font-size:11px">GRAFANA</text>
+          <rect x="106" y="180" width="308" height="46" rx="10" style="fill:var(--panel);stroke:var(--rule2)"/>
+          <text x="128" y="208" style="fill:var(--ink);font:700 15px var(--display)">SLOs · error budgets · burn</text>
+          <text x="392" y="208" text-anchor="end" style="fill:var(--mute);font-size:11px">SRE 8</text>
+          <rect x="118" y="120" width="284" height="46" rx="10" style="fill:var(--panel);stroke:var(--rule2)"/>
+          <text x="140" y="148" style="fill:var(--ink);font:700 15px var(--display)">Incidents · learning</text>
+          <text x="380" y="148" text-anchor="end" style="fill:var(--mute);font-size:11px">SRE 10–11</text>
+          <rect x="130" y="40" width="260" height="62" rx="12" style="fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5"/>
+          <text x="260" y="68" text-anchor="middle" style="fill:var(--ink);font:800 16px var(--display)">The customer’s journey</text>
+          <text x="260" y="88" text-anchor="middle" style="fill:var(--accent);font-size:11px">ONE SLO · MEASURED AT THE EDGE</text>
+          <path d="M260 104v12M260 168v10M260 228v10M260 288v10M260 348v10" style="stroke:var(--accent);stroke-width:1.5;stroke-dasharray:3 3"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<div class="stack-strip"><div class="hwrap">
+  <span class="lab">The stack</span>
+  <span class="t">Prometheus</span><span class="t">Alertmanager</span><span class="t">Grafana</span><span class="t">Loki</span><span class="t">Tempo</span><span class="t">OpenTelemetry</span><span class="t">Terraform</span><span class="t">Amazon EKS</span><span class="t">AMP</span><span class="t">CloudWatch</span>
+</div></div>
+
+<div class="hwrap">
+<section class="hsec" aria-labelledby="h-kpi">
+  <div class="hhead">
+    <div><p class="eyebrow nodot">Worked out, not memorised</p><h2 id="h-kpi">Four numbers you will be able to derive.</h2></div>
+    <p>Each is worked out step by step in the lesson it links to.</p>
+  </div>
+  <div class="kpis">
+    <a class="kpi" href="#ch-8"><small>Error budget, 99.9% · 30 days</small><b>43.2<sub>min</sub></b><span>0.1% of 43,200 minutes of total outage</span></a>
+    <a class="kpi" href="#j-4"><small>Fast-burn page</small><b>14.4<sub>×</sub></b><span>2% of a 30-day budget in one hour, with the 5-minute window confirming</span></a>
+    <a class="kpi" href="#j-2"><small>Five hard dependencies at 99.9%</small><b>99.5<sub>%</sub></b><span>0.999⁵: the ceiling before checkout’s own bugs</span></a>
+    <a class="kpi" href="#j-5"><small>Journey p99 vs the sum</small><b>1.74<sub>s</sub></b><span>Two dependencies at about 1.5 s p99 each, not 3 s together</span></a>
+  </div>
+  <p class="fineprint">The first three follow from the books’ formulas. The last one we measured ourselves in POC 31 with Prometheus 3.5.</p>
+</section>
+
+<section class="hsec" aria-labelledby="h-path">
+  <div class="hhead">
+    <div><p class="eyebrow nodot">01 / The path</p><h2 id="h-path">Six stages, one argument.</h2></div>
+    <p>Each stage answers the question the previous one leaves open.</p>
+  </div>
+  <div class="stages six">
+    <a class="stage" href="#start">
+      <div class="top2"><span class="num">BOOK 1 · 23 LESSONS</span><span class="badge">Complete</span></div>
+      <h3>Site Reliability Engineering</h3>
+      <p>What SRE is and pays for, the people side, SLOs, observability, incidents, automation, testing, capacity, resilience and the future.</p>
+      <p class="can"><b>You can</b>explain error budgets, run an incident and defend a reliability target to a product team.</p>
+      <span class="go">Start here →</span>
+    </a>
+    <a class="stage" href="#pe">
+      <div class="top2"><span class="num">BOOK 2 · 10 LESSONS</span><span class="badge sim">10 of 31 chapters out</span></div>
+      <h3>Platform Engineering at Google</h3>
+      <p>Coupling, layers, shared fate, deep dives on efficiency, security and reliability, developer experience and platform as a product.</p>
+      <p class="can"><b>You can</b>design a platform that makes the reliable path the easy one.</p>
+      <span class="go">Open stage 2 →</span>
+    </a>
+    <a class="stage" href="#m">
+      <div class="top2"><span class="num">BOOK 3 · 15 LESSONS</span><span class="badge">Complete</span></div>
+      <h3>Mastering Prometheus</h3>
+      <p>The TSDB, PromQL semantics, discovery, Alertmanager, HA and sharding, remote storage, Thanos, mixins, CI and SLO rules.</p>
+      <p class="can"><b>You can</b>explain what rate() really does and why cardinality is the bill.</p>
+      <span class="go">Open stage 3 →</span>
+    </a>
+    <a class="stage" href="#g">
+      <div class="top2"><span class="num">BOOK 4 · 13 LESSONS</span><span class="badge">Complete</span></div>
+      <h3>Observability with Grafana</h3>
+      <p>Loki and LogQL, Mimir, Tempo and TraceQL, dashboards, incidents, automation, architecture, RUM, profiling and load tests.</p>
+      <p class="can"><b>You can</b>design collection, storage and dashboards for a whole organisation.</p>
+      <span class="go">Open stage 4 →</span>
+    </a>
+    <a class="stage" href="#j-1">
+      <div class="top2"><span class="num">HANDS-ON · 5 LESSONS</span><span class="badge">Runs locally</span></div>
+      <h3>One SLO across many services</h3>
+      <p>Critical user journeys, design ceilings, internal SLOs, retries, PromQL and burn-rate alerts, then a lab where you break a real shop.</p>
+      <p class="can"><b>You can</b>set a journey SLO, write its rules and prove they fire.</p>
+      <span class="go">Open the track →</span>
+    </a>
+    <a class="stage" href="#labs">
+      <div class="top2"><span class="num">PRACTICE</span><span class="badge">{NCARDS} cards</span></div>
+      <h3>Practice and synthesis</h3>
+      <p>Calculators, {NCARDS} flashcards, {NQUIZ} quiz questions, {NDRILLS} interview drills, the AWS map, and four synthesis pages across all the books.</p>
+      <p class="can"><b>You can</b>answer under pressure, out loud, with numbers.</p>
+      <span class="go">Open practice →</span>
+    </a>
+  </div>
+</section>
+
+<section class="hsec" aria-labelledby="h-how">
+  <div class="split">
+    <div>
+      <p class="eyebrow nodot">02 / How a lesson works</p>
+      <h2 id="h-how" style="font-size:clamp(30px,3.6vw,44px);font-weight:800;letter-spacing:-.04em;line-height:1.05;margin:0 0 16px">Same shape every time.</h2>
+      <p style="color:var(--mute);max-width:40ch">You always know where you are: the idea, the picture, the AWS version, then proof that you can use it. Mark a lesson complete and the left-hand list keeps your place on this device.</p>
+    </div>
+    <ol class="steps">
+      <li><b>The idea in plain words</b><span>The chapter’s argument in short paragraphs, terms explained the first time they appear.</span></li>
+      <li><b>A picture</b><span>Diagrams redrawn for the lesson, with the book’s mistakes called out where we found them.</span></li>
+      <li><b>Going deeper</b><span>The case studies, numbers and named models interviewers probe for.</span></li>
+      <li><b>Say it, and on AWS</b><span>The sentence for the interview, and the same idea in AWS services.</span></li>
+      <li><b>Check yourself and use it</b><span>A question with a model answer, quick checks, an exercise from the repo, and takeaways.</span></li>
+    </ol>
+  </div>
+</section>
+
+<section class="hsec" aria-labelledby="h-labs">
+  <div class="hhead">
+    <div><p class="eyebrow nodot">03 / The labs</p><h2 id="h-labs">Code you can read, run and test.</h2></div>
+    <p>Everything lives in one repository. Status says exactly what has been run.</p>
+  </div>
+  <div class="cards3 four">
+    <a class="labcard" href="https://github.com/phaniuk111/sre">
+      <div class="top2"><span class="num">POC 01–11</span><span class="badge sim">Simulated · 46 tests</span></div>
+      <h3>SRE foundations</h3>
+      <p>Burn-rate alerting, observability, incident tooling, safe rollouts, capacity and data, as small Python models with tests and Terraform for AWS.</p>
+      <div class="tags"><span>SLOs</span><span>burn rate</span><span>canaries</span><span>Terraform</span></div>
+      <span class="go">poc-01 → poc-11 <span>↗</span></span>
+    </a>
+    <a class="labcard" href="https://github.com/phaniuk111/sre">
+      <div class="top2"><span class="num">POC 12–19</span><span class="badge sim">Simulated · 50 tests</span></div>
+      <h3>Platform engineering</h3>
+      <p>Coupling, layered platforms, shared fate, efficiency, security and reliability deep dives, golden paths and platform metrics.</p>
+      <div class="tags"><span>golden paths</span><span>coupling</span><span>EKS</span><span>IAM</span></div>
+      <span class="go">poc-12 → poc-19 <span>↗</span></span>
+    </a>
+    <a class="labcard" href="https://github.com/phaniuk111/sre">
+      <div class="top2"><span class="num">POC 20–30</span><span class="badge sim">Simulated · 103 tests</span></div>
+      <h3>Prometheus and Grafana</h3>
+      <p>A PromQL evaluator, TSDB internals, relabeling and sharding, alert routing, SLO rules, Thanos, LogQL, trace context, ADOT and dashboards as code.</p>
+      <div class="tags"><span>PromQL</span><span>Alertmanager</span><span>ADOT</span><span>AMG</span></div>
+      <span class="go">poc-20 → poc-30 <span>↗</span></span>
+    </a>
+    <a class="labcard" href="https://github.com/phaniuk111/sre/tree/main/poc-31-checkout-journey-slo-lab">
+      <div class="top2"><span class="num">POC 31</span><span class="badge">Runs locally · 11 tests</span></div>
+      <h3>Break a shop, watch the SLO</h3>
+      <p>Five services, real Prometheus 3.5, burn-rate alerts tested with promtool, and chaos switches for failures, outages, retries and slow tails.</p>
+      <div class="tags"><span>Prometheus</span><span>promtool</span><span>chaos</span><span>Grafana</span></div>
+      <span class="go">poc-31-checkout-journey-slo-lab <span>↗</span></span>
+    </a>
+  </div>
+  <p class="fineprint">“Simulated” means the behaviour is modelled in Python and tested; the Terraform parses (22 files) but none of it has been applied to an AWS account.</p>
+</section>
+
+<section class="hsec" aria-labelledby="h-next">
+  <div class="split">
+    <div>
+      <p class="eyebrow nodot">04 / Still on the bench</p>
+      <h2 id="h-next" style="font-size:clamp(30px,3.6vw,44px);font-weight:800;letter-spacing:-.04em;line-height:1.05;margin:0 0 16px">What comes next.</h2>
+      <p style="color:var(--mute);max-width:40ch">Planned work, kept apart from what is finished.</p>
+    </div>
+    <ol class="next">
+      <li><span class="ix">01</span><b>The rest of Platform Engineering at Google</b><span class="badge plan">Waiting</span><span class="d">21 of 31 chapters aren’t published yet (full book listed for June 2027). Read each one as O’Reilly releases it.</span></li>
+      <li><span class="ix">02</span><b>Read The Site Reliability Workbook</b><span class="badge plan">Planned</span><span class="d">“Alerting on SLOs” in full, then check the burn-rate lessons against it.</span></li>
+      <li><span class="ix">03</span><b>Run POC 31 with Docker and Grafana</b><span class="badge plan">Planned</span><span class="d">The compose file and dashboard are written; only the local mode has been run.</span></li>
+      <li><span class="ix">04</span><b>Apply the Terraform in a sandbox account</b><span class="badge plan">Planned</span><span class="d">AMP, AMG and the alert routing, then destroy it.</span></li>
+    </ol>
+  </div>
+</section>
+
+<section class="hsec" aria-labelledby="h-books">
+  <div class="hhead">
+    <div><p class="eyebrow nodot">05 / Sources</p><h2 id="h-books">Four books, read chapter by chapter.</h2></div>
+    <p>Summarised in plain words, with the books’ mistakes called out where we found them.</p>
+  </div>
+  <div class="books four">
+    <div class="book"><small>Book 1 · 23 chapters + appendices</small><b>Site Reliability Engineering, 2nd ed.</b><span>Beyer, Jones, Leng, Huska, Petoff, Murphy · O’Reilly, 2026</span></div>
+    <div class="book"><small>Book 2 · 10 of 31 chapters</small><b>Platform Engineering at Google</b><span>Brookbank, Hargreaves, Virji · O’Reilly, early release</span></div>
+    <div class="book"><small>Book 3 · 15 chapters</small><b>Mastering Prometheus</b><span>William Hegedus · Packt, 2024</span></div>
+    <div class="book"><small>Book 4 · 15 chapters</small><b>Observability with Grafana</b><span>Rob Chapman, Peter Holmes · Packt, 2024</span></div>
+  </div>
+</section>
+
+<div class="closer">
+  <p class="eyebrow">No black boxes</p>
+  <h2>Every number worked out in front of you.</h2>
+  <div class="cta"><a class="primary" href="#start">Start here <span aria-hidden="true">→</span></a><a class="ghost" href="https://github.com/phaniuk111/sre">Open the repository ↗</a></div>
+  <p class="byline">POCs, Terraform, tests and reading notes</p>
+</div>
+</div>
+<footer class="hfoot"><div class="hwrap"><span>SRE Interview Tutor · course</span><span>github.com/phaniuk111/sre</span><span>{NLESSONS} lessons · 210 tests</span></div></footer>
+</section>
+
 
 <section class="lesson" id="start" data-part="1" data-dot="0" data-title="Start here">
 <div class="meta"><span class="chip">Start here</span>Two books · 33 chapter lessons</div>
@@ -227,6 +719,7 @@ input[type=range]{width:100%;accent-color:var(--red);min-height:44px}
   <a href="#m-6" style="--c:var(--rust)"><b>Prometheus · Scaling and operating</b><span>HA, sharding, tuning, Node Exporter, remote storage, Thanos, mixins, CI, SLOs, OpenTelemetry</span></a>
   <a href="#g" style="--c:var(--amber)"><b>Grafana · Signals</b><span>Instrumentation, Loki and LogQL, Mimir, Tempo and TraceQL, Kubernetes and AWS</span></a>
   <a href="#g-8" style="--c:var(--cyan)"><b>Grafana · Running observability</b><span>Dashboards, incidents, automation, platform architecture, RUM, profiling, load tests, DevOps</span></a>
+  <a href="#j-1" style="--c:var(--sky)"><b>Hands-on · One SLO across services</b><span>Critical user journeys, design ceilings, internal SLOs, burn-rate PromQL, and a lab where you break a real shop (POC 31)</span></a>
   <a href="#labs" style="--c:var(--inkline)"><b>Practice and synthesis</b><span>Labs, {NCARDS} flashcards, {NQUIZ} quiz questions, {NDRILLS} interview drills, the AWS map, then an executive summary, knowledge map, requirements checklist and numbers to know</span></a>
 </div>
 
@@ -241,6 +734,7 @@ input[type=range]{width:100%;accent-color:var(--red);min-height:44px}
   <div class="tile" style="--c:var(--ember)"><b>Days 20–22: Prometheus internals</b><span>Prometheus lessons 1–5. Draw the TSDB, explain rate(), trace an alert through Alertmanager. POC 20 to 23.</span></div>
   <div class="tile" style="--c:var(--rust)"><b>Days 23–25: Prometheus at scale</b><span>Prometheus lessons 6–14. HA, cardinality, Thanos versus Mimir versus AMP, SLO rules. POC 24 and 25.</span></div>
   <div class="tile" style="--c:var(--amber)"><b>Days 26–27: logs and traces</b><span>Grafana lessons 1–6. Loki labels, LogQL, trace context, TraceQL, CloudWatch and X-Ray. POC 26 to 28.</span></div>
+  <div class="tile" style="--c:var(--sky)"><b>Day 31: hands-on SLO lab</b><span>The five hands-on lessons, then POC 31: break the shop and watch the SLO and alerts react.</span></div>
   <div class="tile" style="--c:var(--cyan)"><b>Days 28–30: running observability</b><span>Grafana lessons 7–12. Dashboards, incidents, IaC, architecture, RUM, profiling, k6. POC 29 and 30.</span></div>
 </div>
 <p>When you have been through the books, finish with the four synthesis pages at the end of the map: <a href="#summary">executive summary</a>, <a href="#map">knowledge map</a>, <a href="#checklist">requirements checklist</a> and <a href="#numbers">numbers to know</a>.</p>
@@ -300,8 +794,8 @@ input[type=range]{width:100%;accent-color:var(--red);min-height:44px}
 <script>
 {
 const $=s=>document.querySelector(s);
-const PARTS={1:['I · SRE in context','var(--green)'],2:['II · Sociotechnical foundations','var(--red)'],3:['III · Awareness and preparedness','var(--blue)'],4:['IV · Infrastructure design','var(--orange)'],5:['V · Resilient products','var(--purple)'],6:['VI · Outlook','var(--teal)'],7:['Practice and synthesis','var(--inkline)'],P1:['Architecture and ecosystem design','var(--magenta)'],P2:['Execution and product approach','var(--lime)'],M1:['Prometheus · Fundamentals','var(--ember)'],M2:['Prometheus · Scaling and operating','var(--rust)'],G1:['Grafana · Signals','var(--amber)'],G2:['Grafana · Running observability','var(--cyan)']};
-const ORDER=['1','2','3','4','5','6','P1','P2','M1','M2','G1','G2','7'];const BOOKS={'1':'Book 1 · Site Reliability Engineering','P1':'Book 2 · Platform Engineering at Google','M1':'Book 3 · Mastering Prometheus','G1':'Book 4 · Observability with Grafana','7':'All four books'};
+const PARTS={1:['I · SRE in context','var(--green)'],2:['II · Sociotechnical foundations','var(--red)'],3:['III · Awareness and preparedness','var(--blue)'],4:['IV · Infrastructure design','var(--orange)'],5:['V · Resilient products','var(--purple)'],6:['VI · Outlook','var(--teal)'],7:['Practice and synthesis','var(--inkline)'],P1:['Architecture and ecosystem design','var(--magenta)'],P2:['Execution and product approach','var(--lime)'],M1:['Prometheus · Fundamentals','var(--ember)'],M2:['Prometheus · Scaling and operating','var(--rust)'],G1:['Grafana · Signals','var(--amber)'],G2:['Grafana · Running observability','var(--cyan)'],J1:['Hands-on · One SLO across services','var(--sky)']};
+const ORDER=['1','2','3','4','5','6','P1','P2','M1','M2','G1','G2','J1','7'];const BOOKS={'1':'Book 1 · Site Reliability Engineering','P1':'Book 2 · Platform Engineering at Google','M1':'Book 3 · Mastering Prometheus','G1':'Book 4 · Observability with Grafana','J1':'Hands-on track','7':'Practice'};
 const lessons=[...document.querySelectorAll('.lesson')];
 const chapters=lessons.filter(l=>l.dataset.ch);
 let done=new Set();
@@ -313,7 +807,13 @@ $('#start').style.setProperty('--c','var(--ink)');
 const side=$('#side');
 const byPart={};
 lessons.forEach((l,i)=>{(byPart[l.dataset.part]=byPart[l.dataset.part]||[]).push([l,i])});
-side.innerHTML='<div class="sidewrap">'+ORDER.filter(p=>byPart[p]).map(p=>[p,byPart[p]]).map(([p,arr])=>(BOOKS[p]?'<div class="book">'+BOOKS[p]+'</div>':'')+'<div><div class="part">'+PARTS[p][0]+'</div><ol class="stations">'+arr.map(([l,i],k)=>'<li class="'+(k===0?'first ':'')+(k===arr.length-1?'last':'')+'" style="--c:'+PARTS[p][1]+(p==='7'?';--ct:var(--bg)':'')+'"><a href="#'+l.id+'" data-i="'+i+'"><span class="dot">'+l.dataset.dot+'</span><span class="t">'+l.dataset.title+'</span></a></li>').join('')+'</ol></div>').join('')+'</div>';
+let pnum=0;side.innerHTML='<button class="tocbtn" type="button" aria-expanded="false">Contents <span id="tocpos"></span></button><a class="home-link" href="#home">← Course overview</a>'+ORDER.filter(p=>byPart[p]).map(p=>[p,byPart[p]]).map(([p,arr])=>{pnum++;return (BOOKS[p]?'<p class="sbook">'+BOOKS[p]+'</p>':'')+'<details data-p="'+p+'" style="--c:'+PARTS[p][1]+'"><summary><span class="pn">'+String(pnum).padStart(2,'0')+'</span><span class="pt">'+PARTS[p][0]+'</span><span class="pc"></span></summary><ol class="stations">'+arr.map(([l,i],k)=>'<li style="--c:'+PARTS[p][1]+'"><a href="#'+l.id+'" data-i="'+i+'"><span class="dot">'+l.dataset.dot+'</span><span class="t">'+l.dataset.title+'</span></a></li>').join('')+'</ol></details>'}).join('');
+const tocbtn=side.querySelector('.tocbtn');tocbtn.addEventListener('click',()=>{const o=side.classList.toggle('open');tocbtn.setAttribute('aria-expanded',o)});
+/* theme */
+const themebtn=$('#themebtn');const setTheme=t=>{document.documentElement.dataset.theme=t;themebtn.textContent=t==='dark'?'Light':'Dark';try{localStorage.setItem('sre_theme',t)}catch(e){}};
+let th='dark';try{th=localStorage.getItem('sre_theme')||'dark'}catch(e){}setTheme(th);themebtn.addEventListener('click',()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark'));
+/* copy buttons */
+document.addEventListener('click',e=>{const b=e.target.closest('.cb .copy');if(!b)return;const t=b.parentElement.querySelector('code').innerText;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>{b.textContent='Copied';setTimeout(()=>b.textContent='Copy',1500)}).catch(()=>{b.textContent='Select and copy'})});
 
 document.querySelectorAll('.quiz[data-answer]').forEach(q=>{
   const ans=+q.dataset.answer,btns=[...q.querySelectorAll('button')];
@@ -326,37 +826,46 @@ document.querySelectorAll('.quiz[data-answer]').forEach(q=>{
 });
 
 const prog=$('#prog'),progtxt=$('#progtxt'),prev=$('#prev'),next=$('#next'),doneBtn=$('#done');
-let cur=0;
+let cur=-1;
+const home=$('#home');
 const render=()=>{
-  lessons.forEach((l,i)=>{l.hidden=i!==cur});
-  side.querySelectorAll('a').forEach(a=>{const l=lessons[+a.dataset.i];a.classList.toggle('on',+a.dataset.i===cur);a.parentElement.classList.toggle('done',!!l.dataset.ch&&done.has(l.dataset.ch))});
-  prev.disabled=cur===0;next.disabled=cur===lessons.length-1;
-  const ch=lessons[cur].dataset.ch;
+  const isHome=cur<0;
+  document.body.classList.toggle('home',isHome);home.hidden=!isHome;
+  lessons.forEach((l,i)=>{l.hidden=isHome||i!==cur});
+  side.querySelectorAll('.stations a').forEach(a=>{const l=lessons[+a.dataset.i];a.classList.toggle('on',+a.dataset.i===cur);a.parentElement.classList.toggle('done',!!l.dataset.ch&&done.has(l.dataset.ch))});
+  side.querySelectorAll('details').forEach(d=>{const arr=byPart[d.dataset.p];const chs=arr.filter(([l])=>l.dataset.ch);d.querySelector('.pc').textContent=chs.length?chs.filter(([l])=>done.has(l.dataset.ch)).length+'/'+chs.length:arr.length+'';if(!isHome&&lessons[cur].dataset.part===d.dataset.p)d.open=true});
+  side.querySelector('.home-link').classList.toggle('on',isHome);
+  $('#tocpos').textContent=isHome?lessons.length+' pages':'Page '+(cur+1)+' of '+lessons.length;
+  document.querySelectorAll('.top nav a').forEach(a=>{const h=a.getAttribute('href');a.classList.toggle('on',isHome?h==='#home':h==='#start')});
+  prev.disabled=isHome;next.disabled=!isHome&&cur===lessons.length-1;
+  const ch=isHome?null:lessons[cur].dataset.ch;
   doneBtn.hidden=!ch;
   if(ch)doneBtn.textContent=done.has(ch)?'Completed ✓ (undo)':'Mark lesson complete';
   const n=chapters.filter(l=>done.has(l.dataset.ch)).length;
   prog.style.width=(n/chapters.length*100)+'%';
-  progtxt.textContent=n+' of '+chapters.length+' chapters';
+  progtxt.textContent=n+' of '+chapters.length+' done';
   const on=side.querySelector('a.on');
-  if(on&&side.scrollWidth>side.clientWidth)side.scrollLeft=on.offsetLeft-side.clientWidth/2+20;
-  else if(on&&side.scrollHeight>side.clientHeight){const r=on.offsetTop;if(r<side.scrollTop||r>side.scrollTop+side.clientHeight-60)side.scrollTop=r-side.clientHeight/2}
+  if(on&&side.scrollHeight>side.clientHeight){const r=on.offsetTop;if(r<side.scrollTop||r>side.scrollTop+side.clientHeight-60)side.scrollTop=r-side.clientHeight/2}
 };
 const go=(i,scroll)=>{
-  cur=Math.max(0,Math.min(lessons.length-1,i));
-  if(location.hash!=='#'+lessons[cur].id){try{history.replaceState(null,'','#'+lessons[cur].id)}catch(e){}}
+  cur=i<0?-1:Math.max(0,Math.min(lessons.length-1,i));
+  const h=cur<0?'#home':'#'+lessons[cur].id;
+  if(location.hash!==h){try{history.replaceState(null,'',h)}catch(e){}}
+  side.classList.remove('open');tocbtn.setAttribute('aria-expanded','false');
   render();if(scroll)window.scrollTo(0,0);
 };
-const fromHash=()=>{const i=lessons.findIndex(l=>'#'+l.id===location.hash);go(i>=0?i:0,true)};
+const fromHash=()=>{if(!location.hash||location.hash==='#home'){go(-1,true);return}const i=lessons.findIndex(l=>'#'+l.id===location.hash);go(i>=0?i:-1,true)};
 window.addEventListener('hashchange',fromHash);
+window.addEventListener('load',()=>setTimeout(()=>window.scrollTo(0,0),0));
 prev.addEventListener('click',()=>go(cur-1,true));
 next.addEventListener('click',()=>go(cur+1,true));
 doneBtn.addEventListener('click',()=>{
-  const ch=lessons[cur].dataset.ch;if(!ch)return;
+  if(cur<0)return;const ch=lessons[cur].dataset.ch;if(!ch)return;
   if(done.has(ch)){done.delete(ch);save();render();return}
   done.add(ch);save();
   if(cur<lessons.length-1)go(cur+1,true);else render();
 });
-document.addEventListener('click',e=>{const a=e.target.closest('a[href^="#"]');if(!a)return;const i=lessons.findIndex(l=>'#'+l.id===a.getAttribute('href'));if(i>=0){e.preventDefault();go(i,true)}});
+document.addEventListener('click',e=>{const a=e.target.closest('a[href^="#"]');if(!a)return;const h=a.getAttribute('href');if(h==='#home'){e.preventDefault();go(-1,true);return}const i=lessons.findIndex(l=>'#'+l.id===h);if(i>=0){e.preventDefault();go(i,true)}});
 
 /* error budget calculator */
 const fmtMin=m=>m>=1440?(m/1440).toFixed(m>=14400?0:1)+' days':m>=120?(m/60).toFixed(1)+' h':m>=1?m.toFixed(1)+' min':(m*60).toFixed(0)+' s';

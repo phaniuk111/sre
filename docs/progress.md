@@ -46,7 +46,6 @@ Synthesis content lives in `course/synthesis.py` (one source for both the docs a
 
 ## Open items
 - 21 platform chapters are unpublished. When they appear: read them, add `course/pe*.py` lessons, rerun the three commands above, and update the map and requirements.
-- Course not checked at phone width.
 - Terraform not applied to a real AWS account.
 
 ## Log
@@ -60,3 +59,4 @@ Synthesis content lives in `course/synthesis.py` (one source for both the docs a
 | 2026-11-21 | Started book 3 and 4: Mastering Prometheus and Observability with Grafana. Structure fetched: 30 chapters, ~1.1M characters, 233 figures |
 | 2026-11-21 | Books 3 and 4 read in full with all figures; POCs 20–30; 27 course lessons; synthesis extended to four books; gap check folded into SRE lessons; diagrams added to every new lesson |
 | 2026-11-22 | Teach-me lesson on SLOs across multiple services; aligned with SRE 2nd ed. ch 8 and Appendix E read in full; POC 31 hands-on lab (shop, Prometheus rules, promtool tests, 11 exercises, AMP Terraform), verified end to end with real Prometheus |
+| 2026-11-23 | Course restyled: overview page with lab status, dark/light theme, collapsible parts, copy buttons on code; hands-on SLO track (5 lessons, `course/slo_track.py`) moved into the course; checked at desktop and phone width |
