@@ -286,7 +286,7 @@ CH8 = '''
 <p>Alert on how fast the budget is burning, not on a raw error threshold. A long window proves the burn is significant. A short window proves it is still happening, so the page clears soon after you recover.</p>
 ''' + table(['Budget spent', 'Over', 'Confirmed by', 'Burn rate', 'Action'], [['2%', '1 hour', '5 minutes', '14.4×', 'Page'], ['5%', '6 hours', '30 minutes', '6×', 'Page'], ['10%', '3 days', '6 hours', '1×', 'Ticket']], cls='num') + '''
 <p>Where 14.4 comes from: 2% of a 30-day budget in one hour is 0.02 × 720 hours ÷ 1 hour = 14.4 times the sustainable rate. At that pace the whole budget is gone in about 50 hours.</p>
-<div class="note"><b>Low traffic needs statistics</b>With 200 requests in an hour, a handful of errors proves nothing. Page only when the lower bound of a confidence interval (a Wilson score) is above the error rate you care about. For a 14.4% threshold at 99% confidence, that takes 173 failures in 1,000 requests, 42 in 200, or 24 in 100. Try it in the Labs station.</div>
+<div class="note"><b>Low traffic needs statistics</b>With 200 requests in an hour, a handful of errors proves nothing. Page only when the lower bound of a confidence interval (a Wilson score) is above the error rate you care about. With a 99% SLO, a 14.4× burn means a 14.4% error rate. To be 99% confident the true rate is above that (Wilson, z = 2.576) takes 173 failures in 1,000 requests, 42 in 200, or 24 in 100: 24 of 100 gives a lower bound of 14.8%, 23 only 14.0%. Try it in the Labs station.</div>
 
 <h2>What the second edition adds</h2>
 <ul>
