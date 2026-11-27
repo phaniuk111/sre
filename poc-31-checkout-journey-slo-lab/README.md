@@ -38,6 +38,8 @@ python lab.py status
 
 Then work through **[EXERCISES.md](EXERCISES.md)**. `make down` / `make compose-down` when finished.
 
+`make up` also starts three synthetic probes (`probe.py`, locations london, dublin and frankfurt). Each places a tagged test order every 5 seconds; the edge records those under the route `POST /checkout (synthetic)`, so they never count in the customer SLI. Their alerts are in `rules/checkout-probe.yml`: two locations failing pages, one is a ticket, and a silent probe is a ticket. Exercise 12 uses them.
+
 ## What you can change while it runs
 
 | Command | Effect |

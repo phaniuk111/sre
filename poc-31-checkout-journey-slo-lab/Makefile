@@ -26,7 +26,7 @@ status:
 	python lab.py status
 
 rules-test:
-	cd rules && ../bin/promtool check rules checkout-slo.yml && ../bin/promtool test rules checkout-slo.test.yml
+	cd rules && ../bin/promtool check rules checkout-slo.yml checkout-probe.yml && ../bin/promtool test rules checkout-slo.test.yml checkout-probe.test.yml
 
 test:
 	python -m pytest -q

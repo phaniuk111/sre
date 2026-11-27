@@ -268,6 +268,7 @@ class Edge(Role):
     """The load balancer. Every attempt passes here, including ones checkout never sees."""
 
     ROUTE = "POST /checkout"
+    SYNTHETIC_ROUTE = "POST /checkout (synthetic)"   # probe.py's test orders: measured, but not customers
 
     def __init__(self, checkout_url=None, timeout_s=5.0):
         super().__init__("edge")
@@ -281,6 +282,12 @@ class Edge(Role):
         if method != "POST" or path != "/checkout":
             return 404, {"error": "not found"}
         t0 = time.time()
+        route = self.ROUTE
+        try:
+            if json.loads(body or b"{}").get("synthetic") is True:
+                route = self.SYNTHETIC_ROUTE   # keeps probe orders out of the customer SLI (route="POST /checkout")
+        except (ValueError, AttributeError):
+            pass
         try:
             req = urllib.request.Request(self.checkout_url + "/checkout", data=body, method="POST",
                                          headers={"Content-Type": "application/json"})
@@ -294,7 +301,7 @@ class Edge(Role):
             reason = getattr(e, "reason", e)
             status = 504 if isinstance(reason, TimeoutError) or "timed out" in str(reason) else 502
             payload = {"error": "bad gateway" if status == 502 else "gateway timeout"}
-        self.duration.labels(self.ROUTE, str(status)).observe(time.time() - t0)
+        self.duration.labels(route, str(status)).observe(time.time() - t0)
         return status, payload
 
 

@@ -1,0 +1,95 @@
+# promtool test rules etl-slo.test.yml      (time 0 is midnight; one sample a minute)
+rule_files: [etl-slo.yml]
+evaluation_interval: 1m
+tests:
+  # 1. A healthy night: published at 02:10, checker reporting. Nothing fires at 05:30.
+  - interval: 1m
+    input_series:
+      - series: 'etl_last_publish_timestamp_seconds{pipeline="revenue"}'
+        values: '-79200x130 7800x400'           # yesterday 02:00 until 02:10 today, then today's publish
+      - series: 'etl_check_timestamp_seconds{pipeline="revenue"}'
+        values: '0+60x530'
+      - series: 'etl_partition_rows_ratio{pipeline="revenue"}'
+        values: '1x530'
+      - series: 'etl_partition_total_diff{pipeline="revenue"}'
+        values: '0x530'
+    alert_rule_test:
+      - {alertname: ETLDeadlineAtRisk, eval_time: 5h30m, exp_alerts: []}
+      - {alertname: ETLReconcileFailed, eval_time: 5h30m, exp_alerts: []}
+      - {alertname: ETLCheckerSilent, eval_time: 5h30m, exp_alerts: []}
+
+  # 2. The job crashed and nobody reran it: at 05:10 the deadline alert pages, with time to act.
+  - interval: 1m
+    input_series:
+      - series: 'etl_last_publish_timestamp_seconds{pipeline="revenue"}'
+        values: '-79200x400'
+      - series: 'etl_check_timestamp_seconds{pipeline="revenue"}'
+        values: '0+60x530'
+    alert_rule_test:
+      - {alertname: ETLDeadlineAtRisk, eval_time: 4h50m, exp_alerts: []}
+      - alertname: ETLDeadlineAtRisk
+        eval_time: 5h10m
+        exp_alerts:
+          - exp_labels: {severity: page}
+            exp_annotations:
+              summary: Revenue partition not published; deadline is 07:00
+              runbook_url: https://runbooks.example.com/etl-revenue-rerun
+
+  # 3. Exit status 0, but 2% of rows are missing: page on the data, not on the job.
+  - interval: 1m
+    input_series:
+      - series: 'etl_partition_rows_ratio{pipeline="revenue"}'
+        values: '1x120 0.98x60'
+      - series: 'etl_partition_total_diff{pipeline="revenue"}'
+        values: '0x120 -533.32x60'
+      - series: 'etl_check_timestamp_seconds{pipeline="revenue"}'
+        values: '0+60x180'
+    alert_rule_test:
+      - {alertname: ETLReconcileFailed, eval_time: 1h50m, exp_alerts: []}
+      - alertname: ETLReconcileFailed
+        eval_time: 2h20m
+        exp_alerts:
+          - exp_labels: {severity: page, pipeline: revenue}
+            exp_annotations: {summary: Revenue partition does not match the source (rows or totals)}
+
+  # 4. A quiet source is not a stale pipeline: both high-water marks stop together, lag stays 0.
+  - interval: 1m
+    input_series:
+      - series: 'etl_source_high_water_seconds{pipeline="revenue"}'
+        values: '1000x2900'
+      - series: 'etl_output_high_water_seconds{pipeline="revenue"}'
+        values: '1000x2900'
+    promql_expr_test:
+      - expr: etl:freshness_lag:seconds
+        eval_time: 48h
+        exp_samples: [{labels: 'etl:freshness_lag:seconds{pipeline="revenue"}', value: 0}]
+    alert_rule_test:
+      - {alertname: ETLStale, eval_time: 48h, exp_alerts: []}
+
+  # 5. The source keeps moving and the warehouse does not: stale after 27 hours.
+  - interval: 1m
+    input_series:
+      - series: 'etl_source_high_water_seconds{pipeline="revenue"}'
+        values: '0+60x1700'
+      - series: 'etl_output_high_water_seconds{pipeline="revenue"}'
+        values: '0x1700'
+    alert_rule_test:
+      - {alertname: ETLStale, eval_time: 26h, exp_alerts: []}
+      - alertname: ETLStale
+        eval_time: 28h
+        exp_alerts:
+          - exp_labels: {severity: page, pipeline: revenue}
+            exp_annotations: {summary: Warehouse is more than 27 hours behind the orders database}
+
+  # 6. The checker itself dies: a ticket, because silence would otherwise look like health.
+  - interval: 1m
+    input_series:
+      - series: 'etl_check_timestamp_seconds{pipeline="revenue"}'
+        values: '0+60x60 3600x90'
+    alert_rule_test:
+      - {alertname: ETLCheckerSilent, eval_time: 1h10m, exp_alerts: []}
+      - alertname: ETLCheckerSilent
+        eval_time: 2h
+        exp_alerts:
+          - exp_labels: {severity: ticket, pipeline: revenue}
+            exp_annotations: {summary: The ETL checker has not reported for 30 minutes}

@@ -13,6 +13,8 @@
   python lab.py stop checkout            kill one service (the edge keeps answering, with 502s)
   python lab.py start checkout
   python lab.py promql 'journey:checkout_error_ratio:rate5m'
+  python lab.py probe                    run the synthetic probe once and print each step
+  python lab.py probe-fault dublin on    give one probe location a broken network (off to mend it)
   python lab.py down                     stop everything
 
 Works the same against `docker compose up` (ports are mapped to the same numbers); there, use
@@ -31,6 +33,7 @@ import urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 STATE = os.path.join(HERE, ".lab")
+PROBES = {"london": 9201, "dublin": 9202, "frankfurt": 9203}   # three synthetic probe locations
 PROM = os.environ.get("PROM_URL", "http://127.0.0.1:9090").rstrip("/")
 sys.path.insert(0, HERE)
 from shop import DEFAULT_PORTS, ROLES, default_url  # noqa: E402
@@ -96,6 +99,9 @@ def up(a):
             sys.exit(f"{role} did not start; see .lab/logs/{role}.log")
     if not os.path.exists(_pidfile("loadgen")):
         _spawn("loadgen", [py, "loadgen.py", "--rps", str(a.rps)])
+    for loc, port in PROBES.items():
+        if not os.path.exists(_pidfile(f"probe-{loc}")):
+            _spawn(f"probe-{loc}", [py, "probe.py", "--location", loc, "--port", str(port)])
     prom = find_prometheus(a.prometheus)
     if prom and not os.path.exists(_pidfile("prometheus")):
         _spawn("prometheus", [prom, "--config.file=prometheus/prometheus.local.yml",
@@ -109,7 +115,7 @@ def up(a):
 
 
 def down(_):
-    for name in ROLES + ["loadgen", "prometheus"]:
+    for name in ROLES + ["loadgen", "prometheus"] + [f"probe-{loc}" for loc in PROBES]:
         if _kill(name):
             print("stopped", name)
 
@@ -121,6 +127,22 @@ def stop(a):
 def start(a):
     _spawn(a.role, [sys.executable, "shop.py", a.role])
     print("started" if _wait_up(a.role) else "failed to start", a.role)
+
+
+def probe(_):
+    import probe as P
+    r = P.run_once(default_url("edge"))
+    for name, ok, detail in r["steps"]:
+        print(f"  {'ok ' if ok else 'BAD'} {name}: {detail}")
+    print(f"probe {'succeeded' if r['ok'] else 'FAILED'} in {r['seconds']:.2f} s")
+
+
+def probe_fault(a):
+    name = f"probe-{a.location}"
+    _kill(name)
+    argv = [sys.executable, "probe.py", "--location", a.location, "--port", str(PROBES[a.location])]
+    _spawn(name, argv + (["--fail-rate", "1"] if a.state == "on" else []))
+    print(f"{name}: network {'broken' if a.state == 'on' else 'mended'}")
 
 
 def chaos(a):
@@ -224,6 +246,9 @@ def main():
     p = sub.add_parser("config"); p.add_argument("--recommendations", choices=["hard", "soft"])
     p.add_argument("--retries", nargs="*", metavar="DEP=N"); p.set_defaults(fn=config)
     p = sub.add_parser("promql"); p.add_argument("expr"); p.set_defaults(fn=promql)
+    sub.add_parser("probe").set_defaults(fn=probe)
+    p = sub.add_parser("probe-fault"); p.add_argument("location", choices=list(PROBES)); p.add_argument("state", choices=["on", "off"])
+    p.set_defaults(fn=probe_fault)
     a = ap.parse_args()
     a.fn(a)
 

@@ -60,7 +60,15 @@ The book is an early release: ten chapters were published when this was written,
 * Prometheus, running the journey SLI and multiwindow burn-rate alerts;
 * optionally, Grafana through Docker.
 
-Its [11 exercises](poc-31-checkout-journey-slo-lab/EXERCISES.md) have you break it and watch the SLO react: kill checkout, inject random failures and outages, add retries, make a dependency hard, add slow tails, write internal SLOs and the bad-minute rule. It also covers the `le="2.0"` trap in Prometheus 3. The same rules deploy to Amazon Managed Service for Prometheus with Terraform. It covers SRE chapter 8, chapter 9 and Appendix E, and *Mastering Prometheus* chapter 13.
+It also runs three synthetic probes (`probe.py`) whose test orders are kept out of the customer SLI.
+
+Its [12 exercises](poc-31-checkout-journey-slo-lab/EXERCISES.md) have you break it and watch the SLO react: kill checkout, inject random failures and outages, add retries, make a dependency hard, add slow tails, write internal SLOs and the bad-minute rule. It also covers the `le="2.0"` trap in Prometheus 3. The same rules deploy to Amazon Managed Service for Prometheus with Terraform. It covers SRE chapter 8, chapter 9 and Appendix E, and *Mastering Prometheus* chapter 13.
+
+## Hands-on lab: an SLO for an ETL pipeline
+[`poc-32-etl-pipeline-slo-lab`](poc-32-etl-pipeline-slo-lab) is a nightly revenue job you can crash, corrupt, delay or duplicate, and three read-only checks that judge each day as finance would see it: freshness, completeness and correctness. It shows why the job's exit status isn't an SLI, why a rerun before the deadline is a good day, and why batch alerts are about the deadline and not burn rate. Rules are tested with `promtool`.
+
+## Hands-on tasks in the course
+Almost every lesson has a short task against one of these POCs. The commands are in [`course/hands.py`](course/hands.py); `python course/verify_hands.py` runs all of them and records what they print, and the course shows that recorded output.
 
 ## Reading notes and synthesis
 Built in passes: chapter summaries first, then a synthesis across all four books. [`docs/progress.md`](docs/progress.md) records the state and how to rebuild.
@@ -76,7 +84,7 @@ Built in passes: chapter summaries first, then a synthesis across all four books
 The course page itself is in [`course/`](course): `index.html` opens in any browser, and `build.py` rebuilds it.
 
 ## Study guide
-An interactive course with one lesson per chapter (diagrams, AWS mapping, interview practice, quick checks, exercises that point at these POCs) plus labs, flashcards, a quiz and interview drills is published as a private Claude artifact: https://claude.ai/artifact/Q35uEdK1hrKUhbZ15vWvVy (share it from its page if you want others to see it). It opens on a course overview (the path through the books, lab status, what comes next, sources) and has a dark theme with a light toggle. It covers all four books (23 SRE chapters, the 10 published platform engineering chapters, and both 15-chapter observability books) plus a five-lesson hands-on track on setting one SLO across many services that ends in the POC 31 lab: 64 lessons, redrawn versions of the key diagrams, 259 flashcards, 136 quiz questions and 33 interview drills. The diagram notes are also in [`docs/diagrams-and-rereads.md`](docs/diagrams-and-rereads.md).
+An interview-practice course is published as a private Claude artifact: https://claude.ai/artifact/Q35uEdK1hrKUhbZ15vWvVy (share it from its page if you want others to see it). Every lesson opens with a 30-second answer and the follow-up questions, then a hands-on task against a POC with its real output, quick checks and takeaways; the chapter's theory is folded underneath. It has 69 lessons: five interview drills (why 14.4, `rate` against `increase` and `irate`, paging at low traffic, an SLO for an ETL pipeline, synthetic probes), a five-lesson hands-on SLO track, and one lesson per chapter of the four books. There are 47 hands-on tasks, 271 flashcards, 150 quiz questions, 37 spoken drills and three calculators. The diagram notes are also in [`docs/diagrams-and-rereads.md`](docs/diagrams-and-rereads.md).
 
 The same deep-dive material is in [`docs/full-reading-notes.md`](docs/full-reading-notes.md): case studies (Paris outage, Maps STPA/CAST, Google Meet at COVID scale, Traffic Director, Persistent Disk, Azure, Disney, Spotify, Waymo), the numbers worth memorising, and an interview angle for each chapter.
 
@@ -101,4 +109,5 @@ Each Terraform folder is standalone: `cd poc-XX/terraform && terraform init && t
 10. `poc-24` → `poc-25` (SLO rules and scaling past one server)
 11. `poc-26` → `poc-27` → `poc-28` (logs, traces and the collector on EKS)
 12. `poc-29` → `poc-30` (dashboards as code, and observability across the delivery life cycle)
-13. `poc-31` (hands-on: set one SLO for a multi-service journey, then break it and watch the alerts)
+13. `poc-31` (hands-on: set one SLO for a multi-service journey, then break it and watch the alerts and probes)
+14. `poc-32` (hands-on: an SLO for a batch pipeline, judged on the data and the deadline)

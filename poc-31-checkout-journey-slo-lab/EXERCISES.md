@@ -325,3 +325,63 @@ On EKS you would scrape the ingress controller or gateway with the ADOT collecto
 collector instead of `edge`, and send the pages to AWS Systems Manager Incident Manager.
 
 `terraform destroy` when you finish.
+
+---
+
+## 12 · Synthetic probes: measure the journey when nobody is buying
+
+**Interview question:** *"How do you use synthetic probes with a critical user journey?"*
+
+`probe.py` is a scripted customer. Every 5 seconds, from three "locations", it places a test order and
+a declined-card order through the edge and checks the answers and the time taken. `lab.py up` starts
+all three, and Prometheus scrapes them (job `checkout-probe`).
+
+```bash
+python lab.py probe                                   # one run, step by step
+python lab.py promql 'probe:checkout_success:ratio_2m'
+```
+
+**12a. Probe orders are not customers.** Predict: do the probe's orders count in the journey SLI?
+
+```bash
+python lab.py promql 'sum by (route) (rate(edge_request_duration_seconds_count[1m]))'
+```
+
+*You should see two routes: `POST /checkout` at about 10 a second, and `POST /checkout (synthetic)` at
+about 1.2 a second (three probes, two orders each, every 5 s). The SLI rules select the first route
+only, so probes never inflate availability or revenue.*
+
+**12b. One location has a bad network.** Predict: page, ticket or nothing?
+
+```bash
+python lab.py probe-fault dublin on
+# wait 3 minutes
+python lab.py promql 'probe:checkout_success:ratio_2m'
+python lab.py promql 'ALERTS{alertname=~"CheckoutProbe.*"}'
+python lab.py probe-fault dublin off
+```
+
+*Dublin's ratio drops to 0 and the other two stay at 1. `CheckoutProbeOneLocation` goes pending (it
+becomes a ticket after 10 minutes). `CheckoutProbeFailing` needs two locations, so nobody is paged for
+one probe host's network.*
+
+**12c. The shop really breaks.** Predict how long until the page.
+
+```bash
+python lab.py chaos payment --error-rate 1
+# wait 3 minutes
+python lab.py promql 'ALERTS{alertname="CheckoutProbeFailing"}'
+python lab.py chaos payment --reset
+```
+
+*All three locations fail. The 2-minute ratio falls below 0.5 after about a minute, and the alert fires
+a minute later. The real-traffic burn-rate page fires too: at 10 orders a second either would do. Now
+imagine 3 a.m. with two orders an hour, and only the probe has enough events to notice.*
+
+**12d. A dead probe looks healthy.** Kill one probe (`kill $(cat .lab/probe-london.pid)`) and query
+`probe_success`. Its last value was 1 and it stays in query results for five minutes, then vanishes.
+What tells you? *`CheckoutProbeSilent`: the last-run timestamp stops moving.*
+
+**Interview:** "Real traffic tells me how customers fared; a probe tells me whether the journey works
+right now, including when nobody is using it. I script the whole journey, tag the traffic so it stays
+out of customer SLIs, page only when two locations agree, and alert when the probe itself goes quiet."

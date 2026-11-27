@@ -21,6 +21,8 @@ The tests use the books' own examples: the blue/red/green vectors from the Grafa
 python -m pytest -q
 ```
 
+`promtool/rate.test.yml` checks the `rate`, `increase` and `irate` example against real Prometheus (106.67, 1.78 and 0.67 for one set of four samples). Change a sample, predict the results, and run `promtool test rules rate.test.yml`.
+
 ## On AWS
 | Need | Service |
 |---|---|

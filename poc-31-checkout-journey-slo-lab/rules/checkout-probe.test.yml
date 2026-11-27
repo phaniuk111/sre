@@ -1,0 +1,52 @@
+# promtool test rules checkout-probe.test.yml
+rule_files: [checkout-probe.yml]
+evaluation_interval: 15s
+tests:
+  # 1. One location loses its network for 20 minutes: a ticket after 10, never a page.
+  - interval: 15s
+    input_series:
+      - series: 'probe_success{journey="checkout", location="london"}'
+        values: '1x100'
+      - series: 'probe_success{journey="checkout", location="dublin"}'
+        values: '1x8 0x80 1x12'
+      - series: 'probe_success{journey="checkout", location="frankfurt"}'
+        values: '1x100'
+    alert_rule_test:
+      - {alertname: CheckoutProbeFailing, eval_time: 8m, exp_alerts: []}
+      - {alertname: CheckoutProbeOneLocation, eval_time: 8m, exp_alerts: []}
+      - alertname: CheckoutProbeOneLocation
+        eval_time: 15m
+        exp_alerts:
+          - exp_labels: {severity: ticket}
+            exp_annotations: {summary: The checkout probe is failing from a single location}
+      - {alertname: CheckoutProbeFailing, eval_time: 15m, exp_alerts: []}
+
+  # 2. The shop breaks at minute 2: every location fails, and the page fires within about 3 minutes.
+  - interval: 15s
+    input_series:
+      - series: 'probe_success{journey="checkout", location="london"}'
+        values: '1x8 0x40'
+      - series: 'probe_success{journey="checkout", location="dublin"}'
+        values: '1x8 0x40'
+      - series: 'probe_success{journey="checkout", location="frankfurt"}'
+        values: '1x8 0x40'
+    alert_rule_test:
+      - {alertname: CheckoutProbeFailing, eval_time: 2m30s, exp_alerts: []}
+      - alertname: CheckoutProbeFailing
+        eval_time: 5m
+        exp_alerts:
+          - exp_labels: {severity: page}
+            exp_annotations: {summary: The checkout journey is failing from two or more probe locations}
+
+  # 3. A probe process dies. Its last value was 1, so success looks fine; the silence alert catches it.
+  - interval: 15s
+    input_series:
+      - series: 'probe_last_run_timestamp_seconds{journey="checkout", location="london"}'
+        values: '0+15x8 120x40'
+    alert_rule_test:
+      - {alertname: CheckoutProbeSilent, eval_time: 3m, exp_alerts: []}
+      - alertname: CheckoutProbeSilent
+        eval_time: 7m
+        exp_alerts:
+          - exp_labels: {severity: ticket, journey: checkout, location: london}
+            exp_annotations: {summary: A checkout probe has not run for two minutes}

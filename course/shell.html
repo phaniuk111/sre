@@ -416,8 +416,8 @@ body.home .pager{display:none}
 }
 
 /* ---------- tutor additions on top of the course theme ---------- */
-:root{--magenta:#e05fb4;--lime:#9ccc4b;--ember:#fb923c;--rust:#f97362;--orange:#fb923c;--cyan:#22d3ee;--sky:#38bdf8}
-:root[data-theme=light]{--magenta:#c0158a;--lime:#4a7a00;--ember:#c2410c;--rust:#9a3412;--orange:#c05a00;--cyan:#0e7490;--sky:#0369a1}
+:root{--gold:#fbbf24;--magenta:#e05fb4;--lime:#9ccc4b;--ember:#fb923c;--rust:#f97362;--orange:#fb923c;--cyan:#22d3ee;--sky:#38bdf8}
+:root[data-theme=light]{--gold:#a16207;--magenta:#c0158a;--lime:#4a7a00;--ember:#c2410c;--rust:#9a3412;--orange:#c05a00;--cyan:#0e7490;--sky:#0369a1}
 .side .sbook{font:600 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin:18px 8px 6px}
 .side .sbook:first-of-type{margin-top:4px}
 .side summary .pn{color:var(--c,var(--accent))}
@@ -444,6 +444,33 @@ body.home .pager{display:none}
 .lesson .meta{margin:0 0 12px;line-height:1.6}
 .pic,figure.pic{background:var(--panel);border:1px solid var(--rule);border-radius:var(--r)}
 
+/* ---------- interview-first lesson layout ---------- */
+.lesson .say{border-left:3px solid var(--accent)}
+.ivhint,.hsetup{color:var(--mute);font-size:15px}
+.hsetup code{font-size:12.5px}
+.hands{border:1px solid var(--rule2);border-radius:var(--r);background:var(--panel);padding:18px 20px;margin:18px 0 26px}
+.hands .hhd{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px;margin-bottom:6px}
+.hands .hhd b{font:700 18px var(--display);letter-spacing:-.01em;color:var(--ink)}
+.hands .hhd .mins{margin-left:auto;font:500 12px var(--mono);color:var(--mute)}
+.hands .hhd .mins a{color:var(--accent)}
+.hands .hnote{font-size:14.5px;color:var(--mute);margin:4px 0 0}
+.hands .predict{margin:18px 0 6px}
+.hands pre.out{margin:0;background:var(--code);color:var(--codeink);border:1px solid var(--rule);border-radius:10px;padding:14px 16px;overflow-x:auto;font:12.5px/1.55 var(--mono);white-space:pre}
+.hands details.ans{margin:8px 0 4px}
+.hands .story{margin-top:16px;padding:14px 16px;border-radius:10px;background:var(--accent-soft);border:1px solid var(--accent-line,var(--rule2))}
+.hands .story b{display:block;font:600 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+.hands .story p{margin:0}
+details.theory{margin:34px 0 0;border:1px solid var(--rule2);border-radius:var(--r);background:var(--panel)}
+details.theory>summary{cursor:pointer;list-style:none;padding:16px 20px;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px}
+details.theory>summary::-webkit-details-marker{display:none}
+details.theory>summary span{font:700 17px var(--display);color:var(--ink)}
+details.theory>summary span::before{content:"+";display:inline-block;width:1.1em;color:var(--accent);font-family:var(--mono)}
+details.theory[open]>summary span::before{content:"−"}
+details.theory>summary small{font:500 12px var(--mono);color:var(--mute)}
+details.theory[open]{padding:0 20px 20px}
+details.theory[open]>summary{padding:16px 0;border-bottom:1px solid var(--rule);margin-bottom:8px}
+@media (max-width:640px){.hands{padding:14px}.hands .hhd .mins{margin-left:0}}
+
 </style>
 </head>
 <body>
@@ -462,15 +489,15 @@ body.home .pager{display:none}
 <div class="hwrap">
   <div class="hero">
     <div>
-      <p class="eyebrow">An SRE interview course</p>
-      <h1>From one SLO to a <em>reliable platform.</em></h1>
-      <p class="lead">Learn SRE, platform engineering and observability well enough to teach them. Know why every number comes out the way it does.</p>
-      <p>{NLESSONS} lessons across four books, one chapter at a time: what reliability means and costs, how Prometheus and Grafana measure it, how platforms make it the default, and how to set one SLO for a journey that crosses many services. Each lesson explains the idea, draws it, shows the AWS version, then checks you can say it in an interview.</p>
+      <p class="eyebrow">SRE interview practice</p>
+      <h1>Answer it. Run it. <em>Explain it.</em></h1>
+      <p class="lead">Every lesson opens with the interview question and a 30-second answer, then gives you code to run, so you can say “I’ve done this” and mean it.</p>
+      <p>{NLESSONS} lessons from four books and two hands-on tracks. Each one has the question, the follow-ups with model answers, a ten-minute task against a working POC with the output it really prints, and a short story to tell about it. The chapter’s theory is folded underneath for when you want the why.</p>
       <div class="cta">
-        <a class="primary" href="#start">Start here <span aria-hidden="true">→</span></a>
-        <a class="ghost" href="#j-1">Jump to the hands-on SLO track →</a>
+        <a class="primary" href="#k-1">Start with the five drills <span aria-hidden="true">→</span></a>
+        <a class="ghost" href="#start">Or work through the books →</a>
       </div>
-      <p class="byline">{NLESSONS} lessons · 4 books · 31 POCs · 210 tests</p>
+      <p class="byline">{NLESSONS} lessons · {NHANDS} hands-on tasks · 32 POCs · {NTESTS} tests</p>
     </div>
     <div class="heroart">
       <svg viewBox="0 0 520 440" role="img" aria-label="The reliability stack this course climbs, from the platform at the bottom to the customer's journey at the top">
@@ -529,68 +556,70 @@ body.home .pager{display:none}
 
 <section class="hsec" aria-labelledby="h-path">
   <div class="hhead">
-    <div><p class="eyebrow nodot">01 / The path</p><h2 id="h-path">Six stages, one argument.</h2></div>
-    <p>Each stage answers the question the previous one leaves open.</p>
+    <div><p class="eyebrow nodot">01 / The path</p><h2 id="h-path">Start with the drills, then go deep.</h2></div>
+    <p>If the interview is this week, do the first two. The books fill in everything behind them.</p>
   </div>
   <div class="stages six">
-    <a class="stage" href="#start">
-      <div class="top2"><span class="num">BOOK 1 · 23 LESSONS</span><span class="badge">Complete</span></div>
-      <h3>Site Reliability Engineering</h3>
-      <p>What SRE is and pays for, the people side, SLOs, observability, incidents, automation, testing, capacity, resilience and the future.</p>
-      <p class="can"><b>You can</b>explain error budgets, run an incident and defend a reliability target to a product team.</p>
-      <span class="go">Start here →</span>
-    </a>
-    <a class="stage" href="#pe">
-      <div class="top2"><span class="num">BOOK 2 · 10 LESSONS</span><span class="badge sim">10 of 31 chapters out</span></div>
-      <h3>Platform Engineering at Google</h3>
-      <p>Coupling, layers, shared fate, deep dives on efficiency, security and reliability, developer experience and platform as a product.</p>
-      <p class="can"><b>You can</b>design a platform that makes the reliable path the easy one.</p>
-      <span class="go">Open stage 2 →</span>
-    </a>
-    <a class="stage" href="#m">
-      <div class="top2"><span class="num">BOOK 3 · 15 LESSONS</span><span class="badge">Complete</span></div>
-      <h3>Mastering Prometheus</h3>
-      <p>The TSDB, PromQL semantics, discovery, Alertmanager, HA and sharding, remote storage, Thanos, mixins, CI and SLO rules.</p>
-      <p class="can"><b>You can</b>explain what rate() really does and why cardinality is the bill.</p>
-      <span class="go">Open stage 3 →</span>
-    </a>
-    <a class="stage" href="#g">
-      <div class="top2"><span class="num">BOOK 4 · 13 LESSONS</span><span class="badge">Complete</span></div>
-      <h3>Observability with Grafana</h3>
-      <p>Loki and LogQL, Mimir, Tempo and TraceQL, dashboards, incidents, automation, architecture, RUM, profiling and load tests.</p>
-      <p class="can"><b>You can</b>design collection, storage and dashboards for a whole organisation.</p>
-      <span class="go">Open stage 4 →</span>
+    <a class="stage" href="#k-1">
+      <div class="top2"><span class="num">START HERE · 5 DRILLS</span><span class="badge">Runs locally</span></div>
+      <h3>Interview drills</h3>
+      <p>Five questions worked end to end: why 14.4, rate against increase and irate, paging at low traffic, an SLO for an ETL pipeline, and synthetic probes.</p>
+      <p class="can"><b>You can</b>derive the numbers on a whiteboard and show the code that proves them.</p>
+      <span class="go">Open the drills →</span>
     </a>
     <a class="stage" href="#j-1">
       <div class="top2"><span class="num">HANDS-ON · 5 LESSONS</span><span class="badge">Runs locally</span></div>
       <h3>One SLO across many services</h3>
-      <p>Critical user journeys, design ceilings, internal SLOs, retries, PromQL and burn-rate alerts, then a lab where you break a real shop.</p>
+      <p>A shop with five dependencies, a journey SLI at the edge, burn-rate alerts tested with promtool, chaos switches and three synthetic probes.</p>
       <p class="can"><b>You can</b>set a journey SLO, write its rules and prove they fire.</p>
       <span class="go">Open the track →</span>
     </a>
-    <a class="stage" href="#labs">
-      <div class="top2"><span class="num">PRACTICE</span><span class="badge">{NCARDS} cards</span></div>
-      <h3>Practice and synthesis</h3>
-      <p>Calculators, {NCARDS} flashcards, {NQUIZ} quiz questions, {NDRILLS} interview drills, the AWS map, and four synthesis pages across all the books.</p>
-      <p class="can"><b>You can</b>answer under pressure, out loud, with numbers.</p>
-      <span class="go">Open practice →</span>
+    <a class="stage" href="#start">
+      <div class="top2"><span class="num">BOOK 1 · 23 LESSONS</span><span class="badge">13 with hands-on</span></div>
+      <h3>Site Reliability Engineering</h3>
+      <p>SLOs, observability, incidents, automation, testing, capacity, data and resilience each have a task to run. The people and organisation chapters are questions and answers.</p>
+      <p class="can"><b>You can</b>defend a reliability target and run an incident.</p>
+      <span class="go">Open book 1 →</span>
+    </a>
+    <a class="stage" href="#pe">
+      <div class="top2"><span class="num">BOOK 2 · 10 LESSONS</span><span class="badge sim">10 of 31 chapters out</span></div>
+      <h3>Platform Engineering at Google</h3>
+      <p>Coupling, shared fate, safe coding, supply-chain gates, rollouts driven by error budget, and platform scorecards, each with a POC.</p>
+      <p class="can"><b>You can</b>design a platform that makes the reliable path the easy one.</p>
+      <span class="go">Open book 2 →</span>
+    </a>
+    <a class="stage" href="#m">
+      <div class="top2"><span class="num">BOOK 3 · 15 LESSONS</span><span class="badge">13 with hands-on</span></div>
+      <h3>Mastering Prometheus</h3>
+      <p>PromQL on real samples, what a sample costs on disk, relabeling, sharding, alert routing, remote write and Thanos deduplication.</p>
+      <p class="can"><b>You can</b>explain what rate() really does and why cardinality is the bill.</p>
+      <span class="go">Open book 3 →</span>
+    </a>
+    <a class="stage" href="#g">
+      <div class="top2"><span class="num">BOOK 4 · 13 LESSONS</span><span class="badge">11 with hands-on</span></div>
+      <h3>Observability with Grafana</h3>
+      <p>LogQL pipelines, trace propagation and sampling, collector configs for EKS, dashboards as code, load-test gates and deploy verification.</p>
+      <p class="can"><b>You can</b>design collection, storage and dashboards for an organisation.</p>
+      <span class="go">Open book 4 →</span>
     </a>
   </div>
+  <p class="fineprint">For recall practice there are also <a href="#cards">{NCARDS} flashcards</a>, <a href="#quiz">{NQUIZ} quiz questions</a>, <a href="#drills">{NDRILLS} spoken drills</a> and <a href="#labs">three calculators</a>.</p>
 </section>
 
 <section class="hsec" aria-labelledby="h-how">
   <div class="split">
     <div>
       <p class="eyebrow nodot">02 / How a lesson works</p>
-      <h2 id="h-how" style="font-size:clamp(30px,3.6vw,44px);font-weight:800;letter-spacing:-.04em;line-height:1.05;margin:0 0 16px">Same shape every time.</h2>
-      <p style="color:var(--mute);max-width:40ch">You always know where you are: the idea, the picture, the AWS version, then proof that you can use it. Mark a lesson complete and the left-hand list keeps your place on this device.</p>
+      <h2 id="h-how" style="font-size:clamp(30px,3.6vw,44px);font-weight:800;letter-spacing:-.04em;line-height:1.05;margin:0 0 16px">Question first, theory last.</h2>
+      <p style="color:var(--mute);max-width:40ch">Each lesson is laid out in the order an interview goes. Mark it complete and the list on the left keeps your place on this device.</p>
     </div>
     <ol class="steps">
-      <li><b>The idea in plain words</b><span>The chapter’s argument in short paragraphs, terms explained the first time they appear.</span></li>
-      <li><b>A picture</b><span>Diagrams redrawn for the lesson, with the book’s mistakes called out where we found them.</span></li>
-      <li><b>Going deeper</b><span>The case studies, numbers and named models interviewers probe for.</span></li>
-      <li><b>Say it, and on AWS</b><span>The sentence for the interview, and the same idea in AWS services.</span></li>
-      <li><b>Check yourself and use it</b><span>A question with a model answer, quick checks, an exercise from the repo, and takeaways.</span></li>
+      <li><b>The 30-second answer</b><span>What to say first, in words you can say aloud.</span></li>
+      <li><b>The follow-ups</b><span>The questions an interviewer asks next, each with a model answer to open after you’ve tried.</span></li>
+      <li><b>Hands-on</b><span>Commands to copy against a POC in the repository, with the output they really print.</span></li>
+      <li><b>Predict, then check</b><span>Change one input, write down what you expect, and run it.</span></li>
+      <li><b>Your story</b><span>Two or three sentences that turn what you just ran into “here’s what I built and found”.</span></li>
+      <li><b>Background, on demand</b><span>The chapter’s argument, diagrams and case studies, folded away until you want them.</span></li>
     </ol>
   </div>
 </section>
@@ -600,37 +629,51 @@ body.home .pager{display:none}
     <div><p class="eyebrow nodot">03 / The labs</p><h2 id="h-labs">Code you can read, run and test.</h2></div>
     <p>Everything lives in one repository. Status says exactly what has been run.</p>
   </div>
-  <div class="cards3 four">
+  <div class="cards3">
     <a class="labcard" href="https://github.com/phaniuk111/sre">
       <div class="top2"><span class="num">POC 01–11</span><span class="badge sim">Simulated · 46 tests</span></div>
       <h3>SRE foundations</h3>
-      <p>Burn-rate alerting, observability, incident tooling, safe rollouts, capacity and data, as small Python models with tests and Terraform for AWS.</p>
+      <p>Error budgets and burn rates, cohort detectors, incident metrics, retry storms, canary judging, capacity and backup SLOs, as small Python models.</p>
       <div class="tags"><span>SLOs</span><span>burn rate</span><span>canaries</span><span>Terraform</span></div>
       <span class="go">poc-01 → poc-11 <span>↗</span></span>
     </a>
     <a class="labcard" href="https://github.com/phaniuk111/sre">
       <div class="top2"><span class="num">POC 12–19</span><span class="badge sim">Simulated · 50 tests</span></div>
       <h3>Platform engineering</h3>
-      <p>Coupling, layered platforms, shared fate, efficiency, security and reliability deep dives, golden paths and platform metrics.</p>
+      <p>Coupling discovery, a safe SQL API, a supply-chain gate, locked blueprints, budget-driven rollouts and platform scorecards.</p>
       <div class="tags"><span>golden paths</span><span>coupling</span><span>EKS</span><span>IAM</span></div>
       <span class="go">poc-12 → poc-19 <span>↗</span></span>
     </a>
     <a class="labcard" href="https://github.com/phaniuk111/sre">
       <div class="top2"><span class="num">POC 20–30</span><span class="badge sim">Simulated · 103 tests</span></div>
       <h3>Prometheus and Grafana</h3>
-      <p>A PromQL evaluator, TSDB internals, relabeling and sharding, alert routing, SLO rules, Thanos, LogQL, trace context, ADOT and dashboards as code.</p>
+      <p>A PromQL evaluator checked against promtool, TSDB internals, relabeling and sharding, alert routing, Thanos, LogQL, trace context and collector configs.</p>
       <div class="tags"><span>PromQL</span><span>Alertmanager</span><span>ADOT</span><span>AMG</span></div>
       <span class="go">poc-20 → poc-30 <span>↗</span></span>
     </a>
     <a class="labcard" href="https://github.com/phaniuk111/sre/tree/main/poc-31-checkout-journey-slo-lab">
-      <div class="top2"><span class="num">POC 31</span><span class="badge">Runs locally · 11 tests</span></div>
+      <div class="top2"><span class="num">POC 31</span><span class="badge">Runs locally · 15 tests</span></div>
       <h3>Break a shop, watch the SLO</h3>
-      <p>Five services, real Prometheus 3.5, burn-rate alerts tested with promtool, and chaos switches for failures, outages, retries and slow tails.</p>
-      <div class="tags"><span>Prometheus</span><span>promtool</span><span>chaos</span><span>Grafana</span></div>
+      <p>Five services, real Prometheus 3.5, burn-rate alerts, chaos switches, and now three synthetic probes with their own alerts.</p>
+      <div class="tags"><span>Prometheus</span><span>promtool</span><span>chaos</span><span>probes</span></div>
       <span class="go">poc-31-checkout-journey-slo-lab <span>↗</span></span>
     </a>
+    <a class="labcard" href="https://github.com/phaniuk111/sre/tree/main/poc-32-etl-pipeline-slo-lab">
+      <div class="top2"><span class="num">POC 32 · NEW</span><span class="badge">Runs locally · 11 tests</span></div>
+      <h3>An SLO for an ETL pipeline</h3>
+      <p>A nightly revenue job you can crash, corrupt or delay, judged on freshness, completeness and correctness without writing to the source.</p>
+      <div class="tags"><span>freshness</span><span>reconciliation</span><span>deadline alerts</span></div>
+      <span class="go">poc-32-etl-pipeline-slo-lab <span>↗</span></span>
+    </a>
+    <a class="labcard" href="https://github.com/phaniuk111/sre/blob/main/course/hands.py">
+      <div class="top2"><span class="num">IN THE LESSONS</span><span class="badge">{NHANDS} tasks · output checked</span></div>
+      <h3>A task in almost every lesson</h3>
+      <p>Each task’s commands are run by a script before the course is built, and what they print is what the lesson shows under “What you should see”.</p>
+      <div class="tags"><span>copy</span><span>run</span><span>predict</span><span>explain</span></div>
+      <span class="go">course/hands.py <span>↗</span></span>
+    </a>
   </div>
-  <p class="fineprint">“Simulated” means the behaviour is modelled in Python and tested; the Terraform parses (22 files) but none of it has been applied to an AWS account.</p>
+  <p class="fineprint">“Simulated” means the behaviour is modelled in Python and tested. “Runs locally” means I ran it end to end here, with Prometheus 3.5. The Terraform parses (22 files) and has not been applied to an AWS account.</p>
 </section>
 
 <section class="hsec" aria-labelledby="h-next">
@@ -643,7 +686,7 @@ body.home .pager{display:none}
     <ol class="next">
       <li><span class="ix">01</span><b>The rest of Platform Engineering at Google</b><span class="badge plan">Waiting</span><span class="d">21 of 31 chapters aren’t published yet (full book listed for June 2027). Read each one as O’Reilly releases it.</span></li>
       <li><span class="ix">02</span><b>Read The Site Reliability Workbook</b><span class="badge plan">Planned</span><span class="d">“Alerting on SLOs” in full, then check the burn-rate lessons against it.</span></li>
-      <li><span class="ix">03</span><b>Run POC 31 with Docker and Grafana</b><span class="badge plan">Planned</span><span class="d">The compose file and dashboard are written; only the local mode has been run.</span></li>
+      <li><span class="ix">03</span><b>Run POCs 31 and 32 with Docker and Grafana</b><span class="badge plan">Planned</span><span class="d">POC 31’s compose file and dashboard are written; only the local mode has been run. POC 32 has no dashboard yet.</span></li>
       <li><span class="ix">04</span><b>Apply the Terraform in a sandbox account</b><span class="badge plan">Planned</span><span class="d">AMP, AMG and the alert routing, then destroy it.</span></li>
     </ol>
   </div>
@@ -665,24 +708,25 @@ body.home .pager{display:none}
 <div class="closer">
   <p class="eyebrow">No black boxes</p>
   <h2>Every number worked out in front of you.</h2>
-  <div class="cta"><a class="primary" href="#start">Start here <span aria-hidden="true">→</span></a><a class="ghost" href="https://github.com/phaniuk111/sre">Open the repository ↗</a></div>
+  <div class="cta"><a class="primary" href="#k-1">Start with the drills <span aria-hidden="true">→</span></a><a class="ghost" href="https://github.com/phaniuk111/sre">Open the repository ↗</a></div>
   <p class="byline">POCs, Terraform, tests and reading notes</p>
 </div>
 </div>
-<footer class="hfoot"><div class="hwrap"><span>SRE Interview Tutor · course</span><span>github.com/phaniuk111/sre</span><span>{NLESSONS} lessons · 210 tests</span></div></footer>
+<footer class="hfoot"><div class="hwrap"><span>SRE Interview Tutor · course</span><span>github.com/phaniuk111/sre</span><span>{NLESSONS} lessons · {NTESTS} tests</span></div></footer>
 </section>
 
 
 <section class="lesson" id="start" data-part="1" data-dot="0" data-title="Start here">
-<div class="meta"><span class="chip">Start here</span>Two books · 33 chapter lessons</div>
-<h1>Learn SRE and platform engineering well enough to teach them</h1>
+<div class="meta"><span class="chip">Start here</span>Four books · two hands-on tracks · {NLESSONS} lessons</div>
+<h1>Practise SRE interviews by answering, running and explaining</h1>
 <p>This course walks you through four books, one lesson per chapter: all 23 chapters of <i>Site Reliability Engineering, 2nd Edition</i>, the 10 chapters published so far of <i>Platform Engineering at Google</i>, and the two newest observability books on O’Reilly, <i>Mastering Prometheus</i> (2024) and <i>Observability with Grafana</i> (2024), 15 chapters each. I’m your tutor: each lesson explains the ideas in plain words, shows them as a picture, and then makes you practise saying them the way you would in an interview. Everything is written in my own words and mapped to AWS.</p>
-<div class="learn"><b>Every lesson follows the same pattern</b><ul>
-<li><b>The big picture</b>: the chapter’s argument in short paragraphs, with a diagram.</li>
-<li><b>Going deeper</b>: the case studies, numbers and named models interviewers probe for.</li>
-<li><b>Say it in an interview</b>, the AWS translation, and a question with a model answer you reveal after trying.</li>
-<li><b>A quick check, an exercise</b> (often a POC to run from the repo) and three takeaways.</li>
+<div class="learn"><b>Every lesson is laid out in the order an interview goes</b><ul>
+<li><b>In the interview</b>: a 30-second answer to say aloud, then the follow-up questions with model answers you open after trying.</li>
+<li><b>Hands-on</b>: commands to copy and run against a POC in the repository, the output they really print, one thing to predict and check, and a short story to tell about it.</li>
+<li><b>Check yourself</b>: quick questions, the AWS version of the idea, and the takeaways.</li>
+<li><b>Background</b>: the chapter’s argument, diagrams and case studies, folded away at the bottom. Open it when an answer doesn’t make sense yet.</li>
 </ul></div>
+<p>Short on time? Do the <a href="#k-1">five interview drills</a> first, then the <a href="#j-1">hands-on SLO track</a>. They cover the questions that come up most, and each ends in a lab you run yourself.</p>
 <p>Mark a lesson complete at the bottom and its station on the route map fills in. Your progress is kept in this browser.</p>
 
 <h2>Start with one number</h2>
@@ -719,6 +763,7 @@ body.home .pager{display:none}
   <a href="#m-6" style="--c:var(--rust)"><b>Prometheus · Scaling and operating</b><span>HA, sharding, tuning, Node Exporter, remote storage, Thanos, mixins, CI, SLOs, OpenTelemetry</span></a>
   <a href="#g" style="--c:var(--amber)"><b>Grafana · Signals</b><span>Instrumentation, Loki and LogQL, Mimir, Tempo and TraceQL, Kubernetes and AWS</span></a>
   <a href="#g-8" style="--c:var(--cyan)"><b>Grafana · Running observability</b><span>Dashboards, incidents, automation, platform architecture, RUM, profiling, load tests, DevOps</span></a>
+  <a href="#k-1" style="--c:var(--gold)"><b>Interview drills · five questions, worked</b><span>Why 14.4, rate against increase and irate, paging at low traffic, an SLO for an ETL pipeline, synthetic probes: answer, working, follow-ups and a lab for each</span></a>
   <a href="#j-1" style="--c:var(--sky)"><b>Hands-on · One SLO across services</b><span>Critical user journeys, design ceilings, internal SLOs, burn-rate PromQL, and a lab where you break a real shop (POC 31)</span></a>
   <a href="#labs" style="--c:var(--inkline)"><b>Practice and synthesis</b><span>Labs, {NCARDS} flashcards, {NQUIZ} quiz questions, {NDRILLS} interview drills, the AWS map, then an executive summary, knowledge map, requirements checklist and numbers to know</span></a>
 </div>
@@ -794,8 +839,8 @@ body.home .pager{display:none}
 <script>
 {
 const $=s=>document.querySelector(s);
-const PARTS={1:['I · SRE in context','var(--green)'],2:['II · Sociotechnical foundations','var(--red)'],3:['III · Awareness and preparedness','var(--blue)'],4:['IV · Infrastructure design','var(--orange)'],5:['V · Resilient products','var(--purple)'],6:['VI · Outlook','var(--teal)'],7:['Practice and synthesis','var(--inkline)'],P1:['Architecture and ecosystem design','var(--magenta)'],P2:['Execution and product approach','var(--lime)'],M1:['Prometheus · Fundamentals','var(--ember)'],M2:['Prometheus · Scaling and operating','var(--rust)'],G1:['Grafana · Signals','var(--amber)'],G2:['Grafana · Running observability','var(--cyan)'],J1:['Hands-on · One SLO across services','var(--sky)']};
-const ORDER=['1','2','3','4','5','6','P1','P2','M1','M2','G1','G2','J1','7'];const BOOKS={'1':'Book 1 · Site Reliability Engineering','P1':'Book 2 · Platform Engineering at Google','M1':'Book 3 · Mastering Prometheus','G1':'Book 4 · Observability with Grafana','J1':'Hands-on track','7':'Practice'};
+const PARTS={1:['I · SRE in context','var(--green)'],2:['II · Sociotechnical foundations','var(--red)'],3:['III · Awareness and preparedness','var(--blue)'],4:['IV · Infrastructure design','var(--orange)'],5:['V · Resilient products','var(--purple)'],6:['VI · Outlook','var(--teal)'],7:['Practice and synthesis','var(--inkline)'],P1:['Architecture and ecosystem design','var(--magenta)'],P2:['Execution and product approach','var(--lime)'],M1:['Prometheus · Fundamentals','var(--ember)'],M2:['Prometheus · Scaling and operating','var(--rust)'],G1:['Grafana · Signals','var(--amber)'],G2:['Grafana · Running observability','var(--cyan)'],J1:['Hands-on · One SLO across services','var(--sky)'],K1:['Interview drills · five questions, worked','var(--gold)']};
+const ORDER=['1','2','3','4','5','6','P1','P2','M1','M2','G1','G2','K1','J1','7'];const BOOKS={'1':'Book 1 · Site Reliability Engineering','P1':'Book 2 · Platform Engineering at Google','M1':'Book 3 · Mastering Prometheus','G1':'Book 4 · Observability with Grafana','K1':'Interview drills and hands-on','7':'Practice'};
 const lessons=[...document.querySelectorAll('.lesson')];
 const chapters=lessons.filter(l=>l.dataset.ch);
 let done=new Set();

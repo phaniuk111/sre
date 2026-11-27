@@ -1,0 +1,32 @@
+# Alerts on the synthetic probe (probe.py), which walks the checkout journey from three locations.
+# Real-traffic burn-rate alerts are in checkout-slo.yml; these cover quiet hours and the outside view.
+groups:
+  - name: checkout-probe
+    rules:
+      # Share of probe runs that passed in the last 2 minutes, per location.
+      - record: probe:checkout_success:ratio_2m
+        expr: avg_over_time(probe_success{journey="checkout"}[2m])
+
+      # Two or more locations failing is the shop. Page.
+      - alert: CheckoutProbeFailing
+        expr: count(probe:checkout_success:ratio_2m < 0.5) >= 2
+        for: 1m
+        labels: {severity: page}
+        annotations:
+          summary: The checkout journey is failing from two or more probe locations
+
+      # One location failing is probably that probe's network. Ticket, don't wake anyone.
+      - alert: CheckoutProbeOneLocation
+        expr: count(probe:checkout_success:ratio_2m < 0.5) == 1
+        for: 10m
+        labels: {severity: ticket}
+        annotations:
+          summary: The checkout probe is failing from a single location
+
+      # A probe that stopped running tells you nothing. Its silence must not look like health.
+      - alert: CheckoutProbeSilent
+        expr: time() - probe_last_run_timestamp_seconds{journey="checkout"} > 120
+        for: 2m
+        labels: {severity: ticket}
+        annotations:
+          summary: A checkout probe has not run for two minutes

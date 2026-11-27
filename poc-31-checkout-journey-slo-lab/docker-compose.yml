@@ -46,6 +46,19 @@ services:
     command: ["python", "loadgen.py", "--rps", "10"]
     depends_on: [edge]
 
+  probe-london:
+    <<: *shop
+    command: ["python", "probe.py", "--location", "london", "--port", "9201"]
+    depends_on: [edge]
+  probe-dublin:
+    <<: *shop
+    command: ["python", "probe.py", "--location", "dublin", "--port", "9202"]
+    depends_on: [edge]
+  probe-frankfurt:
+    <<: *shop
+    command: ["python", "probe.py", "--location", "frankfurt", "--port", "9203"]
+    depends_on: [edge]
+
   prometheus:
     image: prom/prometheus:v3.5.0
     command:

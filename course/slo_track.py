@@ -229,7 +229,7 @@ python lab.py promql 'sum(rate(edge_request_duration_seconds_bucket{le="2"}[5m])
         + h3('8 · The bad-minute rule')
         + p('Write a 0/1 bad-minute rule from the per-dependency error ratios (ignore recommendations) and the share of good minutes in the last hour, then run <code>python lab.py chaos inventory --error-rate 0.005</code>.')
         + see('The request-based SLI barely moves (0.5% of orders fail), but most minutes turn bad, because at ten orders a second almost every minute contains a failure. Compare with solutions/bad-minute.yml.')
-        + p('EXERCISES.md in the repo has all eleven, including reading the SLI by hand and deploying the same rules to Amazon Managed Service for Prometheus with Terraform.')),
+        + p('EXERCISES.md in the repo has all twelve, including synthetic probes (see the interview drill on probes), reading the SLI by hand and deploying the same rules to Amazon Managed Service for Prometheus with Terraform.')),
     say='I’ve built this end to end: a shop with five dependencies, a journey SLI at the edge, multiwindow burn-rate alerts tested with promtool, and chaos experiments showing that retries fix scattered failures but not outages, that soft dependencies raise the ceiling, and that slow successes burn budget too.',
     aws='terraform/amp.tf in POC 31 creates an AMP workspace, loads the journey and internal SLO rules as rule group namespaces, and routes pages and tickets to two SNS topics. Point a local Prometheus at it with remote_write and SigV4, then terraform destroy when you finish.',
     iq=[('Tell me about a time you tested your alerting.',

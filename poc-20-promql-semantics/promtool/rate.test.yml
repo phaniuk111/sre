@@ -1,0 +1,42 @@
+# The same four samples as the hands-on in promql.py, checked against real Prometheus.
+#   promtool test rules rate.test.yml
+# Change a value, predict the three results, and run it again. promtool prints what it got.
+rule_files: []
+evaluation_interval: 15s
+tests:
+  - interval: 15s
+    input_series:
+      - series: 'c'
+        values: '_ 100 110 170 180'       # samples at 15 s, 30 s, 45 s, 60 s
+    promql_expr_test:
+      # The samples rose by 80 over 45 s; Prometheus stretches that to the 60 s window: 80 x 60 / 45.
+      - expr: increase(c[1m])
+        eval_time: 1m
+        exp_samples: [{labels: '{}', value: 106.66666666666666}]
+      # The same number per second: 106.67 / 60.
+      - expr: rate(c[1m])
+        eval_time: 1m
+        exp_samples: [{labels: '{}', value: 1.7777777777777777}]
+      # Only the last two samples: (180 - 170) / 15. The +60 spike is already forgotten.
+      - expr: irate(c[1m])
+        eval_time: 1m
+        exp_samples: [{labels: '{}', value: 0.6666666666666666}]
+      # 15 seconds earlier irate saw nothing but the spike: (170 - 110) / 15.
+      - expr: irate(c[1m])
+        eval_time: 45s
+        exp_samples: [{labels: '{}', value: 4}]
+
+  # A restart: the counter climbs to 45, the pod restarts, and it climbs again from 0 to 20.
+  # rate and increase treat the drop as a reset, so the answer is 45 + 20, never negative.
+  - interval: 15s
+    input_series:
+      - series: 'c{pod="a"}'
+        values: '0 15 30 45 5 20'
+    promql_expr_test:
+      - expr: increase(c[2m])
+        eval_time: 75s
+        exp_samples: [{labels: '{pod="a"}', value: 65}]
+      # Summing first hides the reset from rate(): this is why it is always sum(rate(...)), never rate(sum(...)).
+      - expr: c - c offset 15s
+        eval_time: 60s
+        exp_samples: [{labels: '{pod="a"}', value: -40}]

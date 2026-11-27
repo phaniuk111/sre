@@ -1,0 +1,44 @@
+# Alerts for a nightly batch pipeline. Burn-rate alerts need steady traffic; one run a day has none,
+# so these alert on "we are about to miss the deadline" and "the data is wrong", before finance reads it.
+groups:
+  - name: etl-revenue
+    interval: 1m
+    rules:
+      # How far the warehouse is behind the source, from the newest timestamp on each side.
+      - record: etl:freshness_lag:seconds
+        expr: etl_source_high_water_seconds - etl_output_high_water_seconds
+
+      # 05:00 and last night's run still has not published: two hours left to fix and rerun.
+      - alert: ETLDeadlineAtRisk
+        expr: hour() >= 5 and hour() < 7 and on() (time() - etl_last_publish_timestamp_seconds{pipeline="revenue"}) > 20 * 3600
+        for: 5m
+        labels: {severity: page}
+        annotations:
+          summary: Revenue partition not published; deadline is 07:00
+          runbook_url: https://runbooks.example.com/etl-revenue-rerun
+
+      # More than a day and a bit behind the source: a run was missed altogether.
+      - alert: ETLStale
+        expr: etl:freshness_lag:seconds{pipeline="revenue"} > 27 * 3600
+        for: 10m
+        labels: {severity: page}
+        annotations:
+          summary: Warehouse is more than 27 hours behind the orders database
+
+      # The job exited 0 but the data is wrong. Page before the consumers read it.
+      - alert: ETLReconcileFailed
+        expr: |
+          abs(etl_partition_rows_ratio{pipeline="revenue"} - 1) > 0.001
+          or
+          abs(etl_partition_total_diff{pipeline="revenue"}) > 0.01
+        labels: {severity: page}
+        annotations:
+          summary: Revenue partition does not match the source (rows or totals)
+
+      # A checker that has stopped looks exactly like a healthy pipeline. Watch the watcher.
+      - alert: ETLCheckerSilent
+        expr: time() - etl_check_timestamp_seconds{pipeline="revenue"} > 1800 or absent(etl_check_timestamp_seconds{pipeline="revenue"})
+        for: 5m
+        labels: {severity: ticket}
+        annotations:
+          summary: The ETL checker has not reported for 30 minutes

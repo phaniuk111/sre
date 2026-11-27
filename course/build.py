@@ -124,6 +124,72 @@ def quick(q, seed):
             + f'<div class="why">{q[3]}</div></div>')
 
 
+import hands as H
+import says
+from slo_track import cb
+HOUT = json.load(open(os.path.join(HERE, 'hands_out.json'), encoding='utf-8'))
+esc = lambda t: t.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+words = lambda html: len(strip(html).split())
+
+
+def iq_html(q, ans):
+    return f'<div class="iq"><p class="iqq">{q}</p><details><summary>Show a model answer</summary>' + ''.join(f'<p>{a}</p>' for a in ans) + '</details></div>'
+
+
+def out_block(label, text, limit=28):
+    lines = text.split('\n')
+    if len(lines) > limit:
+        lines = lines[:limit] + ['…']
+    return f'<details class="ans"><summary>{label}</summary><pre class="out">{esc(chr(10).join(lines))}</pre></details>'
+
+
+def hands_html(lesson_id):
+    """The hands-on block: real commands against a POC, the output they really print, a prediction to check, and a story to tell."""
+    keys = H.FOR.get(lesson_id, [])
+    if not keys:
+        return ''
+    html = ('<h2>Hands-on: run it, then talk about it</h2><p class="hsetup">One-time setup: <code>git clone https://github.com/phaniuk111/sre &amp;&amp; cd sre &amp;&amp; '
+            'pip install -r requirements-dev.txt</code>. Each block starts from the repository root.</p>')
+    for k in keys:
+        t = H.T[k]
+        html += (f'<div class="hands"><div class="hhd"><span class="chip">POC {t["dir"].split("-")[1]}</span><b>{t["title"]}</b>'
+                 f'<span class="mins">{t["mins"]} min · <a href="{H.REPO}{t["dir"]}">{t["dir"]} ↗</a></span></div>'
+                 + (f'<p class="hnote">{t["setup"]}</p>' if t.get('setup') else '')
+                 + cb('1 · Run it', t['cmd'], True) + out_block('What you should see', HOUT[f'{k}.cmd'])
+                 + f'<p class="predict"><b>2 · Predict, then check.</b> {t["change"]}</p>'
+                 + cb('then run', t['change_cmd'], True) + out_block('Show the result', HOUT[f'{k}.change_cmd'])
+                 + f'<div class="story"><b>3 · Your story for the interview</b><p>{t["story"]}</p></div></div>')
+    return html
+
+
+def assemble(lid, body, learn, say, aws, iqs, quiz_html, turn, take, practical=False):
+    """Interview first: the short answer and the follow-ups, then hands-on, then checks.
+    The chapter's theory is still there, folded away as background, unless the lesson is itself practical."""
+    top = ''
+    if say or iqs:
+        top += '<h2>In the interview</h2>'
+        if say:
+            top += f'<div class="say"><b>Your 30-second answer</b><p>{say}</p></div>'
+        if iqs:
+            top += f'<p class="ivhint">{"Then they dig. " if say else ""}Answer each one aloud for two minutes before you open the model answer.</p>' + iqs
+    hands = hands_html(lid)
+    checks = ('<h2>Check yourself</h2>' + quiz_html) if quiz_html else ''
+    turn_html = f'<div class="ex"><b>{"On your own" if hands else "Your turn"}</b>{turn}</div>' if turn else ''
+    aws_html = f'<div class="note aws"><b>On AWS</b>{aws}</div>' if aws else ''
+    take_html = '<div class="take"><b>Key takeaways</b><ul>' + ''.join(f'<li>{t}</li>' for t in take) + '</ul></div>'
+    learn_html = '<div class="learn"><b>You will be able to</b><ul>' + ''.join(f'<li>{t}</li>' for t in learn) + '</ul></div>'
+    practice = top + hands + checks + turn_html + aws_html + take_html
+    hands_min = sum(H.T[k]['mins'] for k in H.FOR.get(lid, []))
+    if practical or not top:
+        mins = max(4, round(words(body + practice) / 190)) + hands_min
+        return learn_html + top + body + hands + checks + turn_html + aws_html + take_html, f'{mins} min'
+    bmin = max(3, round(words(body) / 190))
+    pmin = max(3, round(words(top + checks + turn_html + aws_html + take_html) / 190)) + hands_min
+    theory = (f'<details class="theory"><summary><span>Background: the theory behind the answers</span>'
+              f'<small>{bmin} min read · the chapter’s argument, diagrams and case studies</small></summary>{learn_html}{body}</details>')
+    return practice + theory, f'{pmin} min practice · {bmin} min background'
+
+
 def insert_after(html, heading, extra):
     """place extra after the first block that follows <h2>heading</h2>"""
     tag = f'<h2>{heading}</h2>'
@@ -196,27 +262,18 @@ for n in range(1, 24):
     for h, extra in e.get('after', {}).items():
         body = insert_after(body, h, extra)
     body = body.replace('<td>Auto</td>', '<td><span class="pl a">Auto</span></td>').replace('<td>Human</td>', '<td><span class="pl h">Human</span></td>')
-    tail = ''
-    if say:
-        tail += f'<div class="say"><b>Say it in an interview</b><p>{say}</p></div>'
     if aws:
         aws = re.sub(r'^<b>On AWS:</b>\s*', '', aws)
         aws = aws[0].upper() + aws[1:]
-        tail += f'<div class="note aws"><b>On AWS</b>{aws}</div>'
+    say = say or says.SAY.get(n)
     iqs = ''.join(qa(q) for q in (q1, q2) if q)
     if n in X4.IQ:
-        iqs = ''.join(f'<div class="iq"><p class="iqq">{q}</p><details><summary>Show a model answer</summary>' + ''.join(f'<p>{a}</p>' for a in ans) + '</details></div>' for q, ans in X4.IQ[n])
-    if iqs:
-        tail += '<h2>Interview practice</h2><p>Answer aloud for two minutes before you open the model answer.</p>' + iqs
+        iqs = ''.join(iq_html(q, ans) for q, ans in X4.IQ[n])
     qs = quiz_ch.get(n, [])[:3 if n in X2.NEWQUIZ else 2]
-    tail += ''.join(quick(q, n * 10 + i) for i, q in enumerate(qs))
-    tail += f'<div class="ex"><b>Your turn</b>{e["turn"]}</div>'
-    tail += '<div class="take"><b>Key takeaways</b><ul>' + ''.join(f'<li>{t}</li>' for t in e['take']) + '</ul></div>'
-    words = len(strip(body + tail).split())
-    mins = max(4, round(words / 190))
-    meta = f'<span class="chip">Part {ROMAN[part]} · {X.PARTS[part][0]}</span>Chapter {n} · {mins} min read' + (f' · {e["poc"]}' if e['poc'] else '')
-    learn = '<div class="learn"><b>You will learn</b><ul>' + ''.join(f'<li>{t}</li>' for t in e['learn']) + '</ul></div>'
-    lessons.append(f'<section class="lesson" id="ch-{n}" data-part="{part}" data-ch="{n}" data-dot="{n}" data-title="{e["nav"]}">\n<div class="meta">{meta}</div>\n<h1>{e["h1"]}</h1>\n{learn}\n{body}\n{tail}\n</section>')
+    quiz_html = ''.join(quick(q, n * 10 + i) for i, q in enumerate(qs))
+    inner, mins = assemble(f'ch-{n}', body, e['learn'], say, aws, iqs, quiz_html, e['turn'], e['take'])
+    meta = f'<span class="chip">Part {ROMAN[part]} · {X.PARTS[part][0]}</span>Chapter {n} · {mins}' + (f' · {e["poc"]}' if e['poc'] else '')
+    lessons.append(f'<section class="lesson" id="ch-{n}" data-part="{part}" data-ch="{n}" data-dot="{n}" data-title="{e["nav"]}">\n<div class="meta">{meta}</div>\n<h1>{e["h1"]}</h1>\n{inner}\n</section>')
 
 
 # ------------------------------------------------------------------ second track: Platform Engineering at Google
@@ -230,37 +287,27 @@ for d in pe.L:
         body += X3.connections(d['id'], SY.MAP)
     for m in re.finditer(r'<p>(.*?)</p>', body, re.S):
         assert len(strip(m.group(1))) < 640, ('long paragraph', d['id'], strip(m.group(1))[:80])
-    tail = ''
-    if d.get('say'):
-        tail += f'<div class="say"><b>Say it in an interview</b><p>{d["say"]}</p></div>'
-    if d.get('aws'):
-        tail += f'<div class="note aws"><b>On AWS</b>{d["aws"]}</div>'
-    if d.get('iq'):
-        tail += '<h2>Interview practice</h2><p>Answer aloud for two minutes before you open the model answer.</p>'
-        tail += ''.join(f'<div class="iq"><p class="iqq">{q}</p><details><summary>Show a model answer</summary>' + ''.join(f'<p>{a}</p>' for a in ans) + '</details></div>' for q, ans in d['iq'])
+    iqs = ''.join(iq_html(q, ans) for q, ans in d.get('iq', []))
+    quiz_html = ''
     for i, q in enumerate(d.get('quiz', [])):
-        tail += quick(q, 7000 + len(lessons) * 10 + i)
+        quiz_html += quick(q, 7000 + len(lessons) * 10 + i)
         QUIZ.append(q)
-    if d.get('turn'):
-        tail += f'<div class="ex"><b>Your turn</b>{d["turn"]}</div>'
-    tail += '<div class="take"><b>Key takeaways</b><ul>' + ''.join(f'<li>{t}</li>' for t in d['take']) + '</ul></div>'
-    mins = max(4, round(len(strip(body + tail).split()) / 190))
+    inner, mins = assemble(d['id'], body, d['learn'], d.get('say'), d.get('aws'), iqs, quiz_html, d.get('turn'), d['take'])
     if 'meta' in d:
-        meta, chattr = d['meta'] + f' · {mins} min read', ''
+        meta, chattr = d['meta'] + f' · {mins}', ''
     else:
-        meta = (f'<span class="chip">Platform book · {PE_PART[d["part"]]}</span>Chapter {d["final"]} in the final book · {d["by"]} · {mins} min read'
+        meta = (f'<span class="chip">Platform book · {PE_PART[d["part"]]}</span>Chapter {d["final"]} in the final book · {d["by"]} · {mins}'
                 + (f' · {d["poc"]}' if d['poc'] else ''))
         chattr = f' data-ch="p{d["dot"]}"'
-    learn = '<div class="learn"><b>You will learn</b><ul>' + ''.join(f'<li>{t}</li>' for t in d['learn']) + '</ul></div>'
-    lessons.append(f'<section class="lesson" id="{d["id"]}" data-part="{d["part"]}"{chattr} data-dot="{d["dot"]}" data-title="{d["nav"]}">\n<div class="meta">{meta}</div>\n<h1>{d["h1"]}</h1>\n{learn}\n{body}\n{tail}\n</section>')
+    lessons.append(f'<section class="lesson" id="{d["id"]}" data-part="{d["part"]}"{chattr} data-dot="{d["dot"]}" data-title="{d["nav"]}">\n<div class="meta">{meta}</div>\n<h1>{d["h1"]}</h1>\n{inner}\n</section>')
 CARDS += pe4.CARDS
 DRILLS += pe4.DRILLS
 PE_AWS = X.table(['Concept', 'What to say', 'AWS services', 'POC'], pe4.AWS_ROWS)
 
 # ------------------------------------------------------------------ tracks 3 and 4: Mastering Prometheus, Observability with Grafana
-import obs1, obs2, obs3, obs4, obs5, slo_track
+import obs1, obs2, obs3, obs4, obs5, slo_track, drills_track
 import obs_pics
-for d in obs1.L + obs4.L + slo_track.L:
+for d in obs1.L + obs4.L + drills_track.L + slo_track.L:
     body = d['body']
     for head, fig in obs_pics.P.get(d['id'], []):
         i = body.index(f'<h2>{head}</h2>')
@@ -272,25 +319,16 @@ for d in obs1.L + obs4.L + slo_track.L:
     body += X3.connections(d['id'], SY.MAP)
     for m in re.finditer(r'<p>(.*?)</p>', body, re.S):
         assert len(strip(m.group(1))) < 640, ('long paragraph', d['id'], strip(m.group(1))[:80])
-    tail = ''
-    if d.get('say'):
-        tail += f'<div class="say"><b>Say it in an interview</b><p>{d["say"]}</p></div>'
-    if d.get('aws'):
-        tail += f'<div class="note aws"><b>On AWS</b>{d["aws"]}</div>'
-    if d.get('iq'):
-        tail += '<h2>Interview practice</h2><p>Answer aloud for two minutes before you open the model answer.</p>'
-        tail += ''.join(f'<div class="iq"><p class="iqq">{q}</p><details><summary>Show a model answer</summary>' + ''.join(f'<p>{a}</p>' for a in ans) + '</details></div>' for q, ans in d['iq'])
+    iqs = ''.join(iq_html(q, ans) for q, ans in d.get('iq', []))
+    quiz_html = ''
     for i, q in enumerate(d.get('quiz', [])):
-        tail += quick(q, 9000 + len(lessons) * 10 + i)
+        quiz_html += quick(q, 9000 + len(lessons) * 10 + i)
         QUIZ.append(q)
-    if d.get('turn'):
-        tail += f'<div class="ex"><b>Your turn</b>{d["turn"]}</div>'
-    tail += '<div class="take"><b>Key takeaways</b><ul>' + ''.join(f'<li>{t}</li>' for t in d['take']) + '</ul></div>'
-    mins = max(4, round(len(strip(body + tail).split()) / 190))
-    learn = '<div class="learn"><b>You will learn</b><ul>' + ''.join(f'<li>{t}</li>' for t in d['learn']) + '</ul></div>'
-    lessons.append(f'<section class="lesson" id="{d["id"]}" data-part="{d["part"]}"' + ('' if d['id'] in ('m', 'g') else f' data-ch="{d["id"]}"') + f' data-dot="{d["dot"]}" data-title="{d["nav"]}">\n<div class="meta">{d["meta"]} · {mins} min read</div>\n<h1>{d["h1"]}</h1>\n{learn}\n{body}\n{tail}\n</section>')
-CARDS += obs5.CARDS + slo_track.CARDS
-DRILLS += obs5.DRILLS + slo_track.DRILLS
+    inner, mins = assemble(d['id'], body, d['learn'], d.get('say'), d.get('aws'), iqs, quiz_html, d.get('turn'), d['take'],
+                           practical=d.get('practical', d['part'] == 'J1'))
+    lessons.append(f'<section class="lesson" id="{d["id"]}" data-part="{d["part"]}"' + ('' if d['id'] in ('m', 'g') else f' data-ch="{d["id"]}"') + f' data-dot="{d["dot"]}" data-title="{d["nav"]}">\n<div class="meta">{d["meta"]} · {mins}</div>\n<h1>{d["h1"]}</h1>\n{inner}\n</section>')
+CARDS += obs5.CARDS + slo_track.CARDS + drills_track.CARDS
+DRILLS += obs5.DRILLS + slo_track.DRILLS + drills_track.DRILLS
 OBS_AWS = X.table(['Concept', 'What to say', 'AWS services', 'Lesson, POC'], obs5.AWS_ROWS)
 
 OLD_LABS = re.search(r'<div class="labs">(.*?)</div>\s*</div>\s*</section>', SRC, re.S).group(1)
@@ -306,6 +344,8 @@ page = page.replace('/*LABS*/', OLD_LABS)
 page = page.replace('/*AWS*/', AWS_TABLE).replace('/*AWS2*/', PE_AWS).replace('/*AWS3*/', OBS_AWS)
 js = lambda rows: ',\n'.join(json.dumps(r, ensure_ascii=False) for r in rows)
 page = page.replace('/*CARDS*/', js(CARDS)).replace('/*QUIZ*/', js(QUIZ)).replace('/*DRILLS*/', js(DRILLS))
+NTESTS = os.environ.get('NTESTS', '225')
+page = page.replace('{NHANDS}', str(len(H.T))).replace('{NTESTS}', NTESTS)
 page = page.replace('{NLESSONS}', str(page.count(' data-ch='))).replace('{NCARDS}', str(len(CARDS))).replace('{NQUIZ}', str(len(QUIZ))).replace('{NDRILLS}', str(len(DRILLS)))
 assert '/*' not in page.split('<body>')[1].split('<script>')[0], 'unfilled slot'
 open(os.path.join(HERE, 'index.html'), 'w', encoding='utf-8').write(page)

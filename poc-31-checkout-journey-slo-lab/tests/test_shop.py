@@ -175,3 +175,37 @@ def test_solutions_parse():
         if f.endswith(".yml"):
             out = subprocess.run([_promtool(), "check", "rules", f], cwd=sol, capture_output=True, text=True)
             assert out.returncode == 0, f + out.stdout + out.stderr
+
+
+# ------------------------------------------------------------------ synthetic probe (exercise 12)
+import probe as probe_mod  # noqa: E402
+
+
+def test_probe_walks_the_journey_and_fails_when_a_hard_dependency_is_down(s):
+    r = probe_mod.run_once(s.urls["edge"])
+    assert r["ok"] and [ok for _, ok, _ in r["steps"]] == [True, True]
+    s.post("payment", "/chaos", {"error_rate": 1.0})
+    r = probe_mod.run_once(s.urls["edge"])
+    assert not r["ok"] and "503" in r["steps"][0][2]
+
+
+def test_probe_orders_stay_out_of_the_customer_sli(s):
+    for _ in range(3):
+        probe_mod.run_once(s.urls["edge"])
+    s.order()
+    count = lambda route: s.metric("edge", "edge_request_duration_seconds_count", route=route, code="200")
+    assert count("POST /checkout") == 1                  # only the real customer
+    assert count("POST /checkout (synthetic)") == 6      # two probe orders per run
+
+
+def test_a_probes_own_network_fault_is_not_the_shops_fault(s):
+    r = probe_mod.run_once(s.urls["edge"], fail_rate=1.0)
+    assert not r["ok"] and s.metric("edge", "edge_request_duration_seconds_count", route="POST /checkout (synthetic)", code="200") == 0
+
+
+@pytest.mark.skipif(_promtool() is None, reason="promtool not found")
+def test_probe_rules_pass_promtool_unit_tests():
+    rules = os.path.join(HERE, "rules")
+    for args in (["check", "rules", "checkout-probe.yml"], ["test", "rules", "checkout-probe.test.yml"]):
+        out = subprocess.run([_promtool(), *args], cwd=rules, capture_output=True, text=True)
+        assert out.returncode == 0, out.stdout + out.stderr

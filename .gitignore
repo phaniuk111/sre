@@ -9,3 +9,4 @@ terraform/build/
 **/terraform/build/
 .venv/
 .env
+.lab/
